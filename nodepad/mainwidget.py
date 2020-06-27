@@ -2,8 +2,7 @@
 import functools
 # TODO: Redirect stdout to QTextEdit.
 
-#from oreorelib.ui.pyqt5.mainwindow import MainWindow
-import oreorelib.ui.pyqt5 as OreOreGUI
+from oreorelib.ui.pyqt5.mainwindow import MainWindow
 
 from .ui.graphicssettings import *
 from .ui.graphicsview import GraphicsView
@@ -17,7 +16,7 @@ from .nescene_manager import NESceneManager
 
 
 
-class MainWidget(OreOreGUI.MainWindow):#QMainWindow):#
+class MainWidget(MainWindow):
 
     def __init__( self ):
         super(MainWidget, self).__init__()        
@@ -239,7 +238,7 @@ class MainWidget(OreOreGUI.MainWindow):#QMainWindow):#
 
 
         #================= SetWindowTitle  =================#
-        #self.setWindowTitle( 'OreOre Node Editor' )
+        #self.setWindowTitle( 'NodePad' )
         self.UpdateWindowTitle()
 
 
@@ -513,7 +512,7 @@ class MainWidget(OreOreGUI.MainWindow):#QMainWindow):#
         if( self.__m_SceneManager.IsUpToDate()==False ):
 
             msgBox = QMessageBox()
-            msgBox.setWindowTitle( 'OreOre Node Editor' )
+            msgBox.setWindowTitle( 'NodePad' )
             msgBox.setIcon( QMessageBox.Question )
             msgBox.setStyleSheet( UIStyle.g_MessageBoxStyleSheet + UIStyle.g_ButtonStyleSheet )
             msgBox.setText( 'The scene has been modified.\n Do you really want to quit?' )
@@ -534,7 +533,7 @@ class MainWidget(OreOreGUI.MainWindow):#QMainWindow):#
 
 
     def UpdateWindowTitle( self ):
-        self.setWindowTitle( 'OreOre Node Editor - ' + self.__m_SceneManager.GetFilePath() + g_DataChangedSymbol[ self.__m_SceneManager.IsModified() ] )
+        self.setWindowTitle( 'NodePad - ' + self.__m_SceneManager.GetFilePath() + g_DataChangedSymbol[ self.__m_SceneManager.IsModified() ] )
 
 
     def CreateNodeEditView( self, view_id, title ):
