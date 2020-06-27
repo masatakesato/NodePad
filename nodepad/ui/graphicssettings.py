@@ -19,7 +19,7 @@ g_DataChangedSymbol = { False: '', True: '*' }
 
 ############################### NodeEditor #################################
 
-g_LabelFont = QFont('Times', 9.0)
+g_LabelFont = QFont('Aerial', 9.0)
 
 
 g_LabelColor = QColor(255, 255, 255)
