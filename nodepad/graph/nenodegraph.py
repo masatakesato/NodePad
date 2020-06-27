@@ -917,21 +917,6 @@ class NENodeGraph():
             return None, False
 
 
-    # TODO: Deprecated. 2019.11.21
-    #def ValidateConnections( self, attrib_id ):
-
-    #    reconnectionDict = {}# key: conn_id, value: outer-connected attribute id
-
-    #    attrib = self.__m_IDMap[attrib_id[0]].AttributeByID(attrib_id[1])
-    #    group_id = attrib.ParentNode().ParentID()
-    #    for conn in attrib.Connections().values():
-    #        outerattrib = conn.Source() if attrib.IsInputFlow() else conn.Destination()
-    #        if( outerattrib.ParentNode().ParentID() != group_id ):# gather connections outside "this" group
-    #            reconnectionDict[conn.ID()] = outerattrib.AttributeID()
-
-    #    return reconnectionDict
-
-
     def ValidateConnections( self, attrib_id ):
 
         valid_connections = {}# key: conn_id, value: outer-connected attribute id

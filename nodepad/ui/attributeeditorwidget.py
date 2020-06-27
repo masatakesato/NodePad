@@ -752,7 +752,6 @@ class AttributeEditorWidget(QFrame):
         self.setStyleSheet( UIStyle.g_StaticFrameStyleSheet )
 
         self.__m_CallbackFuncs = {
-            #'Rename_Exec': self.Rename_Exec,# unused. use 'RefreshAttributeEditor_Exec' instead. 2017.09.30
             'SetValue_Exec': self.SetValue_Exec,
             'SetEnabled_Exec': self.SetEnabled_Exec,
         }

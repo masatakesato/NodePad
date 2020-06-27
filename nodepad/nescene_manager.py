@@ -352,7 +352,7 @@ class NESceneManager:
 
         SelectCommand_Multi( self.__m_refNEScene, obj_id_list, option ).execute()
 
-#TODO: これで実装いいかどうか検討する. 2020.06.20
+# TODO: 選択処理の結果をGUI表示に反映させる関数( GUI表示更新をトリガーとしたコールバックを全てブロックしてある )
         self.__m_refNEScene.UpdateSelection()
 
         return True
@@ -385,14 +385,14 @@ class NESceneManager:
         return self.__m_refNEScene.CanBeSymbolized( attrib_id )
 
 
-#TODO: 選択ノード群が複数グループに跨る場合の処理方法を決める.
+# TODO: 選択ノード群が複数グループに跨る場合の処理方法を決める.
     def Group_Exec( self, obj_name_list ):
         obj_id_list = self.__m_refNEScene.GetObjectIDs( obj_name_list, (NENodeObject, NEGroupObject) )
 
         return self.GroupByID_Exec( obj_id_list, parent_id=None )
 
 
-#TODO: 選択ノード群が複数グループに跨る場合の処理方法を決める.
+# TODO: 選択ノード群が複数グループに跨る場合の処理方法を決める.
     def GroupByID_Exec( self, obj_id_list, parent_id, *, pos=None, size=None, name=None, object_id=None, active_symboliclink_ids=None, groupio_ids=(None, None), align_groupios=True, terminate=True ):
 
         print( 'NESceneManager::GroupByID_Exec()...' )
@@ -640,7 +640,7 @@ class NESceneManager:
 
         obj_id_list = self.__m_refNEScene.GetObjectIDs( obj_name_list )
         parent_id = self.__m_refNEScene.GetObjectID( parent_name, typefilter=(NERootObject, NEGroupObject) ) if parent_name else self.__m_refNEScene.CurrentEditSpaceID()
-# TODO: parent_idはコピー先の親空間.. 2020.06.16
+# TODO: parent_idはコピー先の親空間.
         if( parent_id ):
             self.DuplicateByID_Exec( obj_id_list, parent_id )
         else:
@@ -652,7 +652,7 @@ class NESceneManager:
         
         print( 'NESceneManager::DuplicateByID_Exec()...' )
 
-# TODO: コピー先親空間でオブジェクトフィルタリングするのはなぜ??? 2020.06.16
+# TODO: 複数親空間に跨るオブジェクト群を複製できるようにしたい
         obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject), parent_id=None )#parent_id )
         if( not obj_id_list ):
             print( '\tAborting: No valid objects specified.' )
@@ -962,7 +962,7 @@ class NESceneManager:
             self.CutByID_Exec( selected_ids, self.__m_refNEScene.CurrentEditSpaceID() )
 
 
-#TODO: 複数グループを跨ぐノード群を、階層構造を維持したままコピー可能にする方法を考える.
+# TODO: 複数グループを跨ぐノード群を、階層構造を維持したままコピー可能にする方法を考える.
     def Copy( self ):
         selected_ids = self.__m_refNEScene.GetSelectedObjectIDs()
         if( selected_ids ):

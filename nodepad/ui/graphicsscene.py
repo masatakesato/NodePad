@@ -481,7 +481,8 @@ class GraphicsScene(QGraphicsScene):
     def Copy( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.__m_refCallbackFunc( 'CopyByID', item_id_list, parent_id=None )#, parent_id=self.__m_FocusViewID )
-        #TODO: 親空間跨いでのノード複製に対応したいのでparent_id指定を無効化できるか検証中. 2020.01.21
+# TODO: parent_idで、指定親空間内のノード群だけに制限して複製する.
+# TODO: 親空間を跨いで選択したノード群の複製に対応したい( parent_id=None で動作検証中 ).
 
     def Paste( self ):
         self.__m_refCallbackFunc( 'PasteByID', parent_id=self.__m_FocusViewID )
@@ -539,7 +540,7 @@ class GraphicsScene(QGraphicsScene):
         return [ item.ID() for item in self.selectedItems() ]
 
 
-# TODO: 処理をGraphicsSceneの外でやるべきか検討する. 2020.06.17
+# TODO: QGraphicsScene非依存な実装に置き換え可能か検討する.
     def CalcGroupIOOffsets( self, group_id ):
         try:
             grouplayer = self.__m_GraphicsViewLayers[ group_id ]
@@ -572,7 +573,7 @@ class GraphicsScene(QGraphicsScene):
     def __SelectionChangedSlot( self ):
 
         print( 'GraphicScene::__SelectionChangedSlot()...' )
-        inclusiveTypes = [ Node, Group, GroupIO ]# SymbolicLinkは外してある. 2020.06.18
+        inclusiveTypes = [ Node, Group, GroupIO ]# SymbolicLinkは外してある.
 
         # 何も選択されていない場合はitem_idをNoneにしてコールバック
         if( not self.selectedItems() ):

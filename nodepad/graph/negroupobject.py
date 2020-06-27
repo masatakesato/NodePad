@@ -39,7 +39,7 @@ class NEGroupObject(NEGraphObject):
         
         obj.SetParent(self)
         
-        # TODO: 座標変換の動作検証用コード.リファクタリング必要. objをワールド座標系からselfのローカル座標系へ変換する. 2017.09.23
+        # transforma pos from world space to obj's parent space.
         space = self
         pos_stack = []
         while( space != None ):
@@ -67,7 +67,7 @@ class NEGroupObject(NEGraphObject):
 
         obj.SetParent(None)
 
-        # TODO: 座標変換の動作検証用コード.リファクタリング必要. objをselfのローカル座標系からワールド座標系へ変換する. 2017.09.23
+        # transforma pos form obj's parent space to world space.
         space = self
         pos_stack = []
         while( space != None ):

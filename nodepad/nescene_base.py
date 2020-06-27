@@ -3,9 +3,6 @@ from factory.node_manager import *
 
 from graph.nenodegraph import *
 
-#from ui.graphicsscene import GraphicsScene
-#from ui.attributeeditorwidget import AttributeEditorWidget
-
 
 from plugin_manager import *
 
@@ -54,13 +51,13 @@ def Compute( self, dataBlock ):
         #self.__m_AttributeEditor.DeinitializeWidget()
 
 
-    # GUI-dependent function. nescene_managerでのみ使用. 基底クラスで空の関数だけ用意して派生クラスでオーバーライドする? 2020.06.16
+# TODO: GUI-dependent function. nescene_managerでのみ使用. 基底クラスで空の関数だけ用意して派生クラスでオーバーライドしたい
     def BindCommandCallbacks( self, func ):
         #self.__m_Scene.BindCallbackFunc( func )
         #self.__m_AttributeEditor.BindCallbackFunc( func )
         pass
 
-    # GUI-dependent function. nescene_managerでのみ使用. 基底クラスで空の関数だけ用意して派生クラスでオーバーライドする? 2020.06.16
+# TODO: GUI-dependent function. nescene_managerでのみ使用. 基底クラスで空の関数だけ用意して派生クラスでオーバーライドしたい
     def UnbindCallbackFuncs( self ):
         #self.__m_Scene.UnbindCallbackFunc()
         #self.__m_AttributeEditor.UnbindCallbackFunc()
@@ -74,7 +71,7 @@ def Compute( self, dataBlock ):
         return self.__m_NodeGraph
 
 
-    # GUI-dependent function. mainwidgetでのみ使用. 基底クラスで空の関数だけ用意して派生クラスでオーバーライドする? 2020.06.16
+# TODO: GUI-dependent function. mainwidgetでのみ使用. 基底クラスで空の関数だけ用意して派生クラスでオーバーライドしたい
     #def GraphicsScene( self ):
     #    return self.__m_Scene
 
@@ -83,22 +80,19 @@ def Compute( self, dataBlock ):
     #    return self.__m_AttributeEditor
 
 
-    # TODO: GUI-dependent functionaity. Manage selected item ids outside QGraphicsScene. 2020.06.16
+# TODO: NESceneの実装( self.__m_SelectionList を使用)に置き換える.
     def EvaluateSelected( self ):
         pass
-    #    item_ids = self.__m_Scene.GetSelectedObjectIDs()
-    #    for item_id in item_ids:
-    #        self.__m_NodeGraph.Evaluate( item_id )
 
 
     def GetSnapshot( self, object_id ):
         return self.__m_NodeGraph.GetSnapshot( object_id )
 
 
-    # TODO:  GUI-dependent functionaity. Manage selected item ids outside QGraphicsScene. 2020.06.16
+# TODO: NESceneの実装( self.__m_SelectionList を使用)に置き換える.
     def GetSelectedObjectIDs( self ):
         return []
-    #    return self.__m_Scene.GetSelectedObjectIDs()
+
 
     
     def FilterObjectIDs( self, obj_id_list, *, typefilter, parent_id ):
@@ -231,14 +225,9 @@ def Compute( self, dataBlock ):
         return self.__m_NodeGraph.PositionChanged( object_id, translate, relative )
 
 
-    # GUI-dependent function.
+# TODO: GUI-dependent function. QGraphicsScene非依存な実装が可能か検討する.
     #def CurrentEditSpaceID( self ):
     #    return self.__m_Scene.FocusViewID()
-
-
-    # TODO: GUI-dependent function. Manage selected item ids outside QGraphicsScene. 2020.06.16
-    #def Select( self, object_id ):
-    #    return self.__m_Scene.Select_Exec( [object_id], False )
 
 
     def CheckGraph( self ):
@@ -355,7 +344,7 @@ def Compute( self, dataBlock ):
         for obj_id in obj_id_list:
             self.Parent_Operation( obj_id, group.ID() )
 
-#TODO: シンボリックリンク接続先ノードを自グループに包含した場合、コネクションがおかしくなる.2019.12.02. グループ化は同一親ノードに限定する!!!
+# TODO: シンボリックリンク経由で接続されたグループ外ノード含めるとコネクションの親空間設定がおかしくなる. 親空間を跨ぐグループ化処理を検討する.
         #--------------------- グループに内包されるコネクションも子供状態にするオペレーション ------------#
         for conn_id in group.CollectInternalConnections():
             self.Parent_Operation( conn_id, group.ID() )

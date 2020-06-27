@@ -12,7 +12,7 @@ from .ui.attributeeditorwidget import AttributeEditorWidget
 from .plugin_manager import *
 from .selectionlist import SelectionList
 
-#TODO: クラス構造が複雑化している. リファクタリング必要. NENodeGraph + シーン操作用UI群みたいなクラスを作る?.
+# TODO: クラス構造が複雑化している. リファクタリング必要. NENodeGraph + シーン操作用UI群みたいなクラスを作る?.
 
 
 class NEScene:

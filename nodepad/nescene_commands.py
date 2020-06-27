@@ -20,12 +20,12 @@ from .nescene import NEScene
 
 ########################### TODO: カスタムコードノードの操作コマンド試験実装. #####################################
 
-#TODO: Register CustomNode creation procedure at GraphicsScene::contextMenuEvent.
-#TODO: Implement NESceneManager::CreateCustomNode_Exec.
-#TODO: Implement NESceneManager::RemoveCustomNodeByID_Exec.
-#TODO: Implement NEScene::CreateCustomNode_Operation.
-#TODO: Implement NEScene::RemoveCustomNode_Operation.
-#TODO: Implement NEScene::CompileCustomNodeCommand.
+# TODO: Register CustomNode creation procedure at GraphicsScene::contextMenuEvent.
+# TODO: Implement NESceneManager::CreateCustomNode_Exec.
+# TODO: Implement NESceneManager::RemoveCustomNodeByID_Exec.
+# TODO: Implement NEScene::CreateCustomNode_Operation.
+# TODO: Implement NEScene::RemoveCustomNode_Operation.
+# TODO: Implement NEScene::CompileCustomNodeCommand.
 
 
 class CreateCustomNodeCommand(CommandBase):
@@ -226,7 +226,7 @@ class ReconnectCommand(CommandBase):
 
 
 
-#TODO: グループノード作成と、ノードの親グループ変更を別コマンドに分離できるか検討する.
+# TODO: グループノード作成と、ノードの親グループ変更を別コマンドに分離できるか検討する.
 class GroupCommand(CommandBase):
 
     def __init__( self, neScene, obj_id_list, pos, size, name, parent_id, object_id ):
@@ -571,7 +571,7 @@ class RemoveGroupIOCommand(CommandBase):
 
 
 
-#TODO: 複数オブジェクトの一括選択機能にした方がいいか検討する.
+# TODO: 複数オブジェクトの一括選択機能にした方がいいか検討する.
 #class SelectCommand():
 
 #    def __init__( self, neScene, object_id ):
@@ -619,7 +619,7 @@ class SelectCommand_Multi():
 
 
 
-#TODO: 複数グループを跨いで選択したノード群をどうやってスナップショット化するか考える.
+# TODO: 複数グループを跨いで選択したノード群をどうやってスナップショット化するか考える.
 
 class SnapshotCommand():
 
@@ -632,7 +632,7 @@ class SnapshotCommand():
     def Init( self, neScene, obj_id_list ):
         self.Clear()
         
-        # TODO: Need to remove duplicates from list? 2020.01.30
+# TODO: 同一オブジェクトの重複選択を消す必要あるかも.( 例えばコネクション: 直接選択 + ノード接続からの自動検出 )
         refObj_list = [ neScene.GetObjectByID( obj_id ) for obj_id in obj_id_list ]
         #print( 'Duplicate', [ obj.FullKey() for obj in refObj_list ] )
 
@@ -647,9 +647,9 @@ class SnapshotCommand():
 
 
 
-        snapshot_gen_list, descendants = neScene.NodeGraph().PrepareSnapshot( obj_id_list )
+# TODO: 複数親空間を跨ぐノード群選択時のスナップショット収集コード. 2020.01.30
 
-#TODO: Traverse NEScene and Gather snapshot. 2020.01.30
+        snapshot_gen_list, descendants = neScene.NodeGraph().PrepareSnapshot( obj_id_list )
 
         #for obj_id in snapshot_gen_list:
         #    children = descendants[ obj_id ]
@@ -757,7 +757,7 @@ class SnapshotCommand():
         self.__m_ObjectIDs[obj.ID()] = None
 
         if( isinstance(obj, NENodeObject) ):
-#TODO: __CollectCreateNodeArgsに置き換える.
+# TODO: __CollectCreateNodeArgsに置き換える.
 
             # Reserve ObjectID space for attributes
             for attrib in obj.Attributes().values():
@@ -766,7 +766,7 @@ class SnapshotCommand():
             snapshot_list.append( obj.GetSnapshot() )# append NENodeSnapshot
 
         elif( isinstance(obj, NEGroupObject) ):
-#TODO: __CollectCreateGroupArgs関数を定義してまとめる.
+# TODO: __CollectCreateGroupArgs関数を定義してまとめる.
 
             # Append NEGroupSnapshot first.
             snapshot_list.append( obj.GetSnapshot() )# append NEGroupSnapshot

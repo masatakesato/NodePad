@@ -4,7 +4,7 @@ from ..component.descriptors import *
 
 
 
-#TODO: プラグイン実装ではなく、関数記述だけからノード動的生成できないか.
+# TODO: プラグイン実装ではなく、関数記述だけからノード動的生成できないか.
 
 
 class NodeTypeManager:

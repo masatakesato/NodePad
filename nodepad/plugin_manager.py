@@ -30,7 +30,7 @@ def GetSubclass( module, base_class ):
 
 
 
-#TODO: Refactor plugin module import process. 2020.06.27
+# TODO: Refactor plugin module import process.
 def LoadNodePlugin( nodeTypeManager ):
 
     pkg_name = 'nodepad.plugins'

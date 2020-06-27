@@ -61,7 +61,7 @@ class GraphicsView(QGraphicsView):
         tf = -0.5 * h + pos.y()
         
         self.setSceneRect( lf, tf, wf, hf )
-        self.fitInView( lf, tf, wf, hf )# using instead of buggy QGraphicsView::centerOn. 2019.8.03
+        self.fitInView( lf, tf, wf, hf )# using fitInView to avoid QGraphicsView::centerOn bug.
 
         # set scaling
         self.__m_ZoomScale = zoom
@@ -71,10 +71,9 @@ class GraphicsView(QGraphicsView):
 
     ######################## QGraphicsView func override #########################
 
-    # zoom in/out using mouse wheel: http://stackoverflow.com/questions/19113532/qgraphicsview-zooming-in-and-out-under-mouse-position-using-mouse-wheel
-    # deprecated (07.08.2016)
-
-    # new reference implementation: http://blog.automaton2000.com/2014/04/mouse-centered-zooming-in-qgraphicsview.html
+    # reference implementation of zoom in/out using mouse wheel:
+    #  old: http://stackoverflow.com/questions/19113532/qgraphicsview-zooming-in-and-out-under-mouse-position-using-mouse-wheel
+    #  current: http://blog.automaton2000.com/2014/04/mouse-centered-zooming-in-qgraphicsview.html
     def wheelEvent( self, event ):
 
         if( event.angleDelta().x() == 0 ):
