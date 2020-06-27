@@ -36,7 +36,7 @@ def LoadNodePlugin( nodeTypeManager ):
     pkg_name = 'nodepad.plugins'
 
     # get package path
-    plugin_paths = glob.glob( os.getcwd()+'/**/plugins/', recursive=True )
+    plugin_paths = glob.glob( os.path.dirname(__file__)+'/**/plugins/', recursive=True )
 
     # import node plugins
     for importer, modname, ispkg in pkgutil.iter_modules( plugin_paths ):
