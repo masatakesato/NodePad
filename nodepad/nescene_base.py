@@ -1,13 +1,15 @@
-﻿import factory.builder
-from factory.node_manager import *
+﻿import uuid
 
-from graph.nenodegraph import *
+from .factory import builder
+from .factory.node_manager import *
+
+from .graph.nenodegraph import *
 
 
-from plugin_manager import *
+from .plugin_manager import *
+from .selectionlist import SelectionList
 
 
-# NodeGraph Control class
 class NESceneBase:
 
     def __init__( self ):
@@ -18,6 +20,10 @@ class NESceneBase:
         self.__m_NodeGraph = NENodeGraph()
         #self.__m_Scene = GraphicsScene( self.__m_NodeGraph.GetRootID(), self.__m_NodeTypeManager )
         #self.__m_AttributeEditor = AttributeEditorWidget()
+
+        # temporary cached data
+        self.__m_SelectionList = SelectionList( uuid.UUID )
+
 
         # Register TestNode
         LoadNodePlugin( self.__m_NodeTypeManager )
@@ -33,9 +39,9 @@ def Compute( self, dataBlock ):
     print( 'custom_code::Compute()...' )
 
 '''
-        factory.builder.Build( 'CLASS1', CUSTOM_CODE )
+        builder.Build( 'CLASS1', CUSTOM_CODE )
 
-        classObj = factory.builder.CLASS1()
+        classObj = builder.CLASS1()
         classObj.Register( self.__m_NodeTypeManager )
 
 
@@ -51,17 +57,19 @@ def Compute( self, dataBlock ):
         #self.__m_AttributeEditor.DeinitializeWidget()
 
 
-# TODO: GUI-dependent function. nescene_managerでのみ使用. 基底クラスで空の関数だけ用意して派生クラスでオーバーライドしたい
+    # GUI-dependent function. nescene_managerでのみ使用.
     def BindCommandCallbacks( self, func ):
+        pass
         #self.__m_Scene.BindCallbackFunc( func )
         #self.__m_AttributeEditor.BindCallbackFunc( func )
-        pass
 
-# TODO: GUI-dependent function. nescene_managerでのみ使用. 基底クラスで空の関数だけ用意して派生クラスでオーバーライドしたい
+
+    # GUI-dependent function. nescene_managerでのみ使用.
     def UnbindCallbackFuncs( self ):
+        pass
         #self.__m_Scene.UnbindCallbackFunc()
         #self.__m_AttributeEditor.UnbindCallbackFunc()
-        pass
+        
 
     def NodeTypeManager( self ):
         return self.__m_NodeTypeManager
@@ -71,28 +79,28 @@ def Compute( self, dataBlock ):
         return self.__m_NodeGraph
 
 
-# TODO: GUI-dependent function. mainwidgetでのみ使用. 基底クラスで空の関数だけ用意して派生クラスでオーバーライドしたい
-    #def GraphicsScene( self ):
-    #    return self.__m_Scene
+    # GUI-dependent function. mainwidgetでのみ使用.
+    def GraphicsScene( self ):
+        return None
+        #return self.__m_Scene
 
 
-    #def AttributeEditor( self ):
-    #    return self.__m_AttributeEditor
+    def AttributeEditor( self ):
+        return None
+        #return self.__m_AttributeEditor
 
 
-# TODO: NESceneの実装( self.__m_SelectionList を使用)に置き換える.
     def EvaluateSelected( self ):
-        pass
+        for obj_id in self.__m_SelectionList.Iter():
+            self.__m_NodeGraph.Evaluate( obj_id )
 
 
     def GetSnapshot( self, object_id ):
         return self.__m_NodeGraph.GetSnapshot( object_id )
 
 
-# TODO: NESceneの実装( self.__m_SelectionList を使用)に置き換える.
     def GetSelectedObjectIDs( self ):
-        return []
-
+        return self.__m_SelectionList.Iter()
 
     
     def FilterObjectIDs( self, obj_id_list, *, typefilter, parent_id ):
@@ -205,8 +213,7 @@ def Compute( self, dataBlock ):
 
     # GUI-dependent function.
     def GetGroupIOPosition( self, object_id ):
-        return (0, 0)
-    #    return self.__m_Scene.CalcGroupIOOffsets( object_id )
+        return None#return self.__m_Scene.CalcGroupIOOffsets( object_id )
 
 
     def ResolveChildNames( self, object_id ):
@@ -225,9 +232,9 @@ def Compute( self, dataBlock ):
         return self.__m_NodeGraph.PositionChanged( object_id, translate, relative )
 
 
-# TODO: GUI-dependent function. QGraphicsScene非依存な実装が可能か検討する.
-    #def CurrentEditSpaceID( self ):
-    #    return self.__m_Scene.FocusViewID()
+    # GUI-dependent function.
+    def CurrentEditSpaceID( self ):
+        return None# self.__m_FocusViewID# return self.__m_Scene.FocusViewID()
 
 
     def CheckGraph( self ):
@@ -242,6 +249,40 @@ def Compute( self, dataBlock ):
         return self.__m_NodeGraph.ValidateName( object_id, newname )
 
 
+    def UpdateSelection( self ):
+        pass#self.__m_Scene.UpdateSelection( self.__m_SelectionList.Iter() )
+
+
+# TODO: GUI-specific method. Should be removed from NESceneBase
+    #def __UpdateAttributeEditor( self, object_id=None ):
+    #    try:
+    #        # get object and desc from obj_id
+    #        obj_id = object_id if object_id else self.__m_AttributeEditor.ActiveObjectID()
+    #        if( obj_id==None ):
+    #            return False
+
+    #        obj = self.__m_NodeGraph.GetObjectByID( obj_id, c_EditableTypes )
+    #        if( obj==None ):
+    #            return False
+
+    #        desc = obj.GetDesc()
+    #        if( desc==None ):
+    #            return False
+
+    #        self.__m_AttributeEditor.DeinitializeWidget()
+
+    #        # initialize attribute editor widget
+    #        self.__m_AttributeEditor.InitializeWidget( obj_id, desc, obj.Key() )
+        
+    #        # set values to widget
+    #        for attrib in obj.Attributes().values():
+    #            self.__m_AttributeEditor.SetValue_Exec( attrib.AttributeID(), attrib.Value() )
+
+    #        return True
+
+    #    except:
+
+    #        return False
 
 
     ################################### Operations ###################################
@@ -252,11 +293,11 @@ def Compute( self, dataBlock ):
         computeFunc = self.__m_NodeTypeManager.GetComputeFunc( nodetype )
         newNode = self.__m_NodeGraph.AddNode( nodeDesc, computeFunc, pos, size, name, object_id, attrib_ids, parent_id )
         
-        newsize = newNode.GetSize()
         # Create Node in GraphicsScene
+        #newsize = newNode.GetSize()
         #self.__m_Scene.CreateNode_Exec( newNode.Key(), newNode.ID(), newNode.GetDesc(), newNode.GetPosition(), newNode.ParentID() )                    
 
-        return newNode.ID()
+        return newNode#newNode.ID()
 
 
     def RemoveNode_Operation( self, node_id ):
@@ -281,7 +322,7 @@ def Compute( self, dataBlock ):
         #self.__m_AttributeEditor.SetEnabled_Exec( newConn.DestinationAttribID(), False )
 
 
-        return newConn.ID()
+        return newConn#newConn.ID()
 
 
     def Disconnect_Operation( self, conn_id ):
@@ -312,9 +353,10 @@ def Compute( self, dataBlock ):
         #self.__m_AttributeEditor.SetEnabled_Exec( conn.DestinationAttribID(), False )
 
         # return previous connection
-        return (prev_src_attrib_id, prev_dest_attrib_id)
+        return (conn, prev_src_attrib_id, prev_dest_attrib_id)
 
 
+# TODO: グループを跨いで選択したノード群はどうやってグループ化する?
     def CreateGroup_Operation( self, pos, size, name, object_id, parent_id ):
 
         # Create Group in NodeGraph
@@ -344,7 +386,6 @@ def Compute( self, dataBlock ):
         for obj_id in obj_id_list:
             self.Parent_Operation( obj_id, group.ID() )
 
-# TODO: シンボリックリンク経由で接続されたグループ外ノード含めるとコネクションの親空間設定がおかしくなる. 親空間を跨ぐグループ化処理を検討する.
         #--------------------- グループに内包されるコネクションも子供状態にするオペレーション ------------#
         for conn_id in group.CollectInternalConnections():
             self.Parent_Operation( conn_id, group.ID() )
@@ -446,7 +487,7 @@ def Compute( self, dataBlock ):
         # Set new position on parent space
         #self.__m_Scene.Translate_Exec( object_id, new_pos, False )
 
-        return prev_parent_id
+        return prev_parent_id, new_pos
 
 
     def CreateSymbolicLink_Operation( self, group_id, attribdesc, value, name=None, symboliclink_idset=(None,None,None), slot_index=-1 ):
@@ -457,7 +498,7 @@ def Compute( self, dataBlock ):
         #self.__m_Scene.ActivateSymbolicLink_Exec( symboliclink.ParentID(), symboliclink.Key(), symboliclink.GetDesc(), symboliclink.SlotIndex() )# slot_index )
         
         # Update AttributeEditorWidget
-        #self.__m_AttributeEditor.RefreshView_Exec()
+        #self.__UpdateAttributeEditor()
 
         return symboliclink.ID()
 
@@ -470,7 +511,7 @@ def Compute( self, dataBlock ):
         #self.__m_Scene.DeactivateSymbolicLink_Exec( symboliclink_id )
 
         # Update AttributeEditorWidget
-        #self.__m_AttributeEditor.RefreshView_Exec()
+        #self.__UpdateAttributeEditor()
 
 
     def SetSymbolicLinkSlotIndex_Operation( self, object_id, index ):
@@ -482,7 +523,7 @@ def Compute( self, dataBlock ):
         #self.__m_Scene.SetSymbolicLinkSlotIndex_Exec( object_id, index )
 
         # Update AttributeEditorWidget
-        #self.__m_AttributeEditor.RefreshView_Exec()
+        #self.__UpdateAttributeEditor()
 
         return prev_index    
 
@@ -507,36 +548,43 @@ def Compute( self, dataBlock ):
         #self.__m_Scene.RemoveGroupIO_Exec( object_id )
 
 
-    def Select_Operation( self, object_id ):
-        pass
-        #try:
-        #    print( 'NESceneBase::Select_Operation()...' )
+
+    # returns True if selection changed, else False.
+    def Select_Operation_Multi( self, obj_id_list, option ):
+        try:
+            print( 'NESceneBase::Select_Operation_Multi()...' )
+
+            self.__m_SelectionList.Exec( *obj_id_list, **option )
+            self.__m_SelectionList.Print()
+
+            return self.__m_SelectionList.Changed()
+
+            #if( self.__m_SelectionList.Changed()==False ):
+            #    return False
+
+            #self.__m_AttributeEditor.DeinitializeWidget()
+
+            #obj_ids_editable = self.__m_NodeGraph.FilterObjects( self.__m_SelectionList.Iter(), typefilter=c_EditableTypes, parent_id=None )
+
+            #if( not obj_ids_editable ):
+            #    return False
+
+  
+            ## get object and desc from selected id
+            #obj_id = obj_ids_editable[0]
+            #obj = self.__m_NodeGraph.GetObjectByID( obj_id, c_EditableTypes )
+            #desc = obj.GetDesc()
+            #if( desc==None ):    return False
+
+            ## initialize attribute editor widget
+            #self.__m_AttributeEditor.InitializeWidget( obj_id, desc, obj.Key() )
         
-        #    self.__m_AttributeEditor.DeinitializeWidget()
-        
-        #    if( object_id==None ):# deselect operation
-        #        return False
+            ## set values to widget
+            #for attrib in obj.Attributes().values():
+            #    self.__m_AttributeEditor.SetValue_Exec( attrib.AttributeID(), attrib.Value() )
 
-        #    # select node object
-        #    node = self.__m_NodeGraph.GetObjectByID( object_id, ( NENodeObject, NEGroupObject, NEGroupIOObject, NESymbolicLink ) )
-        #    if( node==None ):    return False
+            #return True
 
-        #    # initialize widget
-        #    nodeDesc = node.GetDesc()
-        #    if( nodeDesc==None ):    return False
-
-        #    self.__m_AttributeEditor.InitializeWidget( object_id, nodeDesc, node.Key() )
-        
-        #    # set values to widget
-        #    for attrib in node.Attributes().values():
-        #        self.__m_AttributeEditor.SetValue_Exec( attrib.AttributeID(), attrib.Value() )
-        #        #print( attrib.Key() + ': ' + str(attrib.Value()) )
-
-        #    # Evaluate Selected Node.
-        #    self.__m_NodeGraph.Evaluate( object_id )
-
-        #    return True
-
-        #except:
-        #    traceback.print_exc()
-        #    return False
+        except:
+            traceback.print_exc()
+            return False
