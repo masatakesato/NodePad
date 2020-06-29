@@ -1,20 +1,10 @@
 # NodePad
 
 ------
-A simple python based vidual node editor.
 
 ![nodepad.png](https://bitbucket.org/repo/p8k4Lrr/images/160901691-nodepad.png)
 
-## About ##
-
-------
-
-NodePad is a purporse of development
-- investigating how, and why of software implementation.
-- aquiring knowlege, and software development skills.
-- not intended for practical use.
-
-
+A simple standalone node edit tool
 
 ## About
 
