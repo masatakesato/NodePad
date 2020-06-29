@@ -2,16 +2,17 @@
 
 ------
 
+A simple node edit for visual scripting.
+
 ![nodepad.png](https://bitbucket.org/repo/p8k4Lrr/images/160901691-nodepad.png)
 
-A simple standalone node edit tool
 
 ## About
 
 ------
 
-NodePad is a python based visual scripting tool. The software is still in development, and current goal is to make NodePad simple and protable as a standalone application( such as Windows Notepad for text edit ).
-
+NodePad is a python based visual scripting tool.
+The software is still in development, and current goal is to make NodePad simple and protable as a standalone application( such as Windows Notepad for text edit ).
 
 
 ## Features ##
@@ -71,8 +72,6 @@ or
 cd nodepad
 python nodepad
 ```
-
-
 
 ## License
 
