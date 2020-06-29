@@ -1,10 +1,14 @@
 # NodePad
 
+------
+
 ![nodepad.png](https://bitbucket.org/repo/p8k4Lrr/images/160901691-nodepad.png)
 
 A simple standalone node edit tool
 
-### Features ###
+## Features ##
+
+------
 
 - open/save files
 - import/export files
@@ -13,14 +17,18 @@ A simple standalone node edit tool
 - group/ungroup
 - command-line interpreter
 
-### Requirements ###
+## Requirements ##
+
+------
 
 Python environment with following configuration is required at minimum.
 
 * python 3 ( 3.5 or later recommended ) 
 * PyQt5
 
-### Installation ###
+## Installation ##
+
+------
 
 direct install from git
 
@@ -36,7 +44,9 @@ cd nodepad
 pip install .
 ```
 
-### Usage ###
+## Usage ##
+
+------
 
 ```
 python -m nodepad
@@ -49,8 +59,9 @@ cd nodepad
 python nodepad
 ```
 
-### Author
 
 
+## License
 
-### License
+------
+
