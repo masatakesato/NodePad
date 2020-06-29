@@ -1,10 +1,8 @@
 # NodePad
 
 ------
-
+A simple python based vidual node editor.
 ![nodepad.png](https://bitbucket.org/repo/p8k4Lrr/images/160901691-nodepad.png)
-
-A simple standalone node edit tool
 
 ## Features ##
 
