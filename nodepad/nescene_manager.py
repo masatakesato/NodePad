@@ -9,7 +9,8 @@ from .factory.node_manager import *
 from .graph.nenodegraph import *
 
 from .plugin_manager import *
-from .nescene import *
+#from .nescene import *
+from .nescene_ext import *
 from .nescene_commands import *
 
 

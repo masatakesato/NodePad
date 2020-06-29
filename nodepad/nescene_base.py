@@ -338,6 +338,8 @@ def Compute( self, dataBlock ):
         # Update AttributeEditorWidget
         #self.__m_AttributeEditor.SetEnabled_Exec( dest_attrib_id, True )
 
+        return dest_attrib_id
+
 
     def Reconnect_Operation( self, conn_id, attrib1_id, attrib2_id ):
         # Reconnect in NodeGraph
@@ -490,6 +492,7 @@ def Compute( self, dataBlock ):
         return prev_parent_id, new_pos
 
 
+# TODO: ICommand向けにUUIDを戻り値としたいが、派生クラス向けには実体を戻り値にしたい.
     def CreateSymbolicLink_Operation( self, group_id, attribdesc, value, name=None, symboliclink_idset=(None,None,None), slot_index=-1 ):
         # Create Symboliclink in NodeGraph
         symboliclink = self.__m_NodeGraph.ActivateSymbolicLinkByID( group_id, attribdesc, value, name, symboliclink_idset, slot_index )
@@ -500,7 +503,7 @@ def Compute( self, dataBlock ):
         # Update AttributeEditorWidget
         #self.__UpdateAttributeEditor()
 
-        return symboliclink.ID()
+        return symboliclink#symboliclink.ID()
 
 
     def RemoveSymbolicLink_Operation( self, symboliclink_id ):
@@ -528,6 +531,7 @@ def Compute( self, dataBlock ):
         return prev_index    
 
 
+# TODO: ICommand向けにUUIDを戻り値としたいが、派生クラス向けには実体を戻り値にしたい.
     def CreateGroupIO_Operation( self, dataflow, pos, object_id, group_id ):
         print( 'NESceneBase::CreateGroupIO_Operation()...' )
         # Create GroupIO in NodeGraph
@@ -536,7 +540,7 @@ def Compute( self, dataBlock ):
         # Create GroupIO in GraphicsScene
         #self.__m_Scene.CreateGroupIO_Exec( groupio.Key(), dataflow, groupio.GetPosition(), group_id, groupio.ID() )
         
-        return groupio.ID()
+        return groupio#groupio.ID()
 
 
     def RemoveGroupIO_Operation( self, object_id ):

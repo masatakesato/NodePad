@@ -1,16 +1,21 @@
-﻿import uuid
+﻿#import uuid
+import traceback
 
 #from .factory import builder
-from .factory.node_manager import *
+#from .factory.node_manager import *
 
-#from .graph.nenodegraph import *
+from .graph.nenodegraph import *
 
 
 #from .plugin_manager import *
 #from .selectionlist import SelectionList
 
+from .ui.graphicsscene import GraphicsScene
+from .ui.attributeeditorwidget import AttributeEditorWidget
 
 from .nescene_base import NESceneBase
+
+
 
 
 class NESceneExt(NESceneBase):
@@ -321,8 +326,9 @@ class NESceneExt(NESceneBase):
         return newConn.ID()
 
 
+# TODO: ベースクラスと戻り値の型が異なる.
     def Disconnect_Operation( self, conn_id ):
-        super(NESceneExt, self).Disconnect_Operation( conn_id )
+        dest_attrib_id = super(NESceneExt, self).Disconnect_Operation( conn_id )
         # Disconnect in NodeGraph
         #dest_attrib_id = self.__m_NodeGraph.RemoveConnectionByID( conn_id )
 
@@ -543,6 +549,7 @@ class NESceneExt(NESceneBase):
         return prev_index    
 
 
+# TODO: ベースクラスと戻り値の型が異なる.
     def CreateGroupIO_Operation( self, dataflow, pos, object_id, group_id ):
         groupio = super(NESceneExt, self).CreateGroupIO_Operation( dataflow, pos, object_id, group_id )
         #print( 'NESceneExt::CreateGroupIO_Operation()...' )
@@ -580,13 +587,15 @@ class NESceneExt(NESceneBase):
 
             self.__m_AttributeEditor.DeinitializeWidget()
 
-            obj_ids_editable = self.__m_NodeGraph.FilterObjects( self.__m_SelectionList.Iter(), typefilter=c_EditableTypes, parent_id=None )
+            obj_ids_editable = self.FilterObjectIDs( self.GetSelectedObjectIDs(), typefilter=c_EditableTypes, parent_id=None )
+            # self.__m_NodeGraph.FilterObjects( self.GetSelectedObjectIDs(), typefilter=c_EditableTypes, parent_id=None )
+
             if( not obj_ids_editable ):
                 return False
 
             # get object and desc from selected id
             obj_id = obj_ids_editable[0]
-            obj = self.__m_NodeGraph.GetObjectByID( obj_id, c_EditableTypes )
+            obj = self.GetObjectByID( obj_id, c_EditableTypes )
             desc = obj.GetDesc()
             if( desc==None ):    return False
 

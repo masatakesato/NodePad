@@ -10,8 +10,8 @@ from .graph.negroupobject import NEGroupObject, NEGroupSnapshot
 from .graph.nesymboliclink import NESymbolicLinkSnapshot
 from .graph.negroupioobject import NEGroupIOSnapshot
 
-from .nescene import NEScene
-
+#from .nescene import NEScene
+from .nescene_ext import NESceneExt
 
 
 #========================== Commands ===================================#

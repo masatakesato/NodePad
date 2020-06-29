@@ -10,7 +10,8 @@ from .ui.attributeeditorwidget import AttributeEditorWidget
 from .ui.pythoninterpreter import PyInterp
 
 
-from .nescene import NEScene
+#from .nescene import NEScene
+from .nescene_ext import NESceneExt
 from .nescene_manager import NESceneManager
 
 
@@ -22,7 +23,7 @@ class MainWidget(MainWindow):
         super(MainWidget, self).__init__()        
  
         #========== Initialize NEScene ===========#
-        self.__m_NEScene = NEScene()
+        self.__m_NEScene = NESceneExt()#NEScene()
 
         #========== Initialize GraphicsViews ===========#
         self.__m_Views = {}

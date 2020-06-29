@@ -1,31 +1,56 @@
 # NodePad
 
-This README would normally document whatever steps are necessary to get your application up and running.
-
 ![nodepad.png](https://bitbucket.org/repo/p8k4Lrr/images/160901691-nodepad.png)
 
-### What is this repository for? ###
+A simple standalone node edit tool
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+### Features ###
 
-### How do I get set up? ###
+- open/save files
+- import/export files
+- copy/paste
+- undo/redo
+- group/ungroup
+- command-line interpreter
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+### Requirements ###
 
-### Contribution guidelines ###
+Python environment with following configuration is required at minimum.
 
-* Writing tests
-* Code review
-* Other guidelines
+* python 3 ( 3.5 or later recommended ) 
+* PyQt5
 
-### Who do I talk to? ###
+### Installation ###
 
-* Repo owner or admin
-* Other community or team contact
+direct install from git
+
+```
+pip install git+https://masayan1115@bitbucket.org/masayan1115/nodepad.git
+```
+
+install after cloning
+
+```
+git clone https://masayan1115@bitbucket.org/masayan1115/nodepad.git
+cd nodepad
+pip install .
+```
+
+### Usage ###
+
+```
+python -m nodepad
+```
+
+or
+
+```
+cd nodepad
+python nodepad
+```
+
+### Author
+
+
+
+### License
