@@ -349,12 +349,11 @@ class NESceneManager:
 
         if( not obj_id_list ):
             SelectCommand_Multi( self.__m_refNEScene, [], {'clear':True} ).execute()
+            self.__m_refNEScene.UpdateSelection()
             return False
 
         SelectCommand_Multi( self.__m_refNEScene, obj_id_list, option ).execute()
-
-# TODO: 選択処理の結果をGUI表示に反映させる関数( GUI表示更新をトリガーとしたコールバックを全てブロックしてある )
-        self.__m_refNEScene.UpdateSelection()
+        self.__m_refNEScene.UpdateSelection()# TODO: 選択処理の結果をGUI表示に反映させる関数( GUI表示更新をトリガーとしたコールバックを全てブロックしてある )
 
         return True
 
@@ -364,9 +363,11 @@ class NESceneManager:
         
         if( not obj_id_list ):
             SelectCommand_Multi( self.__m_refNEScene, [], {'clear':True} ).execute()
+            # SelectByID_Exec_Multi is kicked from GraphicsScene. No Need to run self.__m_refNEScene.UpdateSelection().
             return False
 
         SelectCommand_Multi( self.__m_refNEScene, obj_id_list, option ).execute()
+        # SelectByID_Exec_Multi is kicked from GraphicsScene. No Need to run self.__m_refNEScene.UpdateSelection().
 
         # Evaluate Selected Objects.
         self.__m_refNEScene.EvaluateSelected()
@@ -419,8 +420,8 @@ class NESceneManager:
             self.CreateSymbolicLinkByID_Exec( attrib_id, symboliclink_idset=id_set, terminate=False )
 
         # Clear selection
-        #self.__m_CommandManager.executeCmd( SelectCommand( self.__m_refNEScene, None ) )
-        self.__m_CommandManager.executeCmd( SelectCommand_Multi( self.__m_refNEScene, [], {'clear':True} ) )
+        SelectCommand_Multi( self.__m_refNEScene, [], {'clear':True} ).execute()
+        self.__m_refNEScene.UpdateSelection()
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -665,7 +666,8 @@ class NESceneManager:
         selection_id_list = self.__ExecuteSnapshot( self.__m_DuplicationSnapshot, (75.0, 75.0), parent_id )
         #for selection_id in selection_id_list:
         #    self.__m_CommandManager.executeCmd( SelectCommand( self.__m_refNEScene, selection_id ) )
-        self.__m_CommandManager.executeCmd( SelectCommand_Multi( self.__m_refNEScene, selection_id_list, {'clear':True} ) )
+        SelectCommand_Multi( self.__m_refNEScene, selection_id_list, {'clear':True} ).execute()#self.__m_CommandManager.executeCmd( SelectCommand_Multi( self.__m_refNEScene, selection_id_list, {'clear':True} ) )
+        self.__m_refNEScene.UpdateSelection()
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -704,6 +706,7 @@ class NESceneManager:
 
         selection_id_list = self.__ExecuteSnapshot( self.__m_CopySnapshot, (75.0, 75.0), parent_id )
         SelectCommand_Multi( self.__m_refNEScene, selection_id_list, {'clear':True} ).execute()
+        self.__m_refNEScene.UpdateSelection()
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )

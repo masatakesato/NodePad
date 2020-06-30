@@ -250,6 +250,7 @@ def Compute( self, dataBlock ):
 
 
     def UpdateSelection( self ):
+        print( 'NESceneBase::UpdateSelection()...' )
         pass#self.__m_Scene.UpdateSelection( self.__m_SelectionList.Iter() )
 
 
