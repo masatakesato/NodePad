@@ -653,6 +653,7 @@ class GraphicsScene(QGraphicsScene):
             event.accept()
             return
 
+        # check clicked raphicsitem
         item = self.itemAt( event.scenePos(), QTransform() )
         if( isinstance(item, Port) ):
             if( self.CheckLocked( item.PortID() )==False ): # コネクション生成許可されているポートの場合は、破線エッジを描画する
@@ -664,8 +665,11 @@ class GraphicsScene(QGraphicsScene):
                 return
 
         elif( isinstance(item, SymbolicLink) ):
-            self.__m_MouseDragMode = MouseMode.MoveSymbolicLink
+            self.__m_MouseDragMode = MouseMode.DragSymbolicLink
             self.__m_refGroupIO = item.parentItem()
+
+        elif( item ):
+            self.__m_MouseDragMode = MouseMode.DragItem
 
 
         self.__m_MouseStartPos = event.screenPos()
@@ -677,7 +681,7 @@ class GraphicsScene(QGraphicsScene):
         
         groupio = next( (item for item in self.items(event.scenePos()) if isinstance(item, GroupIO) ), None )
 
-        if( self.__m_MouseDragMode==MouseMode.DrawEdge ):
+        if( self.__m_MouseDragMode==MouseMode.DrawEdge ):# drawing connection
             scenepos = event.scenePos()
             currPort = self.itemAt( scenepos, QTransform())          
 
@@ -709,7 +713,7 @@ class GraphicsScene(QGraphicsScene):
                 if( self.CheckSymbolize(self.__m_refStartPort, groupio.DataFlow()) ):
                     groupio.MoveBlank( event.scenePos() )
 
-        elif( self.__m_MouseDragMode==MouseMode.MoveSymbolicLink ):# SymbolicLinkをマウスドラッグする処理だけ抽出
+        elif( self.__m_MouseDragMode==MouseMode.DragSymbolicLink ):# moving SymbolicLink
 
             grabitem = self.mouseGrabberItem()
 
@@ -747,7 +751,8 @@ class GraphicsScene(QGraphicsScene):
 
         # アイテム選択状態でマウスドラッグ終了する場合
         mouseMovement = event.screenPos() - self.__m_MouseStartPos
-        if( self.selectedItems() and ( mouseMovement.x() or mouseMovement.y() ) ):
+        if( self.__m_MouseDragMode==MouseMode.DragItem and ( mouseMovement.x() or mouseMovement.y() ) ):
+        #if( self.selectedItems() and ( mouseMovement.x() or mouseMovement.y() ) ):
             self.Translate()
 
         if( self.__m_MouseDragMode == MouseMode.DrawEdge ):
@@ -764,7 +769,7 @@ class GraphicsScene(QGraphicsScene):
             self.__m_TempEdge = None
             self.__m_refStartPort=None
             
-        elif( self.__m_MouseDragMode == MouseMode.MoveSymbolicLink ):
+        elif( self.__m_MouseDragMode == MouseMode.DragSymbolicLink ):
             if( self.__m_refGroupIO ):# 掴んでいたSymbolicLinkを__m_refGroupIOの上で離した場合
                 if( self.__AssignSynbolicLinkToGroupIO( grabberitem, self.__m_refGroupIO )==False ):
                     self.__m_MouseDragMode = MouseMode.RemoveSymbolicLink

@@ -65,15 +65,13 @@ class MouseMode(IntEnum):
 
     # QGraphicsScene's item operation
     DrawEdge = 0
-    MoveNode = 1
-    MoveGroup = 2
-    MoveGroupIO = 3
-    MoveSymbolicLink = 4
-    RemoveSymbolicLink = 5
+    DragSymbolicLink = 1
+    DragItem = 2
+    RemoveSymbolicLink = 3
 
     # QGraphicsView's operation    
-    RubberBandSelection = 6
-    MoveViewport = 7
+    RubberBandSelection = 4
+    MoveViewport = 5
 
     # Other operations
-    ContextMenu = 8
+    ContextMenu = 6
