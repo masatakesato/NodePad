@@ -115,7 +115,7 @@ class CreateNodeCommand(CommandBase):
 
 
     def execute( self ):
-        self.__m_Snapshot = self.__m_refNEScene.GetSnapshot( self.__m_refNEScene.CreateNode_Operation( self.__m_NodeType, self.__m_Position, self.__m_Size, self.__m_Name, self.__m_ObjectID, self.__m_ParentID, self.__m_ActiveAttribIDs ) )
+        self.__m_Snapshot = self.__m_refNEScene.CreateNode_Operation( self.__m_NodeType, self.__m_Position, self.__m_Size, self.__m_Name, self.__m_ObjectID, self.__m_ParentID, self.__m_ActiveAttribIDs ).GetSnapshot() #self.__m_refNEScene.GetSnapshot( self.__m_refNEScene.CreateNode_Operation( self.__m_NodeType, self.__m_Position, self.__m_Size, self.__m_Name, self.__m_ObjectID, self.__m_ParentID, self.__m_ActiveAttribIDs ) )
 
     def undo( self ):
         print( 'CreateNodeCommand::undo()...' )
@@ -166,7 +166,7 @@ class ConnectCommand(CommandBase):
 
 
     def execute( self ):
-        self.__m_Snapshot = self.__m_refNEScene.GetSnapshot( self.__m_refNEScene.Connect_Operation( self.__m_AttribIDs[0], self.__m_AttribIDs[1], self.__m_ObjectID ) )
+        self.__m_Snapshot = self.__m_refNEScene.Connect_Operation( self.__m_AttribIDs[0], self.__m_AttribIDs[1], self.__m_ObjectID ).GetSnapshot()#self.__m_refNEScene.GetSnapshot( self.__m_refNEScene.Connect_Operation( self.__m_AttribIDs[0], self.__m_AttribIDs[1], self.__m_ObjectID ) )
 
     def undo( self ):
         print( 'ConnectCommand::undo()...' )
@@ -207,21 +207,21 @@ class ReconnectCommand(CommandBase):
         super(ReconnectCommand, self).__init__()
 
         self.__m_refNEScene = neScene
-        self.__m_ObjectID = object_id
+        self.__m_Snapshot = neScene.GetSnapshot( object_id )# keep before-reconnection state for undo
+
         self.__m_NewAttribIDs = attrib_ids
-        self.__m_PrevAttribIDs = None
 
 
     def execute( self ):
-        self.__m_PrevAttribIDs = self.__m_refNEScene.Reconnect_Operation( self.__m_ObjectID, self.__m_NewAttribIDs[0], self.__m_NewAttribIDs[1] )
+        self.__m_refNEScene.Reconnect_Operation( self.__m_Snapshot.ObjectID(), self.__m_NewAttribIDs[0], self.__m_NewAttribIDs[1] )
 
     def undo( self ):
         print( 'ReconnectCommand::undo()...' )
-        self.__m_refNEScene.Reconnect_Operation( self.__m_ObjectID, self.__m_PrevAttribIDs[0], self.__m_PrevAttribIDs[1] )
+        self.__m_refNEScene.Reconnect_Operation( self.__m_Snapshot.ObjectID(), self.__m_Snapshot.SourceAttribID(), self.__m_Snapshot.DestinationAttribID() )
 
     def redo( self ):
         print( 'ReconnectCommand::redo()...' )
-        self.__m_refNEScene.Reconnect_Operation( self.__m_ObjectID, self.__m_NewAttribIDs[0], self.__m_NewAttribIDs[1] )
+        self.__m_refNEScene.Reconnect_Operation( self.__m_Snapshot.ObjectID(), self.__m_NewAttribIDs[0], self.__m_NewAttribIDs[1] )
 
 
 
@@ -421,28 +421,28 @@ class SetVisibleCommand(CommandBase):
         self.__m_refNEScene.SetVisible_Operation( self.__m_ObjectID, self.__m_NewState )
 
 
-# ParentByID_Execで使用.
-class ParentCommand(CommandBase):
+# TODO: ParentByID_Exec(現在未使用)と併せて設計実装予定.
+#class ParentCommand(CommandBase):
 
-    def __init__( self, neScene, object_id, parent_id ):
-        super(ParentCommand, self).__init__()
+#    def __init__( self, neScene, object_id, parent_id ):
+#        super(ParentCommand, self).__init__()
 
-        self.__m_refNEScene = neScene
-        self.__m_ObjectID = object_id
-        self.__m_NewParentID = parent_id
-        self.__m_PrevParentID = None
+#        self.__m_refNEScene = neScene
+#        self.__m_ObjectID = object_id
+#        self.__m_NewParentID = parent_id
+#        self.__m_PrevParentID = neScene.GetObjectByID(object_id).ParentID()# keep current parentid before parant change
 
 
-    def execute( self ):
-        self.__m_PrevParentID = self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_NewParentID )
+#    def execute( self ):
+#        self.__m_PrevParentID = self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_NewParentID )
 
-    def undo( self ):
-        print( 'ParentCommand::undo()...' )
-        self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_PrevParentID )
+#    def undo( self ):
+#        print( 'ParentCommand::undo()...' )
+#        self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_PrevParentID )
 
-    def redo( self ):
-        print( 'ParentCommand::redo()...' )
-        self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_NewParentID )
+#    def redo( self ):
+#        print( 'ParentCommand::redo()...' )
+#        self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_NewParentID )
 
 
 
@@ -463,8 +463,8 @@ class CreateSymbolicLinkCommand(CommandBase):
 
 
     def execute( self ):
-        self.__m_Snapshot = self.__m_refNEScene.GetSnapshot( self.__m_refNEScene.CreateSymbolicLink_Operation( self.__m_GroupID, self.__m_AttribDesc, self.__m_Value, self.__m_Name, self.__m_ObjectIDSet, self.__m_SlotIndex ) )
-
+        self.__m_Snapshot = self.__m_refNEScene.CreateSymbolicLink_Operation( self.__m_GroupID, self.__m_AttribDesc, self.__m_Value, self.__m_Name, self.__m_ObjectIDSet, self.__m_SlotIndex ).GetSnapshot()
+        
     def undo( self ):
         print( 'CreateSymbolicLinkCommand::undo()...' )
         self.__m_refNEScene.RemoveSymbolicLink_Operation( self.__m_Snapshot.ObjectID() )
@@ -537,8 +537,8 @@ class CreateGroupIOCommand(CommandBase):
 
 
     def execute( self ):
-        self.__m_Snapshot = self.__m_refNEScene.GetSnapshot( self.__m_refNEScene.CreateGroupIO_Operation( self.__m_DataFlow, self.__m_Position, self.__m_ObjectID, self.__m_ParentID ) )
-    
+        self.__m_Snapshot = self.__m_refNEScene.CreateGroupIO_Operation( self.__m_DataFlow, self.__m_Position, self.__m_ObjectID, self.__m_ParentID ).GetSnapshot()
+
     def undo( self ):
         print( 'CreateGroupIOCommand::undo()...' )
         self.__m_refNEScene.RemoveGroupIO_Operation( self.__m_Snapshot.ObjectID() )

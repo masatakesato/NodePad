@@ -400,11 +400,11 @@ class NENodeGraph():
             else:
                 conn.SetObjectType( 'Connection' )
 
-            return conn, prev_src_attrib_id, prev_dest_attrib_id
+            return conn
 
         except:
             traceback.print_exc()
-            return None, None, None, None
+            return None
 
 
     def RemoveNodeByID( self, node_id ):
@@ -621,7 +621,9 @@ class NENodeGraph():
 
             # Add to new parent
             self.__m_IDMap[parent_id].AddMember( self.__m_IDMap[object_id] )
-            return prev_parent_id, self.__m_IDMap[object_id].GetPosition()# RemoveMemberの影響で位置座標がワールド空間に戻っている
+            
+            #return prev_parent_id, self.__m_IDMap[object_id].GetPosition()# RemoveMemberの影響で位置座標がワールド空間に戻っている
+            return self.__m_IDMap[object_id]
 
         except:
             traceback.print_exc()

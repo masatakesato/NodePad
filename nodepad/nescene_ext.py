@@ -283,7 +283,6 @@ class NESceneExt(NESceneBase):
 
     ################################### Operations ###################################
 
-# TODO: ベースクラスと戻り値の型が異なる.
     def CreateNode_Operation( self, nodetype, pos, size, name, object_id, parent_id, attrib_ids ):
         newNode = super(NESceneExt, self).CreateNode_Operation( nodetype, pos, size, name, object_id, parent_id, attrib_ids )
         # Create Node in NodeGraph
@@ -295,7 +294,7 @@ class NESceneExt(NESceneBase):
         # Create Node in GraphicsScene
         self.__m_Scene.CreateNode_Exec( newNode.Key(), newNode.ID(), newNode.GetDesc(), newNode.GetPosition(), newNode.ParentID() )                    
 
-        return newNode.ID()
+        return newNode
 
 
     def RemoveNode_Operation( self, node_id ):
@@ -307,7 +306,6 @@ class NESceneExt(NESceneBase):
         self.__m_Scene.RemoveNode_Exec( node_id )
 
 
-# TODO: ベースクラスと戻り値の型が異なる.
     def Connect_Operation( self, attrib1_id, attrib2_id, object_id ):
         newConn = super(NESceneExt, self).Connect_Operation( attrib1_id, attrib2_id, object_id )
         # Create Connection in NodeGraph
@@ -323,12 +321,11 @@ class NESceneExt(NESceneBase):
         self.__m_AttributeEditor.SetEnabled_Exec( newConn.DestinationAttribID(), False )
 
 
-        return newConn.ID()
+        return newConn
 
 
-# TODO: ベースクラスと戻り値の型が異なる.
     def Disconnect_Operation( self, conn_id ):
-        dest_attrib_id = super(NESceneExt, self).Disconnect_Operation( conn_id )
+        super(NESceneExt, self).Disconnect_Operation( conn_id )
         # Disconnect in NodeGraph
         #dest_attrib_id = self.__m_NodeGraph.RemoveConnectionByID( conn_id )
 
@@ -338,13 +335,12 @@ class NESceneExt(NESceneBase):
         # Disconnect in GraphicsScene
         self.__m_Scene.Disconnect_Exec( conn_id )
 
-        # Update AttributeEditorWidget
-        self.__m_AttributeEditor.SetEnabled_Exec( dest_attrib_id, True )
+        # Update AttributeEditorWidget.
+        #self.__m_AttributeEditor.SetEnabled_Exec( dest_attrib_id, True )
 
 
-# TODO: ベースクラスと戻り値の型が異なる.
     def Reconnect_Operation( self, conn_id, attrib1_id, attrib2_id ):
-        conn, prev_src_attrib_id, prev_dest_attrib_id = super(NESceneExt, self).Reconnect_Operation( conn_id, attrib1_id, attrib2_id )
+        conn = super(NESceneExt, self).Reconnect_Operation( conn_id, attrib1_id, attrib2_id )
         # Reconnect in NodeGraph
         #conn, prev_src_attrib_id, prev_dest_attrib_id = self.__m_NodeGraph.ReconnectByID( conn_id, attrib1_id, attrib2_id )
 
@@ -352,13 +348,15 @@ class NESceneExt(NESceneBase):
         #prev_state = self.__m_NodeGraph.LockAttributeByID( conn.DestinationAttribID(), False )
 
         # Reconnect in GraphicsScene
-        self.__m_Scene.Reconnect_Exec( conn_id, ( conn.Source().ParentID(), conn.SourceID() ), ( conn.Destination().ParentID(), conn.DestinationID() ), conn.ParentID() )
+        self.__m_Scene.Reconnect_Exec( conn.ID(), ( conn.Source().ParentID(), conn.SourceID() ), ( conn.Destination().ParentID(), conn.DestinationID() ), conn.ParentID() )
 
+        # TODO: NESceneBase::Reconnect_Operation()内でLockAttributeOperationを呼び出せばいいのでは？
         # Update AttributeEditorWidget
-        self.__m_AttributeEditor.SetEnabled_Exec( conn.DestinationAttribID(), False )
+        #self.__m_AttributeEditor.SetEnabled_Exec( conn.DestinationAttribID(), False )
 
         # return previous connection
-        return (prev_src_attrib_id, prev_dest_attrib_id)
+        #return (prev_src_attrib_id, prev_dest_attrib_id)
+        return conn
 
 
 # TODO: グループを跨いで選択したノード群はどうやってグループ化する?
@@ -494,7 +492,7 @@ class NESceneExt(NESceneBase):
 
 # TODO: ベースクラスと戻り値の型が異なる.
     def Parent_Operation( self, object_id, parent_id ):
-        prev_parent_id, new_pos = super(NESceneExt, self).Parent_Operation( object_id, parent_id )
+        obj = super(NESceneExt, self).Parent_Operation( object_id, parent_id )# prev_parent_id, new_pos
         # Set parent in NodeGraph
         #prev_parent_id, new_pos = self.__m_NodeGraph.ParentByID( object_id, parent_id )
 
@@ -502,12 +500,11 @@ class NESceneExt(NESceneBase):
         self.__m_Scene.Parent_Exec( object_id, parent_id )
 
         # Set new position on parent space
-        self.__m_Scene.Translate_Exec( object_id, new_pos, False )
+        self.__m_Scene.Translate_Exec( object_id, obj.GetPosition(), False )# new_pos
 
-        return prev_parent_id
+        return obj#prev_parent_id
 
 
-# TODO: ベースクラスと戻り値の型が異なる.
     def CreateSymbolicLink_Operation( self, group_id, attribdesc, value, name=None, symboliclink_idset=(None,None,None), slot_index=-1 ):
         symboliclink = super(NESceneExt, self).CreateSymbolicLink_Operation( group_id, attribdesc, value, name, symboliclink_idset, slot_index )
         # Create Symboliclink in NodeGraph
@@ -519,7 +516,7 @@ class NESceneExt(NESceneBase):
         # Update AttributeEditorWidget
         self.__UpdateAttributeEditor()
 
-        return symboliclink.ID()
+        return symboliclink
 
 
     def RemoveSymbolicLink_Operation( self, symboliclink_id ):
@@ -549,7 +546,6 @@ class NESceneExt(NESceneBase):
         return prev_index    
 
 
-# TODO: ベースクラスと戻り値の型が異なる.
     def CreateGroupIO_Operation( self, dataflow, pos, object_id, group_id ):
         groupio = super(NESceneExt, self).CreateGroupIO_Operation( dataflow, pos, object_id, group_id )
         #print( 'NESceneExt::CreateGroupIO_Operation()...' )
@@ -559,7 +555,7 @@ class NESceneExt(NESceneBase):
         # Create GroupIO in GraphicsScene
         self.__m_Scene.CreateGroupIO_Exec( groupio.Key(), dataflow, groupio.GetPosition(), group_id, groupio.ID() )
         
-        return groupio.ID()
+        return groupio
 
 
     def RemoveGroupIO_Operation( self, object_id ):

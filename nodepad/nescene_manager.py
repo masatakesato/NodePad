@@ -747,7 +747,7 @@ class NESceneManager:
 
 
 
-    # TODO: GroupByID_Execを参考に実装する. シンボリックリンク生成とか実装大変な気もする
+# TODO: 現在未使用. GroupByID_Execを参考に設計実装する. シンボリックリンク生成処理の設計は時間かかる見通し.
     def ParentByID_Exec( self, obj_id_list, parent_id, *, terminate=True ):
         pass
         # 同一グループ内のコネクションは維持したまま移動する.

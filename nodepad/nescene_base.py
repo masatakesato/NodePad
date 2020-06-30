@@ -330,7 +330,9 @@ def Compute( self, dataBlock ):
         dest_attrib_id = self.__m_NodeGraph.RemoveConnectionByID( conn_id )
 
         # Set Attribute's Lock/Unlock state in NodeGraph
-        self.__m_NodeGraph.LockAttributeByID( dest_attrib_id, True )
+        #self.__m_NodeGraph.LockAttributeByID( dest_attrib_id, True )
+        self.LockAttribute_Operation( dest_attrib_id, True )
+
 
         # Disconnect in GraphicsScene
         #self.__m_Scene.Disconnect_Exec( conn_id )
@@ -338,15 +340,15 @@ def Compute( self, dataBlock ):
         # Update AttributeEditorWidget
         #self.__m_AttributeEditor.SetEnabled_Exec( dest_attrib_id, True )
 
-        return dest_attrib_id
-
 
     def Reconnect_Operation( self, conn_id, attrib1_id, attrib2_id ):
+        print( 'NESceneBase::Reconnect_Operation()...' )
         # Reconnect in NodeGraph
-        conn, prev_src_attrib_id, prev_dest_attrib_id = self.__m_NodeGraph.ReconnectByID( conn_id, attrib1_id, attrib2_id )
+        conn = self.__m_NodeGraph.ReconnectByID( conn_id, attrib1_id, attrib2_id )
 
         # Set Attribute's Lock/Unlock state in NodeGraph
-        prev_state = self.__m_NodeGraph.LockAttributeByID( conn.DestinationAttribID(), False )
+        #prev_state = self.__m_NodeGraph.LockAttributeByID( conn.DestinationAttribID(), False )
+        self.LockAttribute_Operation( conn.DestinationAttribID(), False )
 
         # Reconnect in GraphicsScene
         #self.__m_Scene.Reconnect_Exec( conn_id, ( conn.Source().ParentID(), conn.SourceID() ), ( conn.Destination().ParentID(), conn.DestinationID() ), conn.ParentID() )
@@ -355,7 +357,7 @@ def Compute( self, dataBlock ):
         #self.__m_AttributeEditor.SetEnabled_Exec( conn.DestinationAttribID(), False )
 
         # return previous connection
-        return (conn, prev_src_attrib_id, prev_dest_attrib_id)
+        return conn
 
 
 # TODO: グループを跨いで選択したノード群はどうやってグループ化する?
@@ -480,8 +482,10 @@ def Compute( self, dataBlock ):
 
 
     def Parent_Operation( self, object_id, parent_id ):
+        print( 'NESceneBase::Parent_Operation()...' )
         # Set parent in NodeGraph
-        prev_parent_id, new_pos = self.__m_NodeGraph.ParentByID( object_id, parent_id )
+        #prev_parent_id, new_pos = self.__m_NodeGraph.ParentByID( object_id, parent_id )
+        obj = self.__m_NodeGraph.ParentByID( object_id, parent_id )
 
         # Set parent in GraphicsScene
         #self.__m_Scene.Parent_Exec( object_id, parent_id )
@@ -489,10 +493,9 @@ def Compute( self, dataBlock ):
         # Set new position on parent space
         #self.__m_Scene.Translate_Exec( object_id, new_pos, False )
 
-        return prev_parent_id, new_pos
+        return obj#prev_parent_id, new_pos
 
 
-# TODO: ICommand向けにUUIDを戻り値としたいが、派生クラス向けには実体を戻り値にしたい.
     def CreateSymbolicLink_Operation( self, group_id, attribdesc, value, name=None, symboliclink_idset=(None,None,None), slot_index=-1 ):
         # Create Symboliclink in NodeGraph
         symboliclink = self.__m_NodeGraph.ActivateSymbolicLinkByID( group_id, attribdesc, value, name, symboliclink_idset, slot_index )
@@ -503,7 +506,7 @@ def Compute( self, dataBlock ):
         # Update AttributeEditorWidget
         #self.__UpdateAttributeEditor()
 
-        return symboliclink#symboliclink.ID()
+        return symboliclink
 
 
     def RemoveSymbolicLink_Operation( self, symboliclink_id ):
@@ -531,7 +534,6 @@ def Compute( self, dataBlock ):
         return prev_index    
 
 
-# TODO: ICommand向けにUUIDを戻り値としたいが、派生クラス向けには実体を戻り値にしたい.
     def CreateGroupIO_Operation( self, dataflow, pos, object_id, group_id ):
         print( 'NESceneBase::CreateGroupIO_Operation()...' )
         # Create GroupIO in NodeGraph
@@ -540,7 +542,7 @@ def Compute( self, dataBlock ):
         # Create GroupIO in GraphicsScene
         #self.__m_Scene.CreateGroupIO_Exec( groupio.Key(), dataflow, groupio.GetPosition(), group_id, groupio.ID() )
         
-        return groupio#groupio.ID()
+        return groupio
 
 
     def RemoveGroupIO_Operation( self, object_id ):
