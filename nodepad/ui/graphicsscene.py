@@ -97,6 +97,7 @@ class GraphicsScene(QGraphicsScene):
 
 
     def SetFocusViewID( self, view_id ):
+        print( 'GraphicsScene::SetFocusViewID()...' )
         self.__m_FocusViewID = view_id
 
 
@@ -454,46 +455,46 @@ class GraphicsScene(QGraphicsScene):
 
 
     #================ Scene Edit Functions =================#
-    def Group( self ):
+    def __Group( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.__m_refCallbackFunc( 'GroupByID', item_id_list, parent_id=self.__m_FocusViewID )
 
 
-    def Ungroup( self ):
+    def __Ungroup( self ):
         for item in self.selectedItems():
             self.__m_refCallbackFunc( 'UngroupByID', item.ID() )
 
 
-    def Undo( self ):
+    def __Undo( self ):
         self.__m_refCallbackFunc( 'Undo' )
 
 
-    def Redo( self ):
+    def __Redo( self ):
         self.__m_refCallbackFunc( 'Redo' )
 
 
-    def Cut( self ):
+    def __Cut( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.clearSelection()
         self.__m_refCallbackFunc( 'CutByID', item_id_list, parent_id=self.__m_FocusViewID )
 
 
-    def Copy( self ):
+    def __Copy( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.__m_refCallbackFunc( 'CopyByID', item_id_list, parent_id=None )#, parent_id=self.__m_FocusViewID )
 # TODO: parent_idで、指定親空間内のノード群だけに制限して複製する.
 # TODO: 親空間を跨いで選択したノード群の複製に対応したい( parent_id=None で動作検証中 ).
 
-    def Paste( self ):
+    def __Paste( self ):
         self.__m_refCallbackFunc( 'PasteByID', parent_id=self.__m_FocusViewID )
 
 
-    def Duplicate( self ):
+    def __Duplicate( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.__m_refCallbackFunc( 'DuplicateByID', item_id_list, parent_id=self.__m_FocusViewID )
 
 
-    def RemoveSelectedObjects( self ):
+    def __RemoveSelectedObjects( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.clearSelection()
         self.__m_refCallbackFunc( 'DeleteByID', item_id_list )
@@ -554,9 +555,11 @@ class GraphicsScene(QGraphicsScene):
             return ()
 
 
-# TODO: 指定GraphicsItemだけを選択状態にする. シグナルemitはブロックする.
+    # 指定GraphicsItemだけを選択状態にする. シグナルemitはブロックする.
     def UpdateSelection( self, obj_id_list ):
         try:
+            #print( 'GraphicsScene::UpdateSelection()...' )
+
             self.blockSignals( True )
 
             self.clearSelection()
@@ -571,18 +574,17 @@ class GraphicsScene(QGraphicsScene):
 
 
     def __SelectionChangedSlot( self ):
-
-        print( 'GraphicScene::__SelectionChangedSlot()...' )
+        #print( 'GraphicScene::__SelectionChangedSlot()...' )
+        
         inclusiveTypes = [ Node, Group, GroupIO ]# SymbolicLinkは外してある.
 
         # 何も選択されていない場合はitem_idをNoneにしてコールバック
         if( not self.selectedItems() ):
-            #self.__m_refCallbackFunc( 'SelectByID', None )
+            #print( '    Nothing selected.' )
             self.__m_refCallbackFunc( 'SelectByID_Multi', [], {'clear':True} )
             return
 
-        # 先頭オブジェクトだけを選択処理する
-        #self.__m_refCallbackFunc( 'SelectByID', item.ID() )
+        # send select callbck with first item.
         self.__m_refCallbackFunc( 'SelectByID_Multi', [ item.ID() for item in self.selectedItems() if type(item) in inclusiveTypes ], {'clear':True} )# [ item.ID() for item in self.selectedItems() ]
 
 
@@ -664,13 +666,13 @@ class GraphicsScene(QGraphicsScene):
                 self.__m_MouseDragMode = MouseMode.DrawEdge
                 return
 
+# TODO: CANNOT deal with double clicking. NEED TO OVERRIDE mouseDoubleClickEvent
         elif( isinstance(item, SymbolicLink) ):
             self.__m_MouseDragMode = MouseMode.DragSymbolicLink
             self.__m_refGroupIO = item.parentItem()
 
         elif( item ):
             self.__m_MouseDragMode = MouseMode.DragItem
-
 
         self.__m_MouseStartPos = event.screenPos()
 
@@ -748,11 +750,10 @@ class GraphicsScene(QGraphicsScene):
 
         item = self.itemAt(event.scenePos(),QTransform())
         grabberitem = self.mouseGrabberItem()
-
+        
         # アイテム選択状態でマウスドラッグ終了する場合
         mouseMovement = event.screenPos() - self.__m_MouseStartPos
         if( self.__m_MouseDragMode==MouseMode.DragItem and ( mouseMovement.x() or mouseMovement.y() ) ):
-        #if( self.selectedItems() and ( mouseMovement.x() or mouseMovement.y() ) ):
             self.Translate()
 
         if( self.__m_MouseDragMode == MouseMode.DrawEdge ):
@@ -779,9 +780,8 @@ class GraphicsScene(QGraphicsScene):
 
         self.__m_refGroupIO = None
         
+        super(GraphicsScene, self).mouseReleaseEvent( event )        
         
-        super(GraphicsScene, self).mouseReleaseEvent( event )
-
         # QGraphicsItem削除は、mouseReleaseEventの後で実施する
         if( self.__m_MouseDragMode == MouseMode.RemoveSymbolicLink ):
             self.__m_refCallbackFunc( 'DeleteByID', [ grabberitem.ID() ] )
@@ -793,31 +793,31 @@ class GraphicsScene(QGraphicsScene):
     def keyPressEvent( self, event ):
         
         if( (event.key()==Qt.Key_Z) and (event.modifiers() & Qt.ControlModifier) ):# Undo(Ctrl+Z)
-            self.Undo()
+            self.__Undo()
 
         elif( (event.key()==Qt.Key_Y) and (event.modifiers() & Qt.ControlModifier) ):# Undo(Ctrl+Y)
-            self.Redo()
+            self.__Redo()
 
         elif( (event.key()==Qt.Key_X) and (event.modifiers() & Qt.ControlModifier) ):# Cut(Ctrl+X)
-            self.Cut()
+            self.__Cut()
 
         elif( (event.key()==Qt.Key_C) and (event.modifiers() & Qt.ControlModifier) ):# Copy(Ctrl+C)
-            self.Copy()
+            self.__Copy()
 
         elif( (event.key()==Qt.Key_V) and (event.modifiers() & Qt.ControlModifier) ):# Paste(Ctrl+V)
-            self.Paste()
+            self.__Paste()
 
         elif( (event.key()==Qt.Key_D) and (event.modifiers() & Qt.ControlModifier) ):# Duplicate(Ctrl+D)
-            self.Duplicate()
+            self.__Duplicate()
 
         if( event.key()==Qt.Key_Delete ):
-            self.RemoveSelectedObjects()
+            self.__RemoveSelectedObjects()
 
         elif( (event.key()==Qt.Key_G) and (event.modifiers() & Qt.ControlModifier) ):# Group(Ctrl+G)
-            self.Group()
+            self.__Group()
 
         elif( (event.key()==Qt.Key_U) and (event.modifiers() & Qt.ControlModifier) ):# Ungroup(Ctrl+U)
-            self.Ungroup()
+            self.__Ungroup()
 
         return super(GraphicsScene, self).keyPressEvent(event)
 

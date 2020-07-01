@@ -15,6 +15,7 @@ class GraphicsView(QGraphicsView):
         self.__m_Key = key
         self.__m_GridStep = gridstep
         self.__m_ZoomScale = 1.0
+        self.__m_PrevPos = QPoint()
         
         self.__m_MouseMode = MouseMode.DoNothing
         self.__m_RubberBand = QRubberBand( QRubberBand.Rectangle, self )
@@ -118,11 +119,17 @@ class GraphicsView(QGraphicsView):
 
     def mousePressEvent(self, event):
 
-        self.prevPos = event.pos()
+        self.__m_PrevPos = event.pos()
 
         if( event.modifiers() == Qt.AltModifier and event.button() == Qt.MiddleButton ):# View Translation
             self.__m_MouseMode = MouseMode.MoveViewport
             self.setCursor(Qt.SizeAllCursor)
+            return
+
+        # Walkaround for 'Ctrl+MouseLeft' item selection across multiple QGraphicsViews.
+        elif( event.modifiers() == Qt.ControlModifier and event.button() == Qt.LeftButton ):# Switch Selection
+            #print( 'GraphicsView::mousePressEvent()... Detected Switch Selection.' )
+            self.__m_MouseMode = MouseMode.SwitchSelection
             return
 
         elif( event.button() == Qt.LeftButton and self.itemAt(event.pos())==None ):# Rubberband Selection
@@ -134,11 +141,11 @@ class GraphicsView(QGraphicsView):
     def mouseMoveEvent(self, event):
 
         if( self.__m_MouseMode == MouseMode.MoveViewport ):
-            delta = (self.mapToScene(event.pos()) - self.mapToScene(self.prevPos)) * -1.0
+            delta = (self.mapToScene(event.pos()) - self.mapToScene(self.__m_PrevPos)) * -1.0
             center = QPoint( self.viewport().width()/2 + delta.x(), self.viewport().height()/2 + delta.y() )
             newCenter = self.mapToScene(center)
             
-            self.prevPos = event.pos()
+            self.__m_PrevPos = event.pos()
             self.centerOn(newCenter)
 
             rect = self.sceneRect()
@@ -146,7 +153,7 @@ class GraphicsView(QGraphicsView):
             #self.ensureVisible( rect.x() + delta.x(), rect.y() + delta.y(), rect.width(), rect.height(), 0, 0 )
 
         elif( self.__m_MouseMode == MouseMode.RubberBandSelection ):
-            self.__m_RubberBand.setGeometry( QRect(self.prevPos, event.pos()).normalized() )
+            self.__m_RubberBand.setGeometry( QRect(self.__m_PrevPos, event.pos()).normalized() )
             self.__m_RubberBand.show()
 
         super(GraphicsView, self).mouseMoveEvent(event)
@@ -170,7 +177,18 @@ class GraphicsView(QGraphicsView):
                     item.setSelected(True)
                 self.scene().blockSignals(False)
                 self.scene().selectionChanged.emit()
-        
+
+        # Walkaround for 'Ctrl+MouseLeft' item selection across multiple QGraphicsViews.
+        elif( self.__m_MouseMode == MouseMode.SwitchSelection ):
+            # Invert mouse picked items' selection flag.
+            self.scene().blockSignals(True)
+            for item in self.items( event.pos() ):
+                item.setSelected( not item.isSelected() )
+            self.scene().blockSignals(False)
+
+            # Manually emit selection changed signal from QGraphicsScene.
+            self.scene().selectionChanged.emit()
+
         self.__m_MouseMode = MouseMode.DoNothing
 
         super(GraphicsView, self).mouseReleaseEvent(event)

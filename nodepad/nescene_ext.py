@@ -244,7 +244,7 @@ class NESceneExt(NESceneBase):
 
     # GUI-dependent function.
     def UpdateSelection( self ):
-        #super(NESceneExt, self).UpdateSelection()  <- Do nothing  <- Do nothing
+        super(NESceneExt, self).UpdateSelection()#  <- Do nothing
         self.__m_Scene.UpdateSelection( self._NESceneBase__m_SelectionList.Iter() )
 
 
@@ -490,7 +490,6 @@ class NESceneExt(NESceneBase):
         return prev_flag
 
 
-# TODO: ベースクラスと戻り値の型が異なる.
     def Parent_Operation( self, object_id, parent_id ):
         obj = super(NESceneExt, self).Parent_Operation( object_id, parent_id )# prev_parent_id, new_pos
         # Set parent in NodeGraph
@@ -573,7 +572,6 @@ class NESceneExt(NESceneBase):
         try:
             #print( 'NESceneExt::Select_Operation_Multi()...' )
             #self.__m_SelectionList.Exec( *obj_id_list, **option )
-            #self.__m_SelectionList.Print()
 
             #if( self.__m_SelectionList.Changed()==False ):
             #    return False

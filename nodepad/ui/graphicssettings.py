@@ -72,6 +72,7 @@ class MouseMode(IntEnum):
     # QGraphicsView's operation    
     RubberBandSelection = 4
     MoveViewport = 5
+    SwitchSelection = 6
 
     # Other operations
-    ContextMenu = 6
+    ContextMenu = 7

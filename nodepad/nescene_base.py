@@ -562,7 +562,6 @@ def Compute( self, dataBlock ):
             print( 'NESceneBase::Select_Operation_Multi()...' )
 
             self.__m_SelectionList.Exec( *obj_id_list, **option )
-            self.__m_SelectionList.Print()
 
             return self.__m_SelectionList.Changed()
 
