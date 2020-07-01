@@ -1334,18 +1334,16 @@ class NENodeGraph():
             if( obj_id in euler ):
                 indices.append( euler.index(obj_id) )
    
-        slice_min = min(indices)
+        # expand search range in order to check neighbors'(parent or child) euler distances.
+        slice_min = min(indices) - 1
         slice_max = max(indices) + 1
 
-        if( slice_max-slice_min==1 ):
-            print( 'Only Single Elements within range!' )
-            # slice_min両端要素からdepthが小さい方を選択する.
-            if( depth[slice_max] < depth[slice_min] ):  return slice_max
-            else: return slice_min - 1
-        else:
-            # search partial list and detect lowest depth index
-            partial_depth = depth[ slice_min:slice_max ]
-            return partial_depth.index( min(partial_depth) ) + slice_min
+        #print( depth )
+        #print( indices )
+        #print( slice_min, slice_max )
+
+        partial_depth = depth[ slice_min:slice_max ]
+        return partial_depth.index( min(partial_depth) ) + slice_min
 
 
     @staticmethod
@@ -1397,6 +1395,7 @@ class NENodeGraph():
         return descendants
 
 
+#TODO: グループとその階層下ノードを選択した際、LCAが正しく検出できない(トップのグループがLCAになる)
     def PrepareSnapshot( self, obj_id_list ):
 
         typefilter =( NERootObject, NENodeObject, NEGroupObject )
@@ -1420,15 +1419,19 @@ class NENodeGraph():
         snapshot_gen_list = [ obj_id for obj_id in iter_traverse_order if obj_id in descendants ]# 処理終了後iter_traverse_orderは探索終わって使えなくなってるので注意
 
         print( 'EulerDepth: ' )
-        for i, obj_id in enumerate(euler):
-            print( '    %s: %d' % ( self.__m_IDMap[obj_id].Key(), depth[i]) )
+        #for i, obj_id in enumerate(euler):
+        #    print( '    %s: %d' % ( self.__m_IDMap[obj_id].Key(), depth[i]) )
+
+        for i in range(len(euler)):
+            print( '    %s: %d' % ( self.__m_IDMap[euler[i]].Key(), depth[i]) )
 
         print( 'LowestCommonAncestor: %s' % self.__m_IDMap[ euler[idx_lca] ].Key() )
 
         print( 'SnapshotGenList: ' )
         for i, obj_id in enumerate( snapshot_gen_list ):
             print( '    [%d]: %s' % (i, self.__m_IDMap[obj_id].Key() ) )
-
+            #for dec_id in descendants[obj_id]):
+            #    print( '      - %s' % self.__m_IDMap[dec_id].Key() )
 
         return snapshot_gen_list, descendants
 

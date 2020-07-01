@@ -646,10 +646,12 @@ class SnapshotCommand():
         self.__CollectConnectArgs( refObj_list )
 
 
-
+################################################################################################################
 # TODO: 複数親空間を跨ぐノード群選択時のスナップショット収集コード. 2020.01.30
-
         snapshot_gen_list, descendants = neScene.NodeGraph().PrepareSnapshot( obj_id_list )
+
+        # 子供から親の順に並んでる
+
 
         #for obj_id in snapshot_gen_list:
         #    children = descendants[ obj_id ]
@@ -666,7 +668,7 @@ class SnapshotCommand():
         #    else:
         #        pass
 
-
+################################################################################################################
 
 
     def Release( self ):
