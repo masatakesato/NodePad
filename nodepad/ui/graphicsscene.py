@@ -645,28 +645,26 @@ class GraphicsScene(QGraphicsScene):
         # http://stackoverflow.com/questions/18428095/qt4-qmenu-addaction-connect-function-with-arguments
         # use "lambda:" for parametrized functions
 
-
         menu.exec(event.screenPos())
 
 
-    def mousePressEvent( self, event ):
+    def __mouseClickEvent( self, event ):
 
         if( event.button() == Qt.RightButton ):
             event.accept()
-            return
+            return False
 
         # check clicked raphicsitem
         item = self.itemAt( event.scenePos(), QTransform() )
         if( isinstance(item, Port) ):
-            if( self.CheckLocked( item.PortID() )==False ): # コネクション生成許可されているポートの場合は、破線エッジを描画する
+            if( self.CheckLocked( item.PortID() )==False ): # Draw connection guideline if port is unlocked.
                 self.__m_refStartPort = item
                 self.__m_TempEdge = TemporaryEdge( item.scenePos() )
                 self.addItem(self.__m_TempEdge)
                 self.__m_GraphicsViewLayers[ self.__m_FocusViewID ].AddItem( self.__m_TempEdge )
                 self.__m_MouseDragMode = MouseMode.DrawEdge
-                return
+                return False
 
-# TODO: CANNOT deal with double clicking. NEED TO OVERRIDE mouseDoubleClickEvent
         elif( isinstance(item, SymbolicLink) ):
             self.__m_MouseDragMode = MouseMode.DragSymbolicLink
             self.__m_refGroupIO = item.parentItem()
@@ -676,7 +674,17 @@ class GraphicsScene(QGraphicsScene):
 
         self.__m_MouseStartPos = event.screenPos()
 
-        super(GraphicsScene, self).mousePressEvent( event )
+        return True
+
+
+    def mouseDoubleClickEvent( self, event ):
+        if( self.__mouseClickEvent(event) ):    
+            super(GraphicsScene, self).mouseDoubleClickEvent(event)
+
+
+    def mousePressEvent( self, event ):
+        if( self.__mouseClickEvent(event) ):    
+            super(GraphicsScene, self).mousePressEvent(event)
 
 
     def mouseMoveEvent( self, event ):
@@ -742,7 +750,6 @@ class GraphicsScene(QGraphicsScene):
 
         self.__m_refGroupIO = groupio
 
-
         super(GraphicsScene, self).mouseMoveEvent(event)
 
 
@@ -776,7 +783,6 @@ class GraphicsScene(QGraphicsScene):
                     self.__m_MouseDragMode = MouseMode.RemoveSymbolicLink
             else:
                 self.__m_MouseDragMode = MouseMode.RemoveSymbolicLink
-        
 
         self.__m_refGroupIO = None
         
@@ -787,7 +793,6 @@ class GraphicsScene(QGraphicsScene):
             self.__m_refCallbackFunc( 'DeleteByID', [ grabberitem.ID() ] )
 
         self.__m_MouseDragMode = MouseMode.DoNothing
-
 
 
     def keyPressEvent( self, event ):
