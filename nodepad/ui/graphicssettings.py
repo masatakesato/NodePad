@@ -69,10 +69,11 @@ class MouseMode(IntEnum):
     DragItem = 2
     RemoveSymbolicLink = 3
 
-    # QGraphicsView's operation    
-    RubberBandSelection = 4
-    MoveViewport = 5
+    # QGraphicsView's operation
+    MoveViewport = 4
+    RubberBandSelection = 5
     SwitchSelection = 6
+    RubberBandSwitchSelection = 7
 
     # Other operations
-    ContextMenu = 7
+    ContextMenu = 8
