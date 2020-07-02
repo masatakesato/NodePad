@@ -14,6 +14,7 @@ class Group(GraphicsNodeItem):
         
         self.__m_ID = group_id
         self.__m_Name = name
+        self.__m_refCallback = group_edit_callback
 
         # Inputs/Outpus
         self.__m_refInputPorts = {}
@@ -52,9 +53,10 @@ class Group(GraphicsNodeItem):
         self.__m_LabelRect = QRectF( label_pos[0], label_pos[1], label_dim[0], label_dim[1] )
         
         # GroupEdit Pushbutton
-        self.__m_EditButton = PushButton( QPixmap( ':/resource/images/edit-group.png'), group_edit_callback )
+        self.__m_EditButton = PushButton( QPixmap( ':/resource/images/edit-group.png'), self.__EditGroupButtonPushed )# group_edit_callback
         self.__m_EditButton.setParentItem( self )
         self.__m_EditButton.setPos( self.__m_BoundingRect.width() - g_TitlebarHeight, 0.5 * (g_TitlebarHeight-g_ButtonSize) )
+
 
 
     def AddSymbolicLink( self, symboliclink, slot_index=-1 ):
@@ -206,6 +208,12 @@ class Group(GraphicsNodeItem):
         self.__m_BoundingRect = self.__m_DrawRect.adjusted( -g_GroupFrameWidth, -g_GroupFrameWidth, g_GroupFrameWidth, g_GroupFrameWidth )
         self.__m_Shape = QPainterPath()
         self.__m_Shape.addRect( self.__m_BoundingRect )
+
+
+
+    def __EditGroupButtonPushed( self ):
+        print( 'Group::__EditGroupButtonPushed()...' )
+        self.__m_refCallback( title=self.__m_Label )
 
 
 

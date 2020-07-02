@@ -86,7 +86,7 @@ class NESceneManager:
 
 
     #====================== SceneManager Setup ==============================#
-    def BindNEScene( self, nescene, views, datachanged, editgroup ):
+    def BindNEScene( self, nescene, datachanged, editgroup ):
 
         self.__m_refNEScene = nescene
         self.__m_refNEScene.BindCommandCallbacks( self.ExecCommandCallback )

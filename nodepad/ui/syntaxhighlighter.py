@@ -1,4 +1,4 @@
-# syntax.py
+﻿# syntax.py
 
 import sys
 

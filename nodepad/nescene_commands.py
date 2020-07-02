@@ -738,6 +738,7 @@ class SnapshotCommand():
             for dest_attrib in obj.InputAttributes().values():
                 for conn in dest_attrib.Connections().values():
                     if( conn.Source().Parent() in obj_list ):
+                        print( conn.ID() in self.__m_ObjectIDs )
                         self.__m_ObjectIDs[conn.ID()] = None
                         print( 'ConnecteateByID_Exec()...%s' % conn.Key() )
                         self.__m_Snapshots.append( conn.GetSnapshot() )# append NEConnectionSnapshot
@@ -763,59 +764,54 @@ class SnapshotCommand():
 
 
 
+    def __CollectCreateGroupArgs( self, refObj ):
+        # Reserve ObjectID slots
+        self.__m_ObjectIDs[refObj.ID()] = None
+
+        # Append NEGroupSnapshot first.
+        print( 'CreateCroupByID_Exec()...%s' % refObj.Key() )
+        self.__m_Snapshots.append( refObj.GetSnapshot() )# append NEGroupSnapshot
+
+        print( refObj.GroupInput().ID() in self.__m_ObjectIDs, refObj.GroupOutput().ID() in  self.__m_ObjectIDs )
+        # Append NEGroupIOSnapshot for reoroducing GroupIO's position.
+        self.__m_ObjectIDs[ refObj.GroupInput().ID() ] = None# symboliclink id
+        self.__m_ObjectIDs[ refObj.GroupOutput().ID() ] = None# input attrib id
+        print( 'CreateGroupIOByID_Exec()...%s' % refObj.GroupInput().Key() )
+        self.__m_Snapshots.append( refObj.GroupInput().GetSnapshot() )# append NEGroupIOSnapshot
+        print( 'CreateGroupIOByID_Exec()...%s' % refObj.GroupOutput().Key() )
+        self.__m_Snapshots.append( refObj.GroupOutput().GetSnapshot() )# append NEGroupIOSnapshot
+
+        # Reserve ObjectID slots for symbolic links, and append NESymbolicLinkSnapshot.
+        for groupio in refObj.GroupIOs():
+            for idx in range( groupio.NumSymbolicLinks() ):
+                symboliclink = groupio.SymbolicLink(idx)
+                id_set = symboliclink.IDSet()
+                self.__m_ObjectIDs[id_set[0]] = None# symboliclink id
+                self.__m_ObjectIDs[id_set[1]] = None# input attrib id
+                self.__m_ObjectIDs[id_set[2]] = None# output attrib id
+                print( 'CreateSymbolicLinkByID_Exec()...%s' % symboliclink.Key() )
+                self.__m_Snapshots.append( symboliclink.GetSnapshot() )# snapshot_list.append( symboliclink.GetSnapshot() )# append NESymbolicLinkSnapshot
+
+
+
     def __CollectGroupArgs( self, refObj ):
-        
-        snapshot_list = []
-        self.__ConstructSnapshotTree( refObj, snapshot_list )
-        self.__m_Snapshots += snapshot_list
+        self.__ConstructSnapshotTree( refObj )
 
 
 
-    def __ConstructSnapshotTree( self, obj, snapshot_list ):
+    def __ConstructSnapshotTree( self, obj ):
         
         for child in obj.Children().values():
-            self.__ConstructSnapshotTree( child, snapshot_list )
+            self.__ConstructSnapshotTree( child )
 
-        # Reserve ObjectID slots
-        self.__m_ObjectIDs[obj.ID()] = None
 
         if( isinstance(obj, NENodeObject) ):
-# TODO: __CollectCreateNodeArgsに置き換える.
-
-            # Reserve ObjectID space for attributes
-            for attrib in obj.Attributes().values():
-                self.__m_ObjectIDs[attrib.ID()] = None
-            # Append snapshot
-            print( 'CreateNodeByID_Exec()...%s' % obj.Key() )
-            snapshot_list.append( obj.GetSnapshot() )# append NENodeSnapshot
+            self.__CollectCreateNodeArgs( obj )
 
         elif( isinstance(obj, NEGroupObject) ):
-# TODO: __CollectCreateGroupArgs関数を定義してまとめる.
+            self.__CollectCreateGroupArgs( obj )
 
-            # Append NEGroupSnapshot first.
-            print( 'CreateCroupByID_Exec()...%s' % obj.Key() )
-            snapshot_list.append( obj.GetSnapshot() )# append NEGroupSnapshot
 
-            # Append NEGroupIOSnapshot for reoroducing GroupIO's position.
-            self.__m_ObjectIDs[ obj.GroupInput().ID() ] = None# symboliclink id
-            self.__m_ObjectIDs[ obj.GroupOutput().ID() ] = None# input attrib id
-            print( 'CreateGroupIOByID_Exec()...%s' % obj.GroupInput().Key() )
-            snapshot_list.append( obj.GroupInput().GetSnapshot() )# append NEGroupIOSnapshot
-            print( 'CreateGroupIOByID_Exec()...%s' % obj.GroupOutput().Key() )
-            snapshot_list.append( obj.GroupOutput().GetSnapshot() )# append NEGroupIOSnapshot
-
-            # Reserve ObjectID slots for symbolic links, and append NESymbolicLinkSnapshot.
-            for groupio in obj.GroupIOs():
-                for idx in range( groupio.NumSymbolicLinks() ):
-                    symboliclink = groupio.SymbolicLink(idx)
-                    id_set = symboliclink.IDSet()
-                    self.__m_ObjectIDs[id_set[0]] = None# symboliclink id
-                    self.__m_ObjectIDs[id_set[1]] = None# input attrib id
-                    self.__m_ObjectIDs[id_set[2]] = None# output attrib id
-                    print( 'CreateSymbolicLinkByID_Exec()...%s' % symboliclink.Key() )
-                    snapshot_list.append( symboliclink.GetSnapshot() )# append NESymbolicLinkSnapshot
-
-                
 
     def ExportCommand( self, filepath ):
 

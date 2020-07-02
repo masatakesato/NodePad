@@ -21,7 +21,7 @@ class MouseState():
 class PushButton(GraphicsNodeItem):
 
     def __init__( self, pixmap, callback, *args, **kwargs ):
-        super(PushButton, self).__init__(*args, **kwargs )
+        super(PushButton, self).__init__(*args, **kwargs)
 
         self.__m_ID = id(self)
 
@@ -32,7 +32,7 @@ class PushButton(GraphicsNodeItem):
         self.__m_Pen = QPen( g_ButtonFrameColor[0], g_ButtonFrameWidth )
         
         self.__m_refPixmap = pixmap.scaledToWidth( g_ButtonSize, Qt.SmoothTransformation )
-        self.__m_refCallback = callback
+        self.__m_refCallback = callback# directly binding external callback function, because QGraphisItem cannot emit signals
         self.__m_MouseState = MouseState.OutsideReleased
 
         self.__m_Gradients = {

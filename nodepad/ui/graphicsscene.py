@@ -290,7 +290,7 @@ class GraphicsScene(QGraphicsScene):
         print( 'GraphicsScene::CreateGroup_Exec' )
 
         # Create Group
-        group = Group( group_name, group_id, functools.partial( self.__m_refCallbackFunc, 'EditGroupByID', group_id, group_name ) )
+        group = Group( group_name, group_id, functools.partial( self.__m_refCallbackFunc, 'EditGroupByID', group_id ) )# group_name
         self.__m_GraphicsItems[ group_id ] = group
         self.addItem( group )
 

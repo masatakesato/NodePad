@@ -58,7 +58,7 @@ class MainWidget(MainWindow):
 
         #============ Initialize SceneManager ===============#
         self.__m_SceneManager = NESceneManager()
-        self.__m_SceneManager.BindNEScene( self.__m_NEScene, self.__m_Views, self.UpdateWindowTitle, self.CreateNodeEditView )
+        self.__m_SceneManager.BindNEScene( self.__m_NEScene, self.UpdateWindowTitle, self.CreateNodeEditView )
 
         vsplitter = QSplitter(Qt.Vertical)
         vsplitter.setContentsMargins(0, 0, 0, 0)
