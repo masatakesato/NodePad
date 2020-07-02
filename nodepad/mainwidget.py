@@ -449,6 +449,7 @@ class MainWidget(MainWindow):
         #=================================== Export nodegraph data ============================#
         self.__m_SceneManager.Export( filepath[0] )
 
+
     
     def ExportSelection( self ):
 
@@ -476,6 +477,7 @@ class MainWidget(MainWindow):
 
         #=================================== Export nodegraph data ============================#
         self.__m_SceneManager.ExportSelection( filepath[0] )
+
 
 
     def CloseApplication( self ):
@@ -507,6 +509,7 @@ class MainWidget(MainWindow):
             sys.exit()
 
 
+
     # ウィンドウ閉じるボタン押した時のイベント
     def closeEvent( self, event ):
        
@@ -533,8 +536,10 @@ class MainWidget(MainWindow):
             event.accept()
 
 
+
     def UpdateWindowTitle( self ):
         self.setWindowTitle( 'NodePad - ' + self.__m_SceneManager.GetFilePath() + g_DataChangedSymbol[ self.__m_SceneManager.IsModified() ] )
+
 
 
     def CreateNodeEditView( self, view_id, title ):

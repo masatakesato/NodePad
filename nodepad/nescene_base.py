@@ -45,16 +45,19 @@ def Compute( self, dataBlock ):
         classObj.Register( self.__m_NodeTypeManager )
 
 
+
     def Release( self ):
         self.__m_NodeTypeManager.Release()
         self.__m_NodeGraph.Release()
         #self.__m_Scene.Release()
 
 
+
     def Clear( self ):
         self.__m_NodeGraph.Init()
         #self.__m_Scene.Init( self.__m_NodeGraph.GetRootID() )
         #self.__m_AttributeEditor.DeinitializeWidget()
+
 
 
     # GUI-dependent function. nescene_managerでのみ使用.
@@ -64,19 +67,23 @@ def Compute( self, dataBlock ):
         #self.__m_AttributeEditor.BindCallbackFunc( func )
 
 
+
     # GUI-dependent function. nescene_managerでのみ使用.
     def UnbindCallbackFuncs( self ):
         pass
         #self.__m_Scene.UnbindCallbackFunc()
         #self.__m_AttributeEditor.UnbindCallbackFunc()
+
         
 
     def NodeTypeManager( self ):
         return self.__m_NodeTypeManager
 
 
+
     def NodeGraph( self ):
         return self.__m_NodeGraph
+
 
 
     # GUI-dependent function. mainwidgetでのみ使用.
@@ -85,9 +92,11 @@ def Compute( self, dataBlock ):
         #return self.__m_Scene
 
 
+
     def AttributeEditor( self ):
         return None
         #return self.__m_AttributeEditor
+
 
 
     def EvaluateSelected( self ):
@@ -95,120 +104,150 @@ def Compute( self, dataBlock ):
             self.__m_NodeGraph.Evaluate( obj_id )
 
 
+
     def GetSnapshot( self, object_id ):
         return self.__m_NodeGraph.GetSnapshot( object_id )
 
 
+
     def GetSelectedObjectIDs( self ):
         return self.__m_SelectionList.Iter()
+
 
     
     def FilterObjectIDs( self, obj_id_list, *, typefilter, parent_id ):
         return self.__m_NodeGraph.FilterObjects( obj_id_list, typefilter=typefilter, parent_id=parent_id )
 
 
+
     def GetRoot( self ):
         return self.__m_NodeGraph.GetRoot()
+
 
 
     def GetRootID( self ):
         return self.__m_NodeGraph.GetRootID()
 
 
+
     def GetChildrenIDs( self, object_id ):
         return self.__m_NodeGraph.GetObjectByID( object_id, c_IDMapSupportTypes ).ChildrenID()
+
 
 
     def GetDescendantIDs( self, object_id ):
         return self.__m_NodeGraph.CollectAllDescendantIDsByID( object_id )
 
 
+
     def GetObjectByID( self, object_id, typefilter=c_IDMapSupportTypes ):
         return self.__m_NodeGraph.GetObjectByID( object_id, typefilter )
+
 
 
     def GetObjectByName( self, name, typefilter=c_KeyMapSupportTypes ):
         return self.__m_NodeGraph.GetObjectByName( object_id, typefilter )
 
 
+
     def GetObjectID( self, name, typefilter=c_KeyMapSupportTypes ):
         return self.__m_NodeGraph.GetObjectID( name, typefilter )
+
 
 
     def GetObjectIDs( self, names, typefilter=c_KeyMapSupportTypes ):
         return [ self.__m_NodeGraph.GetObjectID( name, typefilter ) for name in names ]
 
 
+
     def ObjectExists( self, object_id, typefilter ):
         return self.__m_NodeGraph.ExistsByID( object_id, typefilter )
+
 
 
     def ValidateVisibilityUpdate( self, object_id, visibility ):
         return self.__m_NodeGraph.ValidateVisibilityUpdate( object_id, visibility )
 
 
+
     def GetConnectionID( self, attrib_name1, attrib_name2 ):
         return self.__m_NodeGraph.GetConnectionIDByAttribute( attrib_name1, attrib_name2 )
+
 
 
     def GetConnectionIDs( self, object_id ):
         return self.__m_NodeGraph.GetConnectionIDs( object_id )
 
 
+
     def GetOverlappedConnections( self, attrib_ids ):
         return self.__m_NodeGraph.CollectOverlappedConnectionsByID( attrib_ids )
+
 
 
     def GetAttribute( self, attrib_id ):
         return self.__m_NodeGraph.GetAttributeByID( attrib_id )
 
 
+
     def GetAttributeID( self, name ):
         return self.__m_NodeGraph.GetAttributeID( name )
+
 
 
     def AttributeExisits( self, attrib_id ):
         return self.__m_NodeGraph.AttributeExisitsByID( attrib_id )
 
 
+
     def ValidateAttributeUpdate( self, attrib_id, new_value ):
         return self.__m_NodeGraph.ValidateAttributeUpdate( attrib_id, new_value )
+
 
 
     def IsAttributeLocked( self, attrib_id ):
         return self.__m_NodeGraph.IsLockedByID( attrib_id )
 
 
+
     def IsConnectable( self, attrib_id1, attrib_id2, checkloop ):
         return self.__m_NodeGraph.IsConnectableByID( attrib_id1, attrib_id2, checkloop )
+
 
 
     def ExtractSymbolicLinkConnections( self, object_id ):
         return self.__m_NodeGraph.ExtractSymbolicLinkConnections( object_id )
 
 
+
     def ValidateConnections( self, attrib_id ):
         return self.__m_NodeGraph.ValidateConnections( attrib_id )
+
 
 
     def CanBeSymbolized( self, attrib_id ):
         return self.__m_NodeGraph.CanBeSymbolized( attrib_id )
 
 
+
     def GetSymboliclinkIDs( self, object_id ):
         return self.__m_NodeGraph.GetSymboliclinkIDs( object_id )
+
 
 
     def ValidateSymboliclinkUpdate( self, object_id, new_slot ):
         return self.__m_NodeGraph.ValidateSymboliclinkUpdate( object_id, new_slot )
 
 
+
     def GetExposedAttribs( self, object_ids ):
         return self.__m_NodeGraph.CollectExposedAttribs( object_ids )
 
 
+
     def GetGroupIOIDs( self, object_id ):
         return self.__m_NodeGraph.GetGroupIOIDs( object_id )
+
 
 
     # GUI-dependent function.
@@ -216,20 +255,25 @@ def Compute( self, dataBlock ):
         return None#return self.__m_Scene.CalcGroupIOOffsets( object_id )
 
 
+
     def ResolveChildNames( self, object_id ):
         return self.__m_NodeGraph.ResolveUnparentNameConflicts( object_id )
+
 
 
     def GetType( self, object_id ):
         return self.__m_NodeGraph.GetObjectTypeByID( object_id )
 
 
+
     def IsType( self, object_id, typefilter ):
         return self.__m_NodeGraph.GetObjectTypeByID( object_id ) == typefilter
 
 
+
     def PositionChanged( self, object_id, translate, relative ):
         return self.__m_NodeGraph.PositionChanged( object_id, translate, relative )
+
 
 
     # GUI-dependent function.
@@ -237,21 +281,26 @@ def Compute( self, dataBlock ):
         return None# self.__m_FocusViewID# return self.__m_Scene.FocusViewID()
 
 
+
     def CheckGraph( self ):
         self.__m_NodeGraph.CheckGraph()
+
 
 
     def CenterPosition( self, object_ids ):
         return self.__m_NodeGraph.GetCentroid( object_ids )
 
 
+
     def ValidateName( self, object_id, newname ):
         return self.__m_NodeGraph.ValidateName( object_id, newname )
+
 
 
     def UpdateSelection( self ):
         print( 'NESceneBase::UpdateSelection()...' )
         pass#self.__m_Scene.UpdateSelection( self.__m_SelectionList.Iter() )
+
 
 
 # TODO: GUI-specific method. Should be removed from NESceneBase
@@ -298,7 +347,8 @@ def Compute( self, dataBlock ):
         #newsize = newNode.GetSize()
         #self.__m_Scene.CreateNode_Exec( newNode.Key(), newNode.ID(), newNode.GetDesc(), newNode.GetPosition(), newNode.ParentID() )                    
 
-        return newNode#newNode.ID()
+        return newNode
+
 
 
     def RemoveNode_Operation( self, node_id ):
@@ -307,6 +357,7 @@ def Compute( self, dataBlock ):
 
         # Remove node in GraphicsScene
         #self.__m_Scene.RemoveNode_Exec( node_id )
+
 
 
     def Connect_Operation( self, attrib1_id, attrib2_id, object_id ):
@@ -322,8 +373,8 @@ def Compute( self, dataBlock ):
         # Update AttributeEditorWidget
         #self.__m_AttributeEditor.SetEnabled_Exec( newConn.DestinationAttribID(), False )
 
+        return newConn
 
-        return newConn#newConn.ID()
 
 
     def Disconnect_Operation( self, conn_id ):
@@ -334,12 +385,12 @@ def Compute( self, dataBlock ):
         #self.__m_NodeGraph.LockAttributeByID( dest_attrib_id, True )
         self.LockAttribute_Operation( dest_attrib_id, True )
 
-
         # Disconnect in GraphicsScene
         #self.__m_Scene.Disconnect_Exec( conn_id )
 
         # Update AttributeEditorWidget
         #self.__m_AttributeEditor.SetEnabled_Exec( dest_attrib_id, True )
+
 
 
     def Reconnect_Operation( self, conn_id, attrib1_id, attrib2_id ):
@@ -361,6 +412,7 @@ def Compute( self, dataBlock ):
         return conn
 
 
+
 # TODO: グループを跨いで選択したノード群はどうやってグループ化する?
     def CreateGroup_Operation( self, pos, size, name, object_id, parent_id ):
 
@@ -371,6 +423,7 @@ def Compute( self, dataBlock ):
         #self.__m_Scene.CreateGroup_Exec( newGroup.Key(), newGroup.ID(), newGroup.GetPosition(), newGroup.ParentID() )
         
         return newGroup
+
         
 
     def RemoveGroup_Operation( self, group_id ):
@@ -379,7 +432,8 @@ def Compute( self, dataBlock ):
         result = self.__m_NodeGraph.RemoveGroupByID( group_id )
 
         # Remove group in GraphicsScene
-        #self.__m_Scene.RemoveGroup_Exec( group_id )    
+        #self.__m_Scene.RemoveGroup_Exec( group_id )
+
 
 
     def Group_Operation( self, obj_id_list, pos, size, name, object_id, parent_id ):
@@ -395,7 +449,7 @@ def Compute( self, dataBlock ):
         for conn_id in group.CollectInternalConnections():
             self.Parent_Operation( conn_id, group.ID() )
         
-        return group.ID()
+        return group
 
 
     def Ungroup_Operation( self, group_id ):

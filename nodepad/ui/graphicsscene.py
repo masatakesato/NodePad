@@ -49,7 +49,6 @@ class GraphicsScene(QGraphicsScene):
 
 
 
-
     def Init( self, root_id ):
         print( 'GraphicsScene::Init()...' )
 
@@ -60,6 +59,7 @@ class GraphicsScene(QGraphicsScene):
         self.__m_FocusViewID = root_id
         self.__m_RenderViewLayerID = root_id
         self.__m_GraphicsViewLayers[ root_id ] = GraphicsItemLayer( root_id )
+
 
 
     def Release( self ): 
@@ -78,12 +78,12 @@ class GraphicsScene(QGraphicsScene):
         self.__m_refNodeTypeManager = None
 
 
+
     def IsVisibleFromActiveView( self, item ):
         try:
             return self.__m_GraphicsViewLayers[ self.__m_RenderViewLayerID ].HasItem( item.ID() )
         except:
             return False
-
 
 
     #====================== Setup ==========================#
@@ -92,8 +92,10 @@ class GraphicsScene(QGraphicsScene):
         self.__m_refCallbackFunc = func
 
 
+
     def UnbindCallbackFunc( self ):
         self.__m_refCallbackFunc = None
+
 
 
     def SetFocusViewID( self, view_id ):
@@ -101,12 +103,15 @@ class GraphicsScene(QGraphicsScene):
         self.__m_FocusViewID = view_id
 
 
+
     def FocusViewID( self ):
         return self.__m_FocusViewID
 
 
+
     def SetRenderViewID( self, view_id ):
         self.__m_RenderViewLayerID = view_id
+
 
 
     def RemoveGraphicsViewLayer( self, layer_id ):
@@ -116,9 +121,11 @@ class GraphicsScene(QGraphicsScene):
             return
 
 
+
     #=============== Command functions ================#
     def ExecCommand_( self, *args, **kwargs ):
         self.__m_refCallbackFunc( *args, **kwargs )
+
 
 
     def CreateNode_Exec( self, node_name, node_id, nodeDesc, pos, parent_id ):
@@ -126,7 +133,6 @@ class GraphicsScene(QGraphicsScene):
             node = Node( node_name, node_id, nodeDesc )
             self.addItem(node)
             self.__m_GraphicsItems[ node_id ] = node
-
 
             # Create Input Port GraphicsItems and add to node
             for desc in nodeDesc.InputAttribDescs():
@@ -146,6 +152,7 @@ class GraphicsScene(QGraphicsScene):
             traceback.print_exc()
 
 
+
     def RemoveNode_Exec( self, node_id ):
         try:
             node = self.__m_GraphicsItems[ node_id ]
@@ -159,6 +166,7 @@ class GraphicsScene(QGraphicsScene):
 
         except:
             traceback.print_exc()
+
 
 
     def Connect_Exec( self, conn_name, conn_id, source_id, dest_id, parent_id ):
@@ -189,6 +197,7 @@ class GraphicsScene(QGraphicsScene):
             #print( 'GraphicsScene::Connect_Exec()... Aborting connect operation. could not find attribute.' )
 
 
+
     def Disconnect_Exec( self, edge_id ):
         try:
             edge = self.__m_GraphicsItems[ edge_id ]
@@ -217,6 +226,7 @@ class GraphicsScene(QGraphicsScene):
             return False
 
 
+
     def Reconnect_Exec( self, conn_id, source_id, dest_id, parent_id ):
         try:
 
@@ -228,7 +238,6 @@ class GraphicsScene(QGraphicsScene):
 
             if( edge.DestinationPort() ):
                 edge.DestinationPort().DisconnectEdge(edge)
-
 
             source_port = self.__m_GraphicsItems[ source_id[0] ].OutputPort( source_id[1] )
             dest_port = self.__m_GraphicsItems[ dest_id[0] ].InputPort( dest_id[1] )
@@ -253,6 +262,7 @@ class GraphicsScene(QGraphicsScene):
             return False
 
 
+
     def Rename_Exec( self, obj_id, newname ):
         try:
             obj = self.__m_GraphicsItems[ obj_id ]
@@ -264,6 +274,7 @@ class GraphicsScene(QGraphicsScene):
             return False
 
 
+
     def RenameAttribute_Exec( self, attrib_id, newname ):
         try:
             self.__m_GraphicsItems[attrib_id[0]].RenamePort( attrib_id[1], newname )
@@ -272,6 +283,7 @@ class GraphicsScene(QGraphicsScene):
         except:
             traceback.print_exc()
             return False
+
 
 
     def CreateGroup_Exec( self, group_name, group_id, pos, parent_id ):
@@ -292,6 +304,7 @@ class GraphicsScene(QGraphicsScene):
         return True
 
 
+
     def RemoveGroup_Exec( self, group_id ):
         try:
             group = self.__m_GraphicsItems[ group_id ]
@@ -307,6 +320,7 @@ class GraphicsScene(QGraphicsScene):
             traceback.print_exc()
 
 
+
     def Translate_Exec( self, object_id, translate, relative ):
 
         if( object_id in self.__m_GraphicsItems ):
@@ -316,6 +330,7 @@ class GraphicsScene(QGraphicsScene):
             return True
 
         return False
+
                 
 
     def SetVisible_Exec( self, object_id, flag ):
@@ -325,6 +340,7 @@ class GraphicsScene(QGraphicsScene):
             return True
 
         return False
+
 
 
     def Parent_Exec( self, object_id, parent_id ):
@@ -338,6 +354,7 @@ class GraphicsScene(QGraphicsScene):
  
         # update scene
         self.update()
+
 
 
     def ActivateSymbolicLink_Exec( self, group_id, name, symboliclinkdesc, slot_index=-1 ):
@@ -371,6 +388,7 @@ class GraphicsScene(QGraphicsScene):
             return False
 
 
+
     def DeactivateSymbolicLink_Exec( self, symboliclink_id ):
         try:
             symboliclink = self.__m_GraphicsItems[ symboliclink_id ]
@@ -398,6 +416,7 @@ class GraphicsScene(QGraphicsScene):
             traceback.print_exc()
 
 
+
     def SetSymbolicLinkSlotIndex_Exec( self, symboliclink_id, slot_index ):
         try:
             symboliclink = self.__m_GraphicsItems[ symboliclink_id ]
@@ -411,6 +430,7 @@ class GraphicsScene(QGraphicsScene):
 
         except:
             traceback.print_exc()
+
 
 
     def CreateGroupIO_Exec( self, name, dataflow, pos, group_id, object_id ):
@@ -435,6 +455,7 @@ class GraphicsScene(QGraphicsScene):
             return False
 
 
+
     def RemoveGroupIO_Exec( self, object_id ):
         try:
             groupio = self.__m_GraphicsItems[ object_id ]
@@ -454,10 +475,12 @@ class GraphicsScene(QGraphicsScene):
             traceback.print_exc()
 
 
+
     #================ Scene Edit Functions =================#
     def __Group( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.__m_refCallbackFunc( 'GroupByID', item_id_list, parent_id=self.__m_FocusViewID )
+
 
 
     def __Ungroup( self ):
@@ -465,8 +488,10 @@ class GraphicsScene(QGraphicsScene):
             self.__m_refCallbackFunc( 'UngroupByID', item.ID() )
 
 
+
     def __Undo( self ):
         self.__m_refCallbackFunc( 'Undo' )
+
 
 
     def __Redo( self ):
@@ -479,19 +504,23 @@ class GraphicsScene(QGraphicsScene):
         self.__m_refCallbackFunc( 'CutByID', item_id_list, parent_id=self.__m_FocusViewID )
 
 
+
     def __Copy( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.__m_refCallbackFunc( 'CopyByID', item_id_list, parent_id=None )#, parent_id=self.__m_FocusViewID )
 # TODO: parent_idで、指定親空間内のノード群だけに制限して複製する.
 # TODO: 親空間を跨いで選択したノード群の複製に対応したい( parent_id=None で動作検証中 ).
 
+
     def __Paste( self ):
         self.__m_refCallbackFunc( 'PasteByID', parent_id=self.__m_FocusViewID )
+
 
 
     def __Duplicate( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.__m_refCallbackFunc( 'DuplicateByID', item_id_list, parent_id=self.__m_FocusViewID )
+
 
 
     def __RemoveSelectedObjects( self ):
@@ -500,12 +529,15 @@ class GraphicsScene(QGraphicsScene):
         self.__m_refCallbackFunc( 'DeleteByID', item_id_list )
 
 
+
     def CheckConnectivity( self, port1_id, port2_id ):
         return self.__m_refCallbackFunc( 'CheckConnectivityByID', port1_id, port2_id )
 
 
+
     def CheckLocked( self, port_id ):
         return self.__m_refCallbackFunc( 'CheckLockedByID', port_id )
+
 
 
     def IsSelected( self, object_id ):
@@ -520,14 +552,18 @@ class GraphicsScene(QGraphicsScene):
     #def CheckSymbolize( self, port_id ):
     #    return self.__m_refCallbackFunc( 'CheckSymbolizeByID', port_id )
 
+
+
     def CheckSymbolize( self, port, dataflow ):
         if( port.DataFlow() == dataflow ):
             return self.__m_refCallbackFunc( 'CheckSymbolizeByID', port.PortID() )
         return False
 
 
+
     def Import( self, filepath, pos ):
         return self.__m_refCallbackFunc( 'Import', filepath, (pos.x(), pos.y()) )
+
 
 
     def Translate( self ):
@@ -537,8 +573,10 @@ class GraphicsScene(QGraphicsScene):
             self.__m_refCallbackFunc( 'TranslateByID', item.ID(), (itemPos.x(), itemPos.y()) )
 
 
+
     def GetSelectedObjectIDs( self ):
         return [ item.ID() for item in self.selectedItems() ]
+
 
 
 # TODO: QGraphicsScene非依存な実装に置き換え可能か検討する.
@@ -553,6 +591,7 @@ class GraphicsScene(QGraphicsScene):
         except:
             traceback.print_exc()
             return ()
+
 
 
     # 指定GraphicsItemだけを選択状態にする. シグナルemitはブロックする.
@@ -571,6 +610,7 @@ class GraphicsScene(QGraphicsScene):
 
         except:
             traceback.print_exc()
+
 
 
     def __SelectionChangedSlot( self ):
@@ -608,6 +648,7 @@ class GraphicsScene(QGraphicsScene):
         groupio.AddItem( item )
 
         return True
+
 
 
     def contextMenuEvent( self, event ):
@@ -648,13 +689,14 @@ class GraphicsScene(QGraphicsScene):
         menu.exec(event.screenPos())
 
 
+
     def __mouseClickEvent( self, event ):
 
         if( event.button() == Qt.RightButton ):
             event.accept()
             return False
 
-        # check clicked raphicsitem
+        # check clicked graphicsitem
         item = self.itemAt( event.scenePos(), QTransform() )
         if( isinstance(item, Port) ):
             if( self.CheckLocked( item.PortID() )==False ): # Draw connection guideline if port is unlocked.
@@ -677,14 +719,17 @@ class GraphicsScene(QGraphicsScene):
         return True
 
 
+
     def mouseDoubleClickEvent( self, event ):
         if( self.__mouseClickEvent(event) ):    
             super(GraphicsScene, self).mouseDoubleClickEvent(event)
 
 
+
     def mousePressEvent( self, event ):
         if( self.__mouseClickEvent(event) ):    
             super(GraphicsScene, self).mousePressEvent(event)
+
 
 
     def mouseMoveEvent( self, event ):
@@ -753,6 +798,7 @@ class GraphicsScene(QGraphicsScene):
         super(GraphicsScene, self).mouseMoveEvent(event)
 
 
+
     def mouseReleaseEvent( self, event ):
 
         item = self.itemAt(event.scenePos(),QTransform())
@@ -795,6 +841,7 @@ class GraphicsScene(QGraphicsScene):
         self.__m_MouseDragMode = MouseMode.DoNothing
 
 
+
     def keyPressEvent( self, event ):
         
         if( (event.key()==Qt.Key_Z) and (event.modifiers() & Qt.ControlModifier) ):# Undo(Ctrl+Z)
@@ -833,7 +880,7 @@ class GraphicsScene(QGraphicsScene):
             event.accept()
         else:
             event.ignore()
-        return super(GraphicsScene, self).dragEnterEvent(event) 
+        return super(GraphicsScene, self).dragEnterEvent(event)
 
 
 

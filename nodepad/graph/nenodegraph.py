@@ -43,6 +43,7 @@ def DepthFirstScan( node, group_id_list, node_id_list ):
     nodes_to_visit.clear()
 
 
+
 # Depth First Scan with recursion
 #def DepthFirstScan_rec( node, group_id_list, node_id_list ):
     
@@ -112,7 +113,6 @@ c_EditableTypes = (
 
 class NENodeGraph():
 
-
     def __init__( self ):
 
         self.__m_Root = NERootObject( 'Root' )
@@ -122,9 +122,11 @@ class NENodeGraph():
         self.__m_Pipeline = Pipeline()
 
 
+
     def __del__( self ):
         print( 'NENodeGraph::__del__()...' )
         self.Release()
+
 
 
     def Init( self ):
@@ -138,6 +140,7 @@ class NENodeGraph():
         self.__m_Pipeline.Clear()
 
 
+
     def Release( self ):
         self.__m_KeyMap.Release()
         self.__m_IDMap.clear()
@@ -147,14 +150,14 @@ class NENodeGraph():
         self.__m_Pipeline.Release()
 
 
+
     def GetRoot( self ):
         return self.__m_Root
 
 
+
     def GetRootID( self ):
         return self.__m_Root.ID()
-
-
 
 
     #########################################################################
@@ -184,6 +187,7 @@ class NENodeGraph():
         except:
             traceback.print_exc()
             return None
+
 
     
     def RenameByID( self, obj_id, newname_temp ):
@@ -220,7 +224,7 @@ class NENodeGraph():
             traceback.print_exc()
             return newname_temp, None
 
-#######################################################################################################
+
 
     def RenameAttributeByID( self, attrib_id, newname_temp ):
         try:
@@ -249,7 +253,6 @@ class NENodeGraph():
             return newname_temp, None
 
 
-#######################################################################################################
 
     def AddConnectionByID( self, attrib1_id, attrib2_id, object_id=None ):
         try:
@@ -296,6 +299,7 @@ class NENodeGraph():
         return prev_val
     
 
+
     def LockAttributeByID( self, attrib_id, state ):
 
         attrib = self.GetAttributeByID( attrib_id )
@@ -306,6 +310,7 @@ class NENodeGraph():
         attrib.SetEnable( state )
 
         return prev_state
+
 
 
     def RemoveConnectionByID( self, conn_id ):
@@ -334,6 +339,7 @@ class NENodeGraph():
         self.__m_Pipeline.PropagateDirty( dest_attrib.ParentID() )
 
         return dest_attrib_id
+
 
 
     def ReconnectByID( self, conn_id, attrib1_id, attrib2_id ):
@@ -407,6 +413,7 @@ class NENodeGraph():
             return None
 
 
+
     def RemoveNodeByID( self, node_id ):
         # Remove
         self.__RemoveNodeFromScene( self.__m_IDMap[ node_id ] )
@@ -414,6 +421,7 @@ class NENodeGraph():
         # Remove Datablock
         self.__m_Pipeline.ReleaseDataBlock( node_id )
         self.__m_Pipeline.ReleaseComputeFunc( node_id )
+
 
 
     def GetConnectionIDByAttribute( self, attribkey1, attribkey2 ):
@@ -427,6 +435,7 @@ class NENodeGraph():
         except:
             traceback.print_exc()
             return None
+
 
 
     def GetAttribute( self, name ):
@@ -448,6 +457,7 @@ class NENodeGraph():
         
         # return node attribute
         return node.AttributeByName( attrname )
+
 
 
     def GetAttributeID( self, name ):
@@ -477,6 +487,7 @@ class NENodeGraph():
         return attrib.GetDesc().ObjectID()
 
 
+
     def GetAttributeByID( self, attrib_id ):# attrib_id must be touple. [0]: node/group's object_id, [1]: attribute's object_id
         try:
             return self.__m_IDMap[ attrib_id[0] ].AttributeByID( attrib_id[1] )
@@ -486,11 +497,13 @@ class NENodeGraph():
             return None
 
 
+
     def AttributeExisitsByID( self, attrib_id ):
         try:
             return self.__m_IDMap[ attrib_id[0] ].AttributeExistsByID( attrib_id[1] )
         except:
             return False
+
 
 
     def ExistsByID( self, object_id, object_types=( NENodeObject, NEGroupObject, NEGroupIOObject, NESymbolicLink, NEConnectionObject ) ):
@@ -504,6 +517,7 @@ class NENodeGraph():
         return False # Object found. but type mismatch -> False
 
 
+
     def GetSymbolicLinkByAttributeID( self, attrib_id ):
         try:
             attrib_list = self.__m_IDMap[ attrib_id[0] ].AttributeByID( attrib_id[1] ).GetConnectedAttributes()
@@ -512,6 +526,7 @@ class NENodeGraph():
         except:
             traceback.print_exc()
             return None
+
 
 
     def ExtractSymbolicLinkConnections( self, object_id ):
@@ -524,6 +539,7 @@ class NENodeGraph():
             return None
 
 
+
     def GetGroupIOIDs( self, group_id ):
         try:
             return self.__m_IDMap[ group_id ].GroupIOIDs()
@@ -531,6 +547,7 @@ class NENodeGraph():
         except:
             traceback.print_exc()
             return []
+
 
 
     def GetObjectByID( self, obj_id, typefilter ):
@@ -542,6 +559,7 @@ class NENodeGraph():
             return None
 
 
+
     def GetObjectByName( self, name, typefilter ):
         try:
             obj = self.__m_KeyMap.GetObject(name)
@@ -549,6 +567,7 @@ class NENodeGraph():
         except:
             traceback.print_exc()
             return None
+
 
 
     def GetObjectID( self, name, typefilter ):#=c_KeyMapSupportTypes ):
@@ -561,8 +580,6 @@ class NENodeGraph():
 
 
 
-
-
     def GetObjectTypeByID( self, obj_id ):
         try:
             return type(self.__m_IDMap[ obj_id ])
@@ -571,9 +588,11 @@ class NENodeGraph():
             return None
 
 
+
     def AddGroup( self, pos, size, name, object_id, parent_id ):
         newGroup = self.__AddGroupToScene( pos, size, name, object_id, parent_id )
         return newGroup
+
 
 
     def RemoveGroupByID( self, node_id ):
@@ -585,6 +604,7 @@ class NENodeGraph():
         self.__RemoveGroupFromScene( self.__m_IDMap[ node_id ] )
 
         return True
+
 
 
     def TranslateByID( self, object_id, translate, relative ):
@@ -599,6 +619,7 @@ class NENodeGraph():
         return ( new_pos[0]-prev_pos[0], new_pos[1]-prev_pos[1] )
 
 
+
     def SetVisibleByID( self, object_id, flag ):
 
         if( not object_id in self.__m_IDMap ):
@@ -608,6 +629,7 @@ class NENodeGraph():
         self.__m_IDMap[ object_id ].SetVisible( flag )
 
         return prev_flag
+
 
 
     def ParentByID( self, object_id, parent_id ):
@@ -628,6 +650,7 @@ class NENodeGraph():
         except:
             traceback.print_exc()
             return None, (0, 0)
+
 
 
     def ActivateSymbolicLinkByID( self, group_id, attribdesc, value, name, symboliclink_idset, slot_index=-1 ):
@@ -659,6 +682,7 @@ class NENodeGraph():
             return None
 
 
+
     def DeactivateSymbolicLinkByID( self, symboliclink_id ):
         try:
             symboliclink = self.GetObjectByID( symboliclink_id, (NESymbolicLink,) )
@@ -678,6 +702,7 @@ class NENodeGraph():
         except:
             traceback.print_exc()
 
+
         
     def SetSymbolicLinkSlotIndexByID( self, symboliclink_id, index ):
         try:
@@ -694,6 +719,7 @@ class NENodeGraph():
             return None
 
 
+
     def CreateGroupIO( self, dataflow, pos, group_id, object_id ):
         try:
             groupIO = self.__AddGroupIOToScene( dataflow, pos, group_id, object_id )
@@ -701,6 +727,7 @@ class NENodeGraph():
         except:
             traceback.print_exc()
             return None
+
 
 
     def RemoveGroupIOByID( self, object_id ):
@@ -712,6 +739,7 @@ class NENodeGraph():
         self.__RemoveGroupIOFromScene( self.__m_IDMap[ object_id ] )
 
         return True
+
 
 
     def GetConnectionIDs( self, node_id ):
@@ -731,6 +759,7 @@ class NENodeGraph():
             return []
 
 
+
     def IsConnectedByID( self, attrib_id1, attrib_id2 ):
 
         attrib1 = self.GetAttributeByID( attrib_id1 )
@@ -740,6 +769,7 @@ class NENodeGraph():
             return False
 
         return attrib2.IsConnected( attrib1 )
+
 
 
     def IsConnectableByID( self, attrib_id1, attrib_id2, checkloop=False ):
@@ -766,12 +796,14 @@ class NENodeGraph():
         return True
 
 
+
     def IsLockedByID( self, attrib_id ):# Check if attribute connection is frozen(connection change forbidden)
         try:
             return self.GetAttributeByID( attrib_id ).IsLocked()
         except:
             traceback.print_exc()
             return False
+
 
 
     def CanBeSymbolized( self, attrib_id ):
@@ -788,6 +820,7 @@ class NENodeGraph():
         return parent.CanSymbolize( attrib )
 
 
+
     def PositionChanged( self, object_id, translate, relative ):
 
         if( not object_id in self.__m_IDMap ):
@@ -800,6 +833,7 @@ class NENodeGraph():
             return False
 
         return True
+
 
 
     def CollectAllDescendantIDsByID( self, node_id ):
@@ -817,6 +851,7 @@ class NENodeGraph():
         return group_id_list, node_id_list
 
 
+
     def CollectOverlappedConnectionsByID( self, attrib_ids ):
 
         overlapped_conn_ids = []
@@ -830,6 +865,7 @@ class NENodeGraph():
             overlapped_conn_ids += attrib.ConnectionIDs()
 
         return overlapped_conn_ids
+
 
 
     def CollectExposedAttribs( self, obj_id_list ):
@@ -860,12 +896,14 @@ class NENodeGraph():
         return exposed_attribs
 
 
+
     def GetSymboliclinkIDs( self, group_id ):       
         symboliclink_id_list = []
         for groupio in self.__m_IDMap[ group_id ].GroupIOs():
             symboliclink_id_list += [ v.ID() for v in groupio.SymbolicLinks().values() ]
 
         return symboliclink_id_list
+
 
 
     def FilterObjects(  self, obj_id_list, *, typefilter, parent_id ):
@@ -885,6 +923,7 @@ class NENodeGraph():
             return []
 
 
+
     def GetCentroid( self, obj_id_list ):
 
         centroid = [0, 0]
@@ -902,11 +941,14 @@ class NENodeGraph():
         return centroid
 
 
+
     def ValidateName( self, object_id, name ):
         try:
             obj = self.__m_IDMap[ object_id ]
             new_name = name.replace('.', '_') # convert irregal character'.' to '_'
             
+#TODO: __ResolveKeyConflictで新規に名前生成する?
+
             # Validation failed.
             if( self.__m_KeyMap.IsAlreadyUsed( obj.Parent().FullKey('|') + new_name ) ):
                 return obj.Key(), False
@@ -917,6 +959,7 @@ class NENodeGraph():
         except:        
             traceback.print_exc()
             return None, False
+
 
 
     def ValidateConnections( self, attrib_id ):
@@ -938,6 +981,7 @@ class NENodeGraph():
         return valid_connections, invalid_connections
 
 
+
     def __ResolveNameConflict( self, obj_id ):
         obj_key = self.__m_IDMap[ obj_id ].FullKey()
         if( self.__m_KeyMap.IsAlreadyUsed( obj_key, [obj_id] ) ):
@@ -948,6 +992,7 @@ class NENodeGraph():
         return None
 
 
+
     def ResolveNameConflicts( self, obj_id_list ):
         rename_dict = {}
         for obj_id in obj_id_list:
@@ -955,6 +1000,7 @@ class NENodeGraph():
             if( resolved_name ): rename_dict[ obj_id ] = resolved_name
 
         return rename_dict
+
 
 
     def __ResolveParentNameConflict( self, obj_id, parent_id ):
@@ -967,6 +1013,7 @@ class NENodeGraph():
         return None
 
 
+
     def ResolveParentNameConflicts( self, obj_id_list, parent_id ):
         rename_dict = {}
         parent = self.__m_IDMap[parent_id]
@@ -975,6 +1022,7 @@ class NENodeGraph():
             if( resolved_name ): rename_dict[ obj_id ] = resolved_name
 
         return rename_dict
+
 
 
     def __ResolveUnparentNameConflict( self, obj_id ):
@@ -989,6 +1037,7 @@ class NENodeGraph():
             return producedkey.replace( parentfullkey, '' )
 
         return None
+
 
 
     def ResolveUnparentNameConflicts( self, group_id ):
@@ -1007,6 +1056,7 @@ class NENodeGraph():
         return rename_dict
 
 
+
     def ValidateVisibilityUpdate( self, object_id, visibility ):
         try:
             obj = self.__m_IDMap[ object_id ]
@@ -1020,6 +1070,7 @@ class NENodeGraph():
         except:
             traceback.print_exc()
             return False
+
 
 
     def ValidateAttributeUpdate( self, attrib_id, new_value ):
@@ -1040,6 +1091,7 @@ class NENodeGraph():
             return False
 
 
+
     def ValidateSymboliclinkUpdate( self, object_id, new_slot ):
         try:
             obj = self.GetObjectByID( object_id, (NESymbolicLink,) )            
@@ -1055,10 +1107,12 @@ class NENodeGraph():
         return self.__m_Pipeline.CheckLoop()
 
 
+
     def Evaluate( self, object_id ):
         self.__m_IDMap[ object_id].Info()
 
         return self.__m_Pipeline.Evaluate( object_id )
+
 
 
     def GetSnapshot( self, object_id ):
@@ -1105,6 +1159,7 @@ class NENodeGraph():
         return conn
 
 
+
     def __AddNodeToScene( self, nodeDesc, pos, size, name=None, object_id=None, attrib_ids=None, parent_id=None ):
 
         nodeType = nodeDesc.ObjectType()
@@ -1143,6 +1198,7 @@ class NENodeGraph():
         return node
 
 
+
     def __RemoveNodeFromScene( self, node ):
         # Remove from IDMap
         del self.__m_IDMap[ node.ID() ]
@@ -1153,6 +1209,7 @@ class NENodeGraph():
         # Remove node from root
         node.Release()
         del node
+
 
 
     def __AddGroupToScene( self, pos, size, name=None, object_id=None, parent_id=None ):
@@ -1184,6 +1241,7 @@ class NENodeGraph():
         return group
 
 
+
     def __RemoveGroupFromScene( self, group ):
         
         # Reassign children to group's parent
@@ -1205,6 +1263,7 @@ class NENodeGraph():
         # release parent child relations
         group.Release()
         del group
+
 
         
     def __RemoveConnectionFromScene( self, conn ):
@@ -1228,6 +1287,7 @@ class NENodeGraph():
         del self.__m_IDMap[ conn_id ]
 
 
+
     def __AddSymbolicLinkToScene( self, group, attribdesc, value, name, symboliclink_idset ):
 
         parent_space =group
@@ -1247,6 +1307,7 @@ class NENodeGraph():
         return symboliclink
 
 
+
     def __RemoveSymbolicLinkFromScene( self, symboliclink ):
         # Remove from IDMap
         del self.__m_IDMap[ symboliclink.ID() ]
@@ -1257,6 +1318,7 @@ class NENodeGraph():
         # Remove node from root
         symboliclink.Release()
         del symboliclink
+
 
 
     def __AddGroupIOToScene( self, dataflow, pos, group_id, object_id=None ):
@@ -1275,6 +1337,7 @@ class NENodeGraph():
         return groupio
 
 
+
     def __RemoveGroupIOFromScene( self, groupio ):
         # Remove from IDMap
         del self.__m_IDMap[ groupio.ID() ]
@@ -1287,10 +1350,6 @@ class NENodeGraph():
         del groupio
 
 
-
-    #########################################################################
-    #                      Rule Check Operation(private func)               #
-    #########################################################################
 
     # Resolve UnderScore. currley must be fullpath
     def __ResolveKeyConflict( self, currkey ):
@@ -1325,6 +1384,7 @@ class NENodeGraph():
                 depth.append( d )
 
 
+
     @staticmethod
     def GetLowestCommonAncestor( euler, depth, obj_id_list ):
 
@@ -1346,6 +1406,7 @@ class NENodeGraph():
         return partial_depth.index( min(partial_depth) ) + slice_min
 
 
+
     @staticmethod
     def GenerateTraverseOrder( euler, depth, idx_lca ):
 
@@ -1357,16 +1418,11 @@ class NENodeGraph():
             if( depth[i] > depth_lca ):
                 euler_lca.append( elm )
 
-        # リスト並び順を維持したまま重複要素を削除する(重複したらリスト後方に寄せる).
+        # Euler Depth配列を線形探索し、重複要素を除去しつつ、親子階層の浅い順にtraverse_orderにオブジェクトIDを格納する
+        traverse_order = []
+        [ traverse_order.append(x) for x in euler_lca if not x in traverse_order ]
+        return reversed(traverse_order)# traverse_orderを逆順にする(イテレータを返す)ことで、深度の深いオブジェクトから探索できるようにする
 
-        # 最大インデックス位置に重複要素を集約するため、euler_lcaを後方から探索する.
-        # 本来ならtraverse_orderは先頭から要素追加したいが、速度遅くしたくない。
-        # -> 全要素append終わってからreversed(traverse_order)でリスト逆探索イテレータを返すようにしてる
-        seen = set()
-        seen_add = seen.add
-        traverse_order = [ x for x in reversed(euler_lca) if not (x in seen or seen_add(x)) ]
-        
-        return reversed( traverse_order )
 
 
     @staticmethod
@@ -1395,7 +1451,7 @@ class NENodeGraph():
         return descendants
 
 
-#TODO: グループとその階層下ノードを選択した際、LCAが正しく検出できない(トップのグループがLCAになる)
+
     def PrepareSnapshot( self, obj_id_list ):
 
         typefilter =( NERootObject, NENodeObject, NEGroupObject )

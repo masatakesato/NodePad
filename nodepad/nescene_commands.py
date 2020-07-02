@@ -243,7 +243,7 @@ class GroupCommand(CommandBase):
 
 
     def execute( self ):
-        self.__m_Snapshot = self.__m_refNEScene.GetSnapshot( self.__m_refNEScene.Group_Operation( self.__m_GroupMembers, self.__m_Position, self.__m_Size, self.__m_Name, self.__m_ObjectID, self.__m_ParentID ) )
+        self.__m_Snapshot = self.__m_refNEScene.Group_Operation( self.__m_GroupMembers, self.__m_Position, self.__m_Size, self.__m_Name, self.__m_ObjectID, self.__m_ParentID ).GetSnapshot()
 
     def undo( self ):
         print( 'GroupCommand::undo()...' )
@@ -629,9 +629,11 @@ class SnapshotCommand():
         self.__m_SelectedObjectIDs = set()
 
 
+
     def Init( self, neScene, obj_id_list ):
         self.Clear()
         
+        print('//===================== Initializing Snapshots ===================//' )
 # TODO: 同一オブジェクトの重複選択を消す必要あるかも.( 例えばコネクション: 直接選択 + ノード接続からの自動検出 )
         refObj_list = [ neScene.GetObjectByID( obj_id ) for obj_id in obj_id_list ]
         #print( 'Duplicate', [ obj.FullKey() for obj in refObj_list ] )
@@ -646,39 +648,49 @@ class SnapshotCommand():
         self.__CollectConnectArgs( refObj_list )
 
 
+        for ss in self.__m_Snapshots:
+            print( ss )
+
+
 ################################################################################################################
 # TODO: 複数親空間を跨ぐノード群選択時のスナップショット収集コード. 2020.01.30
+
+        print('//===================== Initializing Snapshots(new version) ===================//' )
         snapshot_gen_list, descendants = neScene.NodeGraph().PrepareSnapshot( obj_id_list )
+        
+        for obj_id in snapshot_gen_list:
+            
+            refObj = neScene.GetObjectByID( obj_id )
 
-        # 子供から親の順に並んでる
+            if( isinstance(refObj, NENodeObject) ):
+                print( 'CreateNodeByID_Exec()...%s' % refObj.Key() )
+                #self.__CollectCreateNodeArgs(refObj)
+            elif( isinstance(refObj, NEGroupObject) ):
+                print( 'CreateGroupByID_Exec()...%s' % refObj.Key() )
+                #self.__CollectGroupArgs(refObj)
+                for child_id in descendants[ obj_id ]:
+                    refChild = neScene.GetObjectByID( child_id )
+                    print( '        ParentByID_Exec()...%s' % refChild.Key() )
+
+            #self.__m_SelectedObjectIDs.add( obj_id )
 
 
-        #for obj_id in snapshot_gen_list:
-        #    children = descendants[ obj_id ]
-        #    refObj = neScene.GetObjectByID( obj_id )
-
-        #    if( not children ):
-        #        if( isinstance(refObj, NENodeObject) ):
-        #            self.__CollectCreateNodeArgs(refObj)
-        #        elif( isinstance(refObj, NEGroupObject) ):
-        #            self.__CollectGroupArgs(refObj)
-
-        #        self.__m_SelectedObjectIDs.add( refObj.ID() )
-
-        #    else:
-        #        pass
+        #self.__CollectConnectArgs( refObj_list )
 
 ################################################################################################################
+
 
 
     def Release( self ):
         self.Clear()
 
 
+
     def Clear( self ):
         self.__m_ObjectIDs.clear()
         self.__m_Snapshots.clear()
         self.__m_SelectedObjectIDs.clear()
+
 
 
     def PublishObjectIDs( self ):
@@ -688,12 +700,15 @@ class SnapshotCommand():
         return self.__m_ObjectIDs
 
 
+
     def Snapshots( self ):
         return self.__m_Snapshots
 
 
+
     def SellectedIDs( self ):
         return self.__m_SelectedObjectIDs
+
 
 
     def __CollectCreateNodeArgs( self, refObj ):
@@ -705,7 +720,9 @@ class SnapshotCommand():
         for attrib in refObj.Attributes().values():
             self.__m_ObjectIDs[attrib.ID()] = None
 
+        print( 'CreateNodeByID_Exec()...%s' % refObj.Key() )
         self.__m_Snapshots.append( refObj.GetSnapshot() )# append NENodeSnapshot
+
 
 
     def __CollectConnectArgs( self, refObjs ):
@@ -722,7 +739,9 @@ class SnapshotCommand():
                 for conn in dest_attrib.Connections().values():
                     if( conn.Source().Parent() in obj_list ):
                         self.__m_ObjectIDs[conn.ID()] = None
+                        print( 'ConnecteateByID_Exec()...%s' % conn.Key() )
                         self.__m_Snapshots.append( conn.GetSnapshot() )# append NEConnectionSnapshot
+
 
     
     def __CollectChildrenForConnectArgs( self, node, obj_list ):
@@ -743,11 +762,13 @@ class SnapshotCommand():
         nodes_to_visit.clear()
 
 
+
     def __CollectGroupArgs( self, refObj ):
         
         snapshot_list = []
         self.__ConstructSnapshotTree( refObj, snapshot_list )
         self.__m_Snapshots += snapshot_list
+
 
 
     def __ConstructSnapshotTree( self, obj, snapshot_list ):
@@ -765,18 +786,22 @@ class SnapshotCommand():
             for attrib in obj.Attributes().values():
                 self.__m_ObjectIDs[attrib.ID()] = None
             # Append snapshot
+            print( 'CreateNodeByID_Exec()...%s' % obj.Key() )
             snapshot_list.append( obj.GetSnapshot() )# append NENodeSnapshot
 
         elif( isinstance(obj, NEGroupObject) ):
 # TODO: __CollectCreateGroupArgs関数を定義してまとめる.
 
             # Append NEGroupSnapshot first.
+            print( 'CreateCroupByID_Exec()...%s' % obj.Key() )
             snapshot_list.append( obj.GetSnapshot() )# append NEGroupSnapshot
 
             # Append NEGroupIOSnapshot for reoroducing GroupIO's position.
             self.__m_ObjectIDs[ obj.GroupInput().ID() ] = None# symboliclink id
             self.__m_ObjectIDs[ obj.GroupOutput().ID() ] = None# input attrib id
+            print( 'CreateGroupIOByID_Exec()...%s' % obj.GroupInput().Key() )
             snapshot_list.append( obj.GroupInput().GetSnapshot() )# append NEGroupIOSnapshot
+            print( 'CreateGroupIOByID_Exec()...%s' % obj.GroupOutput().Key() )
             snapshot_list.append( obj.GroupOutput().GetSnapshot() )# append NEGroupIOSnapshot
 
             # Reserve ObjectID slots for symbolic links, and append NESymbolicLinkSnapshot.
@@ -787,7 +812,9 @@ class SnapshotCommand():
                     self.__m_ObjectIDs[id_set[0]] = None# symboliclink id
                     self.__m_ObjectIDs[id_set[1]] = None# input attrib id
                     self.__m_ObjectIDs[id_set[2]] = None# output attrib id
+                    print( 'CreateSymbolicLinkByID_Exec()...%s' % symboliclink.Key() )
                     snapshot_list.append( symboliclink.GetSnapshot() )# append NESymbolicLinkSnapshot
+
                 
 
     def ExportCommand( self, filepath ):

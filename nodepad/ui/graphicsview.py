@@ -39,6 +39,7 @@ class GraphicsView(QGraphicsView):
         self.setAcceptDrops(True)
 
 
+
     def Release( self ):
         self.setViewport(None)
         self.FocusViewIdChanged.disconnect()
@@ -67,6 +68,23 @@ class GraphicsView(QGraphicsView):
         # set scaling
         self.__m_ZoomScale = zoom
         self.setTransform( QTransform().scale( self.__m_ZoomScale, self.__m_ZoomScale ) )
+
+
+    
+    def __ChangeSelection( self, items, op ):
+
+        change_func = {
+            'true': lambda item : item.setSelected( True ),
+            'false': lambda item : item.setSelected( False ),
+            'invert': lambda item : item.setSelected( not item.isSelected() )
+        }
+        # Invert items selection inside rubberband at once.
+        self.scene().blockSignals(True)
+        for item in items: change_func[op](item)
+        self.scene().blockSignals(False)
+
+        # Emit selection changed signal.
+        self.scene().selectionChanged.emit()
 
 
 
@@ -117,6 +135,7 @@ class GraphicsView(QGraphicsView):
             event.accept()
 
 
+
     def mousePressEvent(self, event):
 
         self.__m_PrevPos = event.pos()
@@ -130,19 +149,17 @@ class GraphicsView(QGraphicsView):
         elif( event.modifiers() == Qt.ControlModifier and event.button() == Qt.LeftButton ):# Switch Selection
             #print( 'GraphicsView::mousePressEvent()... Detected Switch Selection.' )
             if( self.itemAt(event.pos()) ):
-                print( 'switch selection' )
                 self.__m_MouseMode = MouseMode.SwitchSelection
                 return
             else:
-                print( 'bufferband selection' )
                 self.__m_MouseMode = MouseMode.RubberBandSwitchSelection
 
         elif( event.button() == Qt.LeftButton and self.itemAt(event.pos())==None ):# Rubberband Selection
-            print( 'bufferband selection' )
             self.__m_MouseMode = MouseMode.RubberBandSelection
 
         super(GraphicsView, self).mousePressEvent(event)
- 
+
+
 
     def mouseMoveEvent(self, event):
 
@@ -169,52 +186,24 @@ class GraphicsView(QGraphicsView):
         super(GraphicsView, self).mouseMoveEvent(event)
  
 
+
     def mouseReleaseEvent(self, event):
 
         if( self.__m_MouseMode == MouseMode.MoveViewport ):
             self.setCursor(Qt.ArrowCursor)
 
         elif( self.__m_MouseMode == MouseMode.RubberBandSelection ):
-            
             if( self.__m_RubberBand.isVisible() ):
                 self.__m_RubberBand.hide()
-                rect = self.__m_RubberBand.geometry()
+                self.__ChangeSelection( self.items( self.__m_RubberBand.geometry(), Qt.IntersectsItemShape ), 'true' )
 
-                self.scene().blockSignals(True)
+        elif( self.__m_MouseMode == MouseMode.SwitchSelection ):# Walkaround for 'Ctrl+MouseLeft' item selection through multiple QGraphicsViews.
+            self.__ChangeSelection( self.items(event.pos()), 'invert' )
 
-                for item in self.items( rect, Qt.IntersectsItemShape ):
-                    #print( 'SELECTED ITEM SHAPE....', item.shape().boundingRect() )
-                    item.setSelected(True)
-                self.scene().blockSignals(False)
-                self.scene().selectionChanged.emit()
-
-        # Walkaround for 'Ctrl+MouseLeft' item selection across multiple QGraphicsViews.
-        elif( self.__m_MouseMode == MouseMode.SwitchSelection ):
-            # Invert mouse picked items' selection flag.
-            self.scene().blockSignals(True)
-            for item in self.items( event.pos() ):
-                item.setSelected( not item.isSelected() )
-            self.scene().blockSignals(False)
-
-            # Manually emit selection changed signal from QGraphicsScene.
-            self.scene().selectionChanged.emit()
-
-
-        elif( self.__m_MouseMode == MouseMode.RubberBandSwitchSelection ):
-
+        elif( self.__m_MouseMode == MouseMode.RubberBandSwitchSelection ):# Walkaround for 'Ctrl+MouseLeft' rubberband item selection through multiple QGraphicsViews.
             if( self.__m_RubberBand.isVisible() ):
                 self.__m_RubberBand.hide()
-                rect = self.__m_RubberBand.geometry()
-
-                # Invert selection inside boudnary.
-                self.scene().blockSignals(True)
-                for item in self.items( rect, Qt.IntersectsItemShape ):
-                    item.setSelected( not item.isSelected() )
-                self.scene().blockSignals(False)
-
-                # Manually emit selection changed signal from QGraphicsScene.
-                self.scene().selectionChanged.emit()
-
+                self.__ChangeSelection( self.items( self.__m_RubberBand.geometry(), Qt.IntersectsItemShape ), 'invert' )
 
         self.__m_MouseMode = MouseMode.DoNothing
 
@@ -257,9 +246,11 @@ class GraphicsView(QGraphicsView):
         #return super(GraphicsView, self).dragMoveEvent(event)
 
 
+
     def dragLeaveEvent( self, event ):
         pass
         #return super(GraphicsView, self).dragLeaveEvent(event)
+
 
 
     def resizeEvent( self, event ):
@@ -267,14 +258,17 @@ class GraphicsView(QGraphicsView):
         return super(GraphicsView, self).resizeEvent(event)
 
 
+
     def focusInEvent( self, event ):
         self.FocusViewIdChanged.emit( self.__m_Key )
         return super(GraphicsView, self).focusInEvent(event)
 
 
+
     def paintEvent( self, event ):
         self.RenderViewIdChanged.emit( self.__m_Key )
         super(GraphicsView, self).paintEvent(event)
+
 
 
     # View specific key event
