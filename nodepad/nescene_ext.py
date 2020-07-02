@@ -315,12 +315,6 @@ class NESceneExt(NESceneBase):
 
 
 
-    # Implemented in NESceneBase
-    #def ValidateName( self, object_id, newname ):
-    #    return self.__m_NodeGraph.ValidateName( object_id, newname )
-
-
-
     # GUI-dependent function.
     def UpdateSelection( self ):
         super(NESceneExt, self).UpdateSelection()#  <- Do nothing

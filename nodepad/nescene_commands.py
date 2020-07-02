@@ -337,7 +337,7 @@ class RenameCommand(CommandBase):
 
 
     def execute( self ):
-        self.__m_NewName, self.__m_PrevName = self.__m_refNEScene.Rename_Operation( self.__m_ObjectID, self.__m_NewName )
+        self.__m_NewName, self.__m_PrevName = self.__m_refNEScene.Rename_Operation( self.__m_ObjectID, self.__m_NewName )# update self.__m_NewName to actual newname
 
     def undo( self ):
         print( 'RenameCommand::undo()...' )

@@ -310,19 +310,16 @@ class NESceneManager:
 
 
 
-    def RenameByID_Exec( self, node_id, newname, *, terminate=True ):
+    def RenameByID_Exec( self, object_id, newname, *, terminate=True ):
         
-        if( self.__m_refNEScene.ObjectExists( node_id, ( NENodeObject, NEGroupObject, NESymbolicLink ) )==False ):
+        if( self.__m_refNEScene.ObjectExists( object_id, ( NENodeObject, NEGroupObject, NESymbolicLink ) )==False ):
             return False
 
-        valid_new_name, result = self.__m_refNEScene.ValidateName( node_id, newname )
-
-        if( result == False ):# 名前更新に失敗した場合は処理中断
-            RenameCommand( self.__m_refNEScene, node_id, valid_new_name ).execute()
+        if( self.__m_refNEScene.IsNewName( object_id, newname )==False ):# Avoid renaming with current name.
             return False
 
-        #print( 'NESceneManager::RenameByID_Exec()...', obj.Key(), valid_new_name )
-        self.__m_CommandManager.executeCmd( RenameCommand( self.__m_refNEScene, node_id, valid_new_name ) )
+        #print( 'NESceneManager::RenameByID_Exec()...', obj.Key(), newname )
+        self.__m_CommandManager.executeCmd( RenameCommand( self.__m_refNEScene, object_id, newname ) )
         
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -901,7 +898,7 @@ class NESceneManager:
                     self.SetAttributeByID_Exec( (refObjIDs[attribArg[0]], refObjIDs[attribArg[1]]), attribArg[2], terminate=False )
 
 
-        # Assign actual name to Node, Group and Symboliclink
+        # Assign actual name to Node, Group and Symboliclink if possible
         includetypes = ( NENodeSnapshot, NEGroupSnapshot, NESymbolicLinkSnapshot )
         for snapshot in snapshotCommand.Snapshots():
             if( type(snapshot) in includetypes ):

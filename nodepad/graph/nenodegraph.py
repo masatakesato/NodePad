@@ -942,23 +942,11 @@ class NENodeGraph():
 
 
 
-    def ValidateName( self, object_id, name ):
+    def IsNewName( self, object_id, name ):
         try:
-            obj = self.__m_IDMap[ object_id ]
-            new_name = name.replace('.', '_') # convert irregal character'.' to '_'
-            
-#TODO: __ResolveKeyConflictで新規に名前生成する?
-
-            # Validation failed.
-            if( self.__m_KeyMap.IsAlreadyUsed( obj.Parent().FullKey('|') + new_name ) ):
-                return obj.Key(), False
-
-            # Validated succeeded.
-            return new_name, True
-
+            return self.__m_IDMap[ object_id ].Key() != name
         except:        
-            traceback.print_exc()
-            return None, False
+            return False
 
 
 

@@ -292,8 +292,8 @@ def Compute( self, dataBlock ):
 
 
 
-    def ValidateName( self, object_id, newname ):
-        return self.__m_NodeGraph.ValidateName( object_id, newname )
+    def IsNewName( self, object_id, newname ):
+        return self.__m_NodeGraph.IsNewName( object_id, newname )
 
 
 
