@@ -669,6 +669,7 @@ class SnapshotCommand():
             elif( isinstance(refObj, NEGroupObject) ):
                 #print( 'CreateGroupByID_Exec()...%s' % refObj.Key() )
                 if( not descendants[ refObj.ID() ] ): # detected leaf group
+TODO: Implement Partial descendant selection.
                     self.__CollectGroupArgs( refObj )
                 else:
                     self.__CollectCreateGroupArgs( refObj )
