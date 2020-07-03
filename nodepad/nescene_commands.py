@@ -226,6 +226,37 @@ class ReconnectCommand(CommandBase):
 
 
 
+class CreateGroupCommand(CommandBase):
+
+    def __init__( self, neScene, pos, size, name, parent_id, object_id ):
+        super(CreateGroupCommand, self).__init__()
+
+        self.__m_refNEScene = neScene
+        self.__m_Snapshot = None
+        self.__m_Position = pos
+        self.__m_Size = size
+        self.__m_Name = name
+        self.__m_ParentID = parent_id
+        self.__m_ObjectID = object_id
+
+
+    def execute( self ):
+        self.__m_Snapshot = self.__m_refNEScene.CreateGroup_Operation( self.__m_Position, self.__m_Size, self.__m_Name, self.__m_ObjectID, self.__m_ParentID ).GetSnapshot()
+
+    def undo( self ):
+        print( 'CreateGroupCommand::undo()...' )
+        self.__m_refNEScene.RemoveGroup_Operation( self.__m_Snapshot.ObjectID() )
+
+    def redo( self ):
+        print( 'CreateGroupCommand::redo()...' )
+        self.__m_refNEScene.CreateGroup_Operation( self.__m_Snapshot.Translation(), self.__m_Snapshot.Size(), self.__m_Snapshot.Key(), self.__m_Snapshot.ObjectID(), self.__m_Snapshot.ParentID() )
+
+
+
+
+
+
+
 # TODO: グループノード作成と、ノードの親グループ変更を別コマンドに分離できるか検討する.
 class GroupCommand(CommandBase):
 
@@ -422,27 +453,27 @@ class SetVisibleCommand(CommandBase):
 
 
 # TODO: ParentByID_Exec(現在未使用)と併せて設計実装予定.
-#class ParentCommand(CommandBase):
+class ParentCommand(CommandBase):
 
-#    def __init__( self, neScene, object_id, parent_id ):
-#        super(ParentCommand, self).__init__()
+    def __init__( self, neScene, object_id, parent_id ):
+        super(ParentCommand, self).__init__()
 
-#        self.__m_refNEScene = neScene
-#        self.__m_ObjectID = object_id
-#        self.__m_NewParentID = parent_id
-#        self.__m_PrevParentID = neScene.GetObjectByID(object_id).ParentID()# keep current parentid before parant change
+        self.__m_refNEScene = neScene
+        self.__m_ObjectID = object_id
+        self.__m_NewParentID = parent_id
+        self.__m_PrevParentID = neScene.GetObjectByID(object_id).ParentID()# keep current parentid before parant change
 
 
-#    def execute( self ):
-#        self.__m_PrevParentID = self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_NewParentID )
+    def execute( self ):
+        self.__m_PrevParentID = self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_NewParentID )
 
-#    def undo( self ):
-#        print( 'ParentCommand::undo()...' )
-#        self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_PrevParentID )
+    def undo( self ):
+        print( 'ParentCommand::undo()...' )
+        self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_PrevParentID )
 
-#    def redo( self ):
-#        print( 'ParentCommand::redo()...' )
-#        self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_NewParentID )
+    def redo( self ):
+        print( 'ParentCommand::redo()...' )
+        self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_NewParentID )
 
 
 
@@ -669,7 +700,7 @@ class SnapshotCommand():
             elif( isinstance(refObj, NEGroupObject) ):
                 #print( 'CreateGroupByID_Exec()...%s' % refObj.Key() )
                 if( not descendants[ refObj.ID() ] ): # detected leaf group
-TODO: Implement Partial descendant selection.
+#TODO: Implement Partial descendant selection.
                     self.__CollectGroupArgs( refObj )
                 else:
                     self.__CollectCreateGroupArgs( refObj )

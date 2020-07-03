@@ -62,6 +62,7 @@ class NESceneManager:
             'CheckLockedByID': self.CheckLockedByID,
             'CheckSymbolizeByID': self.CheckSymbolizeByID,
 
+            'CreateGroupByID': self.CreateGroupByID_Exec,# TODO: 試験実装.
             #'CreateGroupIOByID': CreateGroupIOByID_Exec, # 非公開
             #'RemoveGroupIOByID': RemoveGroupIOByID_Exec, # 非公開
 
@@ -491,6 +492,23 @@ class NESceneManager:
 
 
 
+    def CreateGroupByID_Exec( self, parent_id, *, pos=(0,0), size=None, name=None, object_id=None, active_symboliclink_ids=None, groupio_ids=(None, None), terminate=True ):
+
+        # Group Createion Command
+        command = self.__m_CommandManager.executeCmd( CreateGroupCommand( self.__m_refNEScene, pos, size, name, parent_id, object_id ) )
+        group_id = command._CreateGroupCommand__m_Snapshot.ObjectID()
+
+        # GroupIO Creation Command
+        groupio_pos = ( (-150, 0), (150, 0) )# Generate GroupIOs' default position
+        self.CreateGroupIOByID_Exec( DataFlow.Input, groupio_pos[0], group_id, object_id=groupio_ids[0], terminate=False )
+        self.CreateGroupIOByID_Exec( DataFlow.Output, groupio_pos[1], group_id, object_id=groupio_ids[1], terminate=False )
+        
+        # Terminate command sequence
+        if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
+
+
+
+
     # Use Delete_Exec instead.
     #def RemoveGroup_Exec( self, group_name ):
     #    group_id = self.__m_refNEScene.GetObjectID( group_name, (NEGroupObject,) )
@@ -786,6 +804,19 @@ class NESceneManager:
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
 
+
+
+    def Parent_Exec( self, parent_name ):
+        obj_id_list = self.__m_refNEScene.GetSelectedObjectIDs()
+        if( not obj_id_list ):
+            print( 'Aborting Parent Operation: Select Object(s).' )
+            return False
+
+        parent_id = self.__m_refNEScene.GetObjectID( parent_name, (NEGroupObject,) )
+        print( 'TODO: Implement Parent_Exec()...', parent_name, parent_id )
+        #self.ParentByID_Exec( obj_id_list, parent_id )
+        return True
+TODO: ??????????????????????????????????????????????????????
 
 
 # TODO: 現在未使用. GroupByID_Execを参考に設計実装する. シンボリックリンク生成処理の設計は時間かかる見通し.

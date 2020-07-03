@@ -686,6 +686,12 @@ class GraphicsScene(QGraphicsScene):
         # http://stackoverflow.com/questions/18428095/qt4-qmenu-addaction-connect-function-with-arguments
         # use "lambda:" for parametrized functions
 
+        # test implementation for creating empty group
+        action = QAction( 'Empty Group', self )
+        action.triggered.connect( functools.partial( callback, 'CreateGroupByID', self.__m_FocusViewID, pos=(pos.x(), pos.y()), size=None ) )
+       
+        menu.addAction( action )
+
         menu.exec(event.screenPos())
 
 
