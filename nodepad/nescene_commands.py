@@ -635,21 +635,20 @@ class SnapshotCommand():
         
         print('//===================== Initializing Snapshots ===================//' )
 # TODO: 同一オブジェクトの重複選択を消す必要あるかも.( 例えばコネクション: 直接選択 + ノード接続からの自動検出 )
-        refObj_list = [ neScene.GetObjectByID( obj_id ) for obj_id in obj_id_list ]
+        #refObj_list = [ neScene.GetObjectByID( obj_id ) for obj_id in obj_id_list ]
         #print( 'Duplicate', [ obj.FullKey() for obj in refObj_list ] )
 
-        for refObj in refObj_list:
-            if( isinstance(refObj, NENodeObject) ):
-                self.__CollectCreateNodeArgs(refObj)
-            elif( isinstance(refObj, NEGroupObject) ):
-                self.__CollectGroupArgs(refObj)
-            self.__m_SelectedObjectIDs.add( refObj.ID() )
+        #for refObj in refObj_list:
 
-        self.__CollectConnectArgs( refObj_list )
+        #    if( isinstance(refObj, NENodeObject) ):
+        #        self.__CollectCreateNodeArgs(refObj)
 
+        #    elif( isinstance(refObj, NEGroupObject) ):
+        #        self.__CollectGroupArgs(refObj)
 
-        for ss in self.__m_Snapshots:
-            print( ss )
+        #    self.__m_SelectedObjectIDs.add( refObj.ID() )
+
+        #self.__CollectConnectArgs( refObj_list )
 
 
 ################################################################################################################
@@ -657,25 +656,29 @@ class SnapshotCommand():
 
         print('//===================== Initializing Snapshots(new version) ===================//' )
         snapshot_gen_list, descendants = neScene.NodeGraph().PrepareSnapshot( obj_id_list )
-        
-        for obj_id in snapshot_gen_list:
-            
-            refObj = neScene.GetObjectByID( obj_id )
+        refObj_list = [ neScene.GetObjectByID( obj_id ) for obj_id in snapshot_gen_list ]
+
+        for refObj in refObj_list:
+        #for obj_id in snapshot_gen_list:
+            #refObj = neScene.GetObjectByID( obj_id )
 
             if( isinstance(refObj, NENodeObject) ):
                 print( 'CreateNodeByID_Exec()...%s' % refObj.Key() )
-                #self.__CollectCreateNodeArgs(refObj)
+                self.__CollectCreateNodeArgs(refObj)
+
             elif( isinstance(refObj, NEGroupObject) ):
-                print( 'CreateGroupByID_Exec()...%s' % refObj.Key() )
-                #self.__CollectGroupArgs(refObj)
-                for child_id in descendants[ obj_id ]:
-                    refChild = neScene.GetObjectByID( child_id )
-                    print( '        ParentByID_Exec()...%s' % refChild.Key() )
+                #print( 'CreateGroupByID_Exec()...%s' % refObj.Key() )
+                if( not descendants[ refObj.ID() ] ): # detected leaf group
+                    self.__CollectGroupArgs( refObj )
+                else:
+                    self.__CollectCreateGroupArgs( refObj )
+                #for child_id in descendants[ refObj.ID() ]:
+                #    refChild = neScene.GetObjectByID( child_id )
+                #    print( '        ParentByID_Exec()...%s' % refChild.Key() )
 
-            #self.__m_SelectedObjectIDs.add( obj_id )
+            self.__m_SelectedObjectIDs.add( refObj.ID() )
 
-
-        #self.__CollectConnectArgs( refObj_list )
+        self.__CollectConnectArgs( refObj_list )
 
 ################################################################################################################
 
@@ -764,6 +767,7 @@ class SnapshotCommand():
 
 
 
+    # Snapshot generation method for single NEGroupSnapshot. Does not deal with descendants.
     def __CollectCreateGroupArgs( self, refObj ):
         # Reserve ObjectID slots
         self.__m_ObjectIDs[refObj.ID()] = None
@@ -794,6 +798,7 @@ class SnapshotCommand():
 
 
 
+    # Snapshot generation method for NEGroupSnapshot and its all descendants.
     def __CollectGroupArgs( self, refObj ):
         self.__ConstructSnapshotTree( refObj )
 
