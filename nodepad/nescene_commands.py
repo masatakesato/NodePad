@@ -465,7 +465,7 @@ class ParentCommand(CommandBase):
 
 
     def execute( self ):
-        self.__m_PrevParentID = self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_NewParentID )
+        self.__m_refNEScene.Parent_Operation( self.__m_ObjectID, self.__m_NewParentID )
 
     def undo( self ):
         print( 'ParentCommand::undo()...' )
@@ -602,34 +602,10 @@ class RemoveGroupIOCommand(CommandBase):
 
 
 
-# TODO: 複数オブジェクトの一括選択機能にした方がいいか検討する.
-#class SelectCommand():
-
-#    def __init__( self, neScene, object_id ):
-#        super(SelectCommand, self).__init__()
-
-#        self.__m_refNEScene = neScene
-#        self.__m_ObjectID = object_id
-
-
-#    def execute( self ):
-#        self.__m_refNEScene.Select_Operation( self.__m_ObjectID )
-    
-#    def undo( self ):
-#        print( 'SelectCommand::undo()...' )
-#        self.__m_refNEScene.Select_Operation( None )
-
-#    def redo( self ):
-#        print( 'SelectCommand::redo()...' )
-#        self.__m_refNEScene.Select_Operation( self.__m_ObjectID )
-
-
-
-
-class SelectCommand_Multi():
+class SelectCommand():
 
     def __init__( self, neScene, object_ids, option ):
-        super(SelectCommand_Multi, self).__init__()
+        super(SelectCommand, self).__init__()
 
         self.__m_refNEScene = neScene
         self.__m_ObjectIDs = object_ids
@@ -637,15 +613,15 @@ class SelectCommand_Multi():
 
 
     def execute( self ):
-        self.__m_refNEScene.Select_Operation_Multi( self.__m_ObjectIDs, self.__m_Option )
+        self.__m_refNEScene.Select_Operation( self.__m_ObjectIDs, self.__m_Option )
     
     def undo( self ):
-        print( 'SelectCommand_Multi::undo()...' )
-        self.__m_refNEScene.Select_Operation_Multi( [], {'clear':True} )
+        print( 'SelectCommand::undo()...' )
+        self.__m_refNEScene.Select_Operation( [], {'clear':True} )
 
     def redo( self ):
-        print( 'SelectCommand_Multi::redo()...' )
-        self.__m_refNEScene.Select_Operation_Multi( self.__m_ObjectIDs, self.__m_Option )
+        print( 'SelectCommand::redo()...' )
+        self.__m_refNEScene.Select_Operation( self.__m_ObjectIDs, self.__m_Option )
 
 
 

@@ -77,13 +77,19 @@ manager.Delete_Exec( ['Group001|Group Input'] )# invalid command
 manager.Delete_Exec( ['Group001'] )
 
 
-
-
 //============= 複数選択 ===================//
 manager = MainWidget.SceneManager()
 manager.CreateNode_Exec( 'Float', pos=(0, 0) )
 manager.CreateNode_Exec( 'Float', pos=(100, 20) )
-manager.Select_Exec_Multi( 'Float001' )
-manager.Select_Exec_Multi( 'Float002', clear=True )
-manager.Select_Exec_Multi( 'Float001', 'Float002' )
-manager.Select_Exec_Multi( 'Float001', 'Float002', clear=True )
+manager.Select_Exec( 'Float001' )
+manager.Select_Exec( 'Float002', clear=True )
+manager.Select_Exec( 'Float001', 'Float002' )
+manager.Select_Exec( 'Float001', 'Float002', clear=True )
+
+
+//============ Parent operation ===========//
+manager = MainWidget.SceneManager()
+manager.CreateNode_Exec( 'Float', pos=(0, 0) )
+manager.CreateGroup_Exec( pos=(100, 100) )
+manager.Select_Exec( 'Float001' )
+manager.Parent_Exec( 'Group001' )

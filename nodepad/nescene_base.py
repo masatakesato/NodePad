@@ -611,9 +611,9 @@ def Compute( self, dataBlock ):
 
 
     # returns True if selection changed, else False.
-    def Select_Operation_Multi( self, obj_id_list, option ):
+    def Select_Operation( self, obj_id_list, option ):
         try:
-            print( 'NESceneBase::Select_Operation_Multi()...' )
+            print( 'NESceneBase::Select_Operation()...' )
 
             self.__m_SelectionList.Exec( *obj_id_list, **option )
 

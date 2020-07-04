@@ -688,8 +688,8 @@ class GraphicsScene(QGraphicsScene):
 
         # test implementation for creating empty group
         action = QAction( 'Empty Group', self )
-        action.triggered.connect( functools.partial( callback, 'CreateGroupByID', self.__m_FocusViewID, pos=(pos.x(), pos.y()), size=None ) )
-       
+        action.triggered.connect( functools.partial( callback, 'CreateGroup', pos=(pos.x(), pos.y()), size=None, parent_id=self.__m_FocusViewID ) )
+        
         menu.addAction( action )
 
         menu.exec(event.screenPos())

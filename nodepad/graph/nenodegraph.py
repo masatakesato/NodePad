@@ -570,7 +570,7 @@ class NENodeGraph():
 
 
 
-    def GetObjectID( self, name, typefilter ):#=c_KeyMapSupportTypes ):
+    def GetObjectID( self, name, typefilter ):
         try:
             obj = self.__m_KeyMap.GetObject(name)
             return obj.ID() if type(obj) in typefilter else None

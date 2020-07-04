@@ -660,14 +660,14 @@ class NESceneExt(NESceneBase):
 
 
 
-    def Select_Operation_Multi( self, obj_id_list, option ):
+    def Select_Operation( self, obj_id_list, option ):
         try:
-            #print( 'NESceneExt::Select_Operation_Multi()...' )
+            #print( 'NESceneExt::Select_Operation()...' )
             #self.__m_SelectionList.Exec( *obj_id_list, **option )
 
             #if( self.__m_SelectionList.Changed()==False ):
             #    return False
-            result = super(NESceneExt, self).Select_Operation_Multi( obj_id_list, option )
+            result = super(NESceneExt, self).Select_Operation( obj_id_list, option )
             if( result==False ):
                 return False
 
