@@ -297,6 +297,16 @@ def Compute( self, dataBlock ):
 
 
 
+    def IsAncestorOf( self, ancestor_id, object_id ):
+        return self.__m_NodeGraph.IsAncestorOf( ancestor_id, object_id )
+
+
+
+    def IsDescendantOf( self, object_id, descendant_id ):
+        return self.__m_NodeGraph.IsDescendantOf( object_id, descendant_id )
+
+
+
     def UpdateSelection( self ):
         print( 'NESceneBase::UpdateSelection()...' )
         pass#self.__m_Scene.UpdateSelection( self.__m_SelectionList.Iter() )

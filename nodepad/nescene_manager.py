@@ -828,15 +828,24 @@ class NESceneManager:
         # 同一グループ内のコネクションは維持したまま移動する.
         # グループを跨ぐコネクションはすべてカットする.
 
+        print( 'NESceneManager::ParentByID_Exec()...' )
+
         if( self.__m_refNEScene.ObjectExists( parent_id, (NERootObject, NEGroupObject, ) )==False ):
             return False
 
         obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject), parent_id=None )
+
+# TODO: ペアレント処理から除外する条件を整理する
+# 既に所属しているノードを指定した場合
+# 自分の子孫にペアレントしようとしている場合
+        obj_id_list = [ object_id for object_id in obj_id_list if ( self.__m_refNEScene.IsAncestorOf( object_id, parent_id )==False and object_id!=parent_id ) ]
+        
         if( not obj_id_list ):
             print( '    Aborting: No valid objects specified.' )
             return False
 
         for object_id in obj_id_list:
+
             print( 'ParentByID_Exec()...' )
 
             # Remove all realted connections from node/group
@@ -847,10 +856,11 @@ class NESceneManager:
             # Move to new parent 
             self.__m_CommandManager.executeCmd( ParentCommand( self.__m_refNEScene, object_id, parent_id ) )
 
-            # Terminate command sequence
-            if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
 
-            return True
+        # Terminate command sequence
+        if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
+        
+        return True
 
 
 

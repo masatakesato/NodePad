@@ -1112,6 +1112,35 @@ class NENodeGraph():
 
 
 
+    # check if ancestor_id is ancestor of object_id
+    def IsAncestorOf( self, ancestor_id, object_id ):
+        try:
+            print( 'NENodeGraph::IsAncestorOf()...' )
+            root_id = self.__m_Root.ID()
+            curr_id = self.__m_IDMap[ object_id ].ParentID()
+
+            while( curr_id != root_id ):
+                if( curr_id == ancestor_id ):
+                    print( 'True', self.__m_IDMap[ object_id ].Key() )
+                    return True
+                curr_id = self.__m_IDMap[ curr_id ].ParentID()
+
+            print( 'False' )
+            return False
+
+        except:
+            traceback.print_exc()
+            return False
+
+
+
+    # check if object_id is descendant of descendant_id
+    def IsDescendantOf( self, object_id, descendant_id ):
+        return self.IsAncestorOf( descendant_id, object_id )
+
+
+
+
     #########################################################################
     #               Object Create/Delete Operation(private func)            #
     #########################################################################
