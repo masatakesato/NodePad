@@ -33,6 +33,8 @@ class NodeInfo_Widget(QFrame):
         self.__m_LineEdit.setAlignment( Qt.AlignLeft | Qt.AlignVCenter )
         self.__m_LineEdit.setContentsMargins( g_AttribMarginLeft, g_AttribMarginTop, g_AttribMarginRight, g_AttribMarginBottom )
 
+        self.__m_CurrentValue = ''
+
         # connect signal and slot.
         self.__m_LineEdit.editingFinished.connect( self.__EditingFinishedSlot )
 
@@ -48,24 +50,31 @@ class NodeInfo_Widget(QFrame):
         self.setLayout( layout )
 
 
+
     #def __del__( self ):
     #    self.__m_LineEdit.returnPressed.disconnect()
     #    self.__m_LineEdit.editingFinished.disconnect()
+
+
 
     def Release( self ):
         self.__m_LineEdit.editingFinished.disconnect()
         self.__m_refCallbackFunc = None
 
 
+
     def ID( self ):
         return self.__m_ID
+
 
 
     def SetValue( self, value ):
         try:
             self.__m_LineEdit.setText( value )
+            self.__m_CurrentValue = value
         except:
             traceback.print_exc()
+
 
 
     def __EditingFinishedSlot( self ):
@@ -73,7 +82,12 @@ class NodeInfo_Widget(QFrame):
         self.__m_LineEdit.blockSignals(True)
         self.__m_LineEdit.clearFocus()
         self.__m_LineEdit.blockSignals(False)
-        self.__m_refCallbackFunc( self.__m_ID, self.__m_LineEdit.text() )
+
+        value = self.__m_LineEdit.text()
+        if( value ):#and not value.isspace() ):
+            self.__m_refCallbackFunc( self.__m_ID, self.__m_LineEdit.text() )
+        else:
+            self.__m_LineEdit.setText( self.__m_CurrentValue )            
 
 
 

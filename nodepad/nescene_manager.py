@@ -316,7 +316,7 @@ class NESceneManager:
         if( self.__m_refNEScene.ObjectExists( object_id, ( NENodeObject, NEGroupObject, NESymbolicLink ) )==False ):
             return False
 
-        if( self.__m_refNEScene.IsNewName( object_id, newname )==False ):# Avoid renaming with current name.
+        if( self.__m_refNEScene.IsValidNewName( object_id, newname )==False ):# Avoid renaming with current name.
             return False
 
         #print( 'NESceneManager::RenameByID_Exec()...', obj.Key(), newname )

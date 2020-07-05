@@ -960,10 +960,11 @@ class NENodeGraph():
 
 
 
-    def IsNewName( self, object_id, name ):
+    def IsValidNewName( self, object_id, name ):
         try:
-            return self.__m_IDMap[ object_id ].Key() != name
-        except:        
+            return  ( self.__m_IDMap[ object_id ].Key() != name ) and ( name )# and ( not name.isspace() )
+        except:
+            traceback.print_exc()
             return False
 
 
