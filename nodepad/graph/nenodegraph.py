@@ -89,11 +89,13 @@ c_IDMapSupportTypes = (
     NESymbolicLink, )
 
 
+
 c_KeyMapSupportTypes = (
     NENodeObject,
     NEGroupObject,
     NEGroupIOObject,
     NESymbolicLink, )
+
 
 
 c_RenamableTypes = (    
@@ -107,6 +109,7 @@ c_EditableTypes = (
     NENodeObject,
     NEGroupObject,
     NEGroupIOObject, )
+
 
 
 
@@ -906,7 +909,7 @@ class NENodeGraph():
 
 
 
-    def FilterObjects(  self, obj_id_list, *, typefilter, parent_id ):
+    def FilterObjects( self, obj_id_list, *, typefilter, parent_id ):
         try:
             # Filter by type only if typefilters is specified
             obj_ids_filtered = [ obj_id for obj_id in obj_id_list if type(self.__m_IDMap[obj_id]) in typefilter ] if typefilter else obj_id_list
@@ -918,7 +921,22 @@ class NENodeGraph():
             return [ obj_id for obj_id in obj_ids_filtered if self.__m_IDMap[obj_id].ParentID()==parent_id ]
 
         except:
+            traceback.print_exc()
+            return []
 
+
+
+    def FilterDescendants( self, obj_id_list, parent_id ):
+        try:
+            direct_children = self.__m_IDMap[ parent_id ].Children()
+
+            return [ obj_id for obj_id in obj_id_list if
+                    ( type(self.__m_IDMap[obj_id]) in (NENodeObject, NEGroupObject) ) and    # include nodegraph and group only
+                    ( self.IsAncestorOf(obj_id, parent_id) == False ) and                   # exclude parent_id's ancestors
+                    ( obj_id != parent_id ) and                                              # exclude parent_id self
+                    ( not obj_id in direct_children ) ]                                      # exclude parent_id's children
+
+        except:
             traceback.print_exc()
             return []
 

@@ -831,17 +831,13 @@ class NESceneManager:
         print( 'NESceneManager::ParentByID_Exec()...' )
 
         if( self.__m_refNEScene.ObjectExists( parent_id, (NERootObject, NEGroupObject, ) )==False ):
+            print( '    Aborting: No valid parent specified.' )
             return False
 
-        obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject), parent_id=None )
+        obj_id_list = self.__m_refNEScene.FilterDescendants( obj_id_list, parent_id )
 
-# TODO: ペアレント処理から除外する条件を整理する
-# 既に所属しているノードを指定した場合
-# 自分の子孫にペアレントしようとしている場合
-        obj_id_list = [ object_id for object_id in obj_id_list if ( self.__m_refNEScene.IsAncestorOf( object_id, parent_id )==False and object_id!=parent_id ) ]
-        
         if( not obj_id_list ):
-            print( '    Aborting: No valid objects specified.' )
+            print( '    Aborting: No parentable objects selected.' )
             return False
 
         for object_id in obj_id_list:

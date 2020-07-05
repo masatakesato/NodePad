@@ -130,13 +130,18 @@ def Compute( self, dataBlock ):
 
 
 
-    def GetChildrenIDs( self, object_id ):
-        return self.__m_NodeGraph.GetObjectByID( object_id, c_IDMapSupportTypes ).ChildrenID()
+    def GetChildrenIDs( self, object_id, typefilter=c_IDMapSupportTypes ):
+        return self.__m_NodeGraph.GetObjectByID( object_id, typefilter ).ChildrenID()
 
 
 
     def GetDescendantIDs( self, object_id ):
         return self.__m_NodeGraph.CollectAllDescendantIDsByID( object_id )
+
+
+
+    def FilterDescendants( self, obj_id_list, parent_id ):
+        return self.__m_NodeGraph.FilterDescendants( obj_id_list, parent_id )
 
 
 
@@ -294,16 +299,6 @@ def Compute( self, dataBlock ):
 
     def IsNewName( self, object_id, newname ):
         return self.__m_NodeGraph.IsNewName( object_id, newname )
-
-
-
-    def IsAncestorOf( self, ancestor_id, object_id ):
-        return self.__m_NodeGraph.IsAncestorOf( ancestor_id, object_id )
-
-
-
-    def IsDescendantOf( self, object_id, descendant_id ):
-        return self.__m_NodeGraph.IsDescendantOf( object_id, descendant_id )
 
 
 
