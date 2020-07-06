@@ -10,7 +10,7 @@ class NEData(NEObject):
 
         self.__m_DataType = attribDesc.DataType()
         self.__m_Value = attribDesc.DefaultValue()# 参照を渡したいので
-        self.__m_DirtyFlag = True#False # True: Data is out of date(needs update), False: Data is up to date.
+        self.__m_DirtyFlag = True # True: Data is out of date(needs update), False: Data is up to date.
         self.__m_ParentID = attribDesc.ObjectID()[0]
 
         self.__m_References = []# コネクションされたNEData(複数可)への参照
