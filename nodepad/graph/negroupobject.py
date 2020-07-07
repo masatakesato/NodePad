@@ -40,26 +40,27 @@ class NEGroupObject(NEGraphObject):
             self.__m_refGroupIOs[ obj.DataFlow() ] = obj
         
         obj.SetParent(self)
-        print( obj.Key() )
+        
         #============= transforma pos from world space to obj's parent space. ====================#
-        space = self
-        pos_stack = []
-        while( space != None ):
-            pos_stack.append( space.GetPosition() )
-            space = space.Parent()
+# TODO: DEPRECATE! Use Transfom matrices instead. 2020.08.30
+        #space = self
+        #pos_stack = []
+        #while( space != None ):
+        #    pos_stack.append( space.GetPosition() )
+        #    space = space.Parent()
 
-        obj_pos = list(obj.GetPosition())
-        print( 'obj_pos before:', obj_pos[0], obj_pos[1] )
-        for pos in reversed(pos_stack):
-            obj_pos[0] -= pos[0]
-            obj_pos[1] -= pos[1]
-        print( 'obj_pos after:', obj_pos[0], obj_pos[1] )
+        #obj_pos = list(obj.GetPosition())
+        #print( 'obj_pos before:', obj_pos[0], obj_pos[1] )
+        #for pos in reversed(pos_stack):
+        #    obj_pos[0] -= pos[0]
+        #    obj_pos[1] -= pos[1]
+        #print( 'obj_pos after:', obj_pos[0], obj_pos[1] )
 
         ####################### Transformation using derived matrix #############################
-        obj_pos2 = self._NEGraphObject__m_DerivedTransform * obj.GetPositionAsVec3()
-        print( 'obj_pos_asvec3:', obj.GetPositionAsVec3()[0:3] )
-        print( 'obj_pos_transformed:', obj_pos2[0], obj_pos2[1] )
-        self._NEGraphObject__m_DerivedTransform.Print()
+        obj_pos2 = self._NEGraphObject__m_MatDerived * obj.GetPositionAsVec3()
+        #print( 'obj_pos_asvec3:', obj.GetPositionAsVec3()[0:3] )
+        #print( 'obj_pos_transformed:', obj_pos2[0], obj_pos2[1] )
+        #self._NEGraphObject__m_MatDerived.Print()
         #########################################################################################
 
         #obj.SetTranslation( ( obj_pos[0], obj_pos[1] ) )
@@ -81,26 +82,26 @@ class NEGroupObject(NEGraphObject):
 
         obj.SetParent(None)
 
-        # transforma pos form obj's parent space to world space.
-        space = self
-        pos_stack = []
-        while( space != None ):
-            pos_stack.append( space.GetPosition() )
-            space = space.Parent()
+        #============= transforma pos form obj's parent space to world space. ====================#
+# TODO: DEPRECATE! Use Transfom matrices instead. 2020.08.30
+        #space = self
+        #pos_stack = []
+        #while( space != None ):
+        #    pos_stack.append( space.GetPosition() )
+        #    space = space.Parent()
 
-        obj_pos = list(obj.GetPosition())
-        print( 'obj_pos before:', obj_pos[0], obj_pos[1] )
-        for pos in pos_stack:
-            obj_pos[0] += pos[0]
-            obj_pos[1] += pos[1]
-        print( 'obj_pos after:', obj_pos[0], obj_pos[1] )
+        #obj_pos = list(obj.GetPosition())
+        #print( 'obj_pos before:', obj_pos[0], obj_pos[1] )
+        #for pos in pos_stack:
+        #    obj_pos[0] += pos[0]
+        #    obj_pos[1] += pos[1]
+        #print( 'obj_pos after:', obj_pos[0], obj_pos[1] )
 
         ####################### Transformation using derived matrix #############################
-        mat_inv = mathutil.InverseMat3( self._NEGraphObject__m_DerivedTransform )
-        obj_pos2 = mat_inv * obj.GetPositionAsVec3()
-        print( 'obj_pos_asvec3:', obj.GetPositionAsVec3()[0:3] )
-        print( 'obj_pos_transformed:', obj_pos2[0], obj_pos2[1] )
-        self._NEGraphObject__m_DerivedTransform.Print()
+        obj_pos2 = self._NEGraphObject__m_MatWorld * obj.GetPositionAsVec3()
+        #print( 'obj_pos_asvec3:', obj.GetPositionAsVec3()[0:3] )
+        #print( 'obj_pos_transformed:', obj_pos2[0], obj_pos2[1] )
+        #self._NEGraphObject__m_MatDerived.Print()
         #########################################################################################
 
         #obj.SetTranslation( ( obj_pos[0], obj_pos[1] ) )

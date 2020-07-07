@@ -1,6 +1,8 @@
 ﻿from .negraphobject import NEGraphObject
 
 
+
+
 class NERootObject(NEGraphObject):
 
     def __init__( self, name, obj_id=None ):

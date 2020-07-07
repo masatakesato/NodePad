@@ -15,23 +15,25 @@ class NEGraphObject(NEObject):
         self.__m_Visible = True
         self.__m_Position = mathutil.Vec3( 0.0, 0.0, 1.0 )#(0, 0)#pos# 親空間内での座標.
         self.__m_Size = [0, 0]# 表示図形の幅, 高さ
-###################### TODO: Implement Transformation Matrix ########################
+
+        # Transform matrices and status
+        self.__m_MatLocal = mathutil.IdentityMat3()# Local transform matrix of THIS object
+        self.__m_MatDerived = mathutil.IdentityMat3()# Transform matrix accumulated from parent space.
+        self.__m_MatWorld = mathutil.IdentityMat3()# Local-to-world transform matrix.
         self.__m_DirtyFlag = False
-        self.__m_LocalTransform = mathutil.IdentityMat3()# Local transformation matrix of THIS object
-        self.__m_DerivedTransform = mathutil.IdentityMat3()# Transform matrix accumulated from parent space.
-#####################################################################################
 
 
 
     def Release( self ):
+
         self.SetParent(None)
         self.ClearChildren()
+
         mathutil.SetVec3( self.__m_Position, 0.0, 0.0, 1.0 )#self.__m_Position = (0.0, 0.0)
-###################### TODO: Implement Transformation Matrix ########################
+        mathutil.SetIdentityMat3( self.__m_MatLocal )
+        mathutil.SetIdentityMat3( self.__m_MatDerived )
+        mathutil.SetIdentityMat3( self.__m_MatWorld )
         self.__m_DirtyFlag = False
-        mathutil.SetIdentityMat3( self.__m_LocalTransform )
-        mathutil.SetIdentityMat3( self.__m_DerivedTransform )
-#####################################################################################
 
 
 
@@ -102,10 +104,7 @@ class NEGraphObject(NEObject):
         self.__m_Parent = parent
         if( self.__m_Parent and bRegisterAsChild ):
             self.__m_Parent.__AddChild( self )
-###################### TODO: Implement Transformation Matrix ########################
             self.__m_DirtyFlag = True
-            #self.__m_DerivedTransform = self.__m_LocalTransform * self.__m_Parent.__m_DerivedTransform
-#####################################################################################
 
 
 
@@ -130,11 +129,7 @@ class NEGraphObject(NEObject):
     def SetTranslation( self, pos ):
         mathutil.SetVec2( self.__m_Position, pos[0], pos[1] )
         #self.__m_Position = pos
-###################### TODO: Implement Transformation Matrix ########################
         self.__m_DirtyFlag = True
-        mathutil.SetTranslateMat3( self.__m_LocalTransform, -pos[0], -pos[1] )
-        #self.__m_DerivedTransform = self.__m_LocalTransform * self.__m_Parent.__m_DerivedTransform
-#####################################################################################
 
 
 
@@ -145,11 +140,17 @@ class NEGraphObject(NEObject):
 
     def UpdateTransform( self ):
         print( 'NEGraphObject::UpdateTransform()...%s' % self.Key() )
-        # update derived transform
+
+        # update local transform matrix
+        mathutil.SetTranslateMat3( self.__m_MatLocal, -self.__m_Position[0], -self.__m_Position[1] )
+
+        # update derived transform matrix
         if( self.__m_Parent ):
-            self.__m_DerivedTransform = self.__m_LocalTransform * self.__m_Parent.__m_DerivedTransform
+            self.__m_MatDerived = self.__m_MatLocal * self.__m_Parent.__m_MatDerived
+            self.__m_MatWorld = mathutil.InverseMat3( self.__m_MatDerived )
+
         # Set transform status to up-to-date  
-        self.__m_DirtyFlag = False 
+        self.__m_DirtyFlag = False
 
 
 
