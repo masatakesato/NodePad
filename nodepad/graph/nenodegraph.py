@@ -1,4 +1,4 @@
-﻿from collections import defaultdict
+﻿from collections import defaultdict, deque
 import traceback
 
 
@@ -18,6 +18,7 @@ from .nesymboliclink import NESymbolicLink
 from .negroupioobject import NEGroupIOObject
 
 from .keymap import KeyMap
+
 
 
 
@@ -642,9 +643,11 @@ class NENodeGraph():
 
             # Remove from current parent.
             prev_parent_id = self.__m_IDMap[object_id].ParentID()
+            self.__UpdateTransform( prev_parent_id )# Update relevant transform matrices
             self.__m_IDMap[prev_parent_id].RemoveMember( object_id )
 
             # Add to new parent
+            self.__UpdateTransform( parent_id )# Update relevant transform matrices
             self.__m_IDMap[parent_id].AddMember( self.__m_IDMap[object_id] )
             
             #return prev_parent_id, self.__m_IDMap[object_id].GetPosition()# RemoveMemberの影響で位置座標がワールド空間に戻っている
@@ -1384,6 +1387,33 @@ class NENodeGraph():
         # Remove node from root
         groupio.Release()
         del groupio
+
+
+
+    def __UpdateTransform( self, object_id ):
+        try:
+            obj = self.__m_IDMap[ object_id ]
+            if( isinstance(obj,NERootObject) ):
+                return
+
+            #print( '//---------- NENodeGraph::__UpdateTransform()... ----------//' )
+        
+            # Gather parents to space_stack[ space, parent, grandparent... ]
+            space_deque = deque()
+            while( not isinstance(obj,NERootObject) ):
+                space_deque.appendleft( obj )
+                obj = obj.Parent()
+
+            
+            # Propagate transform update.
+            for i, val in enumerate(space_deque):
+                if( val.IsDirty() ):# If 'Dirty' ancestor found, propagate transform to descendants.
+                    for j in range(i, len(space_deque)):
+                        space_deque[j].UpdateTransform()
+                    break
+
+        except:
+            traceback.print_exc()
 
 
 

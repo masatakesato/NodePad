@@ -42,6 +42,11 @@ class Matrix:
 
      
 
+    def __getitem__( self, row ):
+        return self.__m_Elms[row]
+
+
+
     def __add__( self, other ):
         result = self.__class__( self.__m_NumRows, self.__m_NumCols )
         for i in range(self.__m_NumRows):
@@ -63,7 +68,7 @@ class Matrix:
     def __mul__( self, other ):
 
         try:
-            if( isinstance(other, Matrix) ):
+            if( isinstance(other, Matrix) ):# mat by mat
                 result = self.__class__( self.__m_NumRows, other.__m_NumCols )
                 for i in range(self.__m_NumRows):
                     for j in range(other.__m_NumCols):
@@ -72,11 +77,12 @@ class Matrix:
                             result[i][j] += self.__m_Elms[i][k] * other.__m_Elms[k][j]
                 return result
 
-            elif( isinstance(other, Vector) ):
-                result = Vector( self.__m_NumRows )
-                for i in range( self.__m_NumRows ):
+            elif( isinstance(other, Vector) ):# mat by vector
+                dim = min( other.Dim(), self.__m_NumRows )
+                result = Vector( dim )
+                for i in range( dim ):
                     result[i] = 0.0
-                    for j in range( other.Dim() ):
+                    for j in range( dim ):
                         result[i] += self.__m_Elms[i][j] * other[j]
                 return result
 
@@ -89,17 +95,52 @@ class Matrix:
 
 
 
-    def __getitem__( self, row ):
-        return self.__m_Elms[row]
-
-
-
     def __rmul__( self, other ):
         result = self.__class__( self.__m_NumRows, self.__m_NumCols )
         for i in range(self.__m_NumRows):
             for j in range(self.__m_NumCols):
                 result.__m_Elms[i][j] = other * self.__m_Elms[i][j]
         return result
+
+
+
+    def __imul__( self, other ):
+        try:
+            if( isinstance(other, Matrix) ):# mat by mat
+                result = []
+                for i in range(self.__m_NumRows): result.append( Vector(other.__m_NumCols) )
+
+                for i in range(self.__m_NumRows):
+                    for j in range(other.__m_NumCols):
+                        result[i][j] = 0.0
+                        for k in range(self.__m_NumCols):
+                            result[i][j] += self.__m_Elms[i][k] * other.__m_Elms[k][j]
+
+                self.__m_Elms.clear()
+                self.__m_Elms = result
+                self.__m_NumCols = other.__m_NumCols
+                return self
+
+            elif( isinstance(other, Vector) ):# mat by vector
+                result = []
+                for i in range(self.__m_NumRows): result.append( Vector(1) )
+
+                for i in range( self.__m_NumRows ):
+                    result[i][0] = 0.0
+                    for j in range( other.Dim() ):
+                        result[i][0] += self.__m_Elms[i][j] * other[j]
+                
+                self.__m_Elms.clear()
+                self.__m_Elms = result
+                self.__m_NumCols = 1
+                return self
+
+            else:
+                raise TypeError( 'Unsupported type.' )
+
+        except:
+            traceback.print_exc()
+            return None
 
 
 

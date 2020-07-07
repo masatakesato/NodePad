@@ -8,7 +8,7 @@ from .matrix import Matrix
 
 ################# Vector #####################
 
-def vector2( x, y ):
+def Vec2( x, y ):
     vec = Vector(2)
     vec[0] = x
     vec[1] = y
@@ -16,7 +16,7 @@ def vector2( x, y ):
 
 
 
-def vector3( x, y, z ):
+def Vec3( x, y, z ):
     vec = Vector(3)
     vec[0] = x
     vec[1] = y
@@ -25,7 +25,7 @@ def vector3( x, y, z ):
 
 
 
-def vector4( x, y, z, w ):
+def Vec4( x, y, z, w ):
     vec = Vector(4)
     vec[0] = x
     vec[1] = y
@@ -89,8 +89,7 @@ def SetTranslateMat3( m, x, y ):
 
 
 
-
-def inverse_3x3( m ):
+def InverseMat3( m ):
 
     m_inv = 1.0 / ( m[0][0]*m[1][1]*m[2][2] + m[0][1]*m[1][2]*m[2][0] + m[0][2]*m[1][0]*m[2][1] - m[0][2]*m[1][1]*m[2][0] - m[0][1]*m[1][0]*m[2][2] - m[0][0]*m[1][2]*m[2][1] )
     
