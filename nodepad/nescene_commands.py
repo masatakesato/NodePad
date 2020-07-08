@@ -254,57 +254,26 @@ class CreateGroupCommand(CommandBase):
 
 
 
-
-
-
-# TODO: グループノード作成と、ノードの親グループ変更を別コマンドに分離できるか検討する.
-class GroupCommand(CommandBase):
-
-    def __init__( self, neScene, obj_id_list, pos, size, name, parent_id, object_id ):
-        super(GroupCommand, self).__init__()
-
-        self.__m_refNEScene = neScene
-        self.__m_Snapshot = None
-        self.__m_Position = pos
-        self.__m_Size = size
-        self.__m_Name = name
-        self.__m_ParentID = parent_id
-        self.__m_ObjectID = object_id
-        self.__m_GroupMembers = obj_id_list
-
-
-    def execute( self ):
-        self.__m_Snapshot = self.__m_refNEScene.Group_Operation( self.__m_GroupMembers, self.__m_Position, self.__m_Size, self.__m_Name, self.__m_ObjectID, self.__m_ParentID ).GetSnapshot()
-
-    def undo( self ):
-        print( 'GroupCommand::undo()...' )
-        self.__m_refNEScene.Ungroup_Operation( self.__m_Snapshot.ObjectID() )
-
-    def redo( self ):
-        print( 'GroupCommand::redo()...' )
-        self.__m_refNEScene.Group_Operation( self.__m_Snapshot.MemberIDs(), self.__m_Snapshot.Translation(), self.__m_Snapshot.Size(), self.__m_Snapshot.Key(), self.__m_Snapshot.ObjectID(), self.__m_Snapshot.ParentID() )
-
-
-
-class UngroupCommand(CommandBase):
+class RemoveGroupCommand(CommandBase):
 
     def __init__( self, neScene, object_id ):
-        super(UngroupCommand, self).__init__()
+        super(RemoveGroupCommand, self).__init__()
 
         self.__m_refNEScene = neScene
         self.__m_Snapshot = neScene.GetSnapshot( object_id )
 
 
     def execute( self ):
-        self.__m_refNEScene.Ungroup_Operation( self.__m_Snapshot.ObjectID() )
+        self.__m_refNEScene.RemoveGroup_Operation( self.__m_Snapshot.ObjectID() )
 
     def undo( self ):
-        print( 'UngroupCommand::undo()...' )
-        self.__m_refNEScene.Group_Operation( self.__m_Snapshot.MemberIDs(), self.__m_Snapshot.Translation(), self.__m_Snapshot.Size(), self.__m_Snapshot.Key(), self.__m_Snapshot.ObjectID(), self.__m_Snapshot.ParentID() )
+        print( 'RemoveGroupCommand::undo()...' )
+        self.__m_refNEScene.CreateGroup_Operation( self.__m_Snapshot.Translation(), self.__m_Snapshot.Size(), self.__m_Snapshot.Key(), self.__m_Snapshot.ObjectID(), self.__m_Snapshot.ParentID() )
 
     def redo( self ):
-        print( 'UngroupCommand::redo()...' )
-        self.__m_refNEScene.Ungroup_Operation( self.__m_Snapshot.ObjectID() )
+        print( 'RemoveGroupCommand::redo()...' )
+        self.__m_refNEScene.RemoveGroup_Operation( self.__m_Snapshot.ObjectID() )
+
 
 
 
@@ -781,16 +750,16 @@ class SnapshotCommand():
         self.__m_ObjectIDs[refObj.ID()] = None
 
         # Append NEGroupSnapshot first.
-        print( 'CreateCroupByID_Exec()...%s' % refObj.Key() )
+        print( 'Append Group Snapshot...%s' % refObj.Key() )
         self.__m_Snapshots.append( refObj.GetSnapshot() )# append NEGroupSnapshot
 
         print( refObj.GroupInput().ID() in self.__m_ObjectIDs, refObj.GroupOutput().ID() in  self.__m_ObjectIDs )
         # Append NEGroupIOSnapshot for reoroducing GroupIO's position.
         self.__m_ObjectIDs[ refObj.GroupInput().ID() ] = None# symboliclink id
         self.__m_ObjectIDs[ refObj.GroupOutput().ID() ] = None# input attrib id
-        print( 'CreateGroupIOByID_Exec()...%s' % refObj.GroupInput().Key() )
+        print( 'Append GroupIn Snapshot...%s' % refObj.GroupInput().Key() )
         self.__m_Snapshots.append( refObj.GroupInput().GetSnapshot() )# append NEGroupIOSnapshot
-        print( 'CreateGroupIOByID_Exec()...%s' % refObj.GroupOutput().Key() )
+        print( 'Append GroupOut Snapshot...%s' % refObj.GroupOutput().Key() )
         self.__m_Snapshots.append( refObj.GroupOutput().GetSnapshot() )# append NEGroupIOSnapshot
 
         # Reserve ObjectID slots for symbolic links, and append NESymbolicLinkSnapshot.
@@ -801,7 +770,7 @@ class SnapshotCommand():
                 self.__m_ObjectIDs[id_set[0]] = None# symboliclink id
                 self.__m_ObjectIDs[id_set[1]] = None# input attrib id
                 self.__m_ObjectIDs[id_set[2]] = None# output attrib id
-                print( 'CreateSymbolicLinkByID_Exec()...%s' % symboliclink.Key() )
+                print( 'Append SymbolicLink Snapshot...%s' % symboliclink.Key() )
                 self.__m_Snapshots.append( symboliclink.GetSnapshot() )# snapshot_list.append( symboliclink.GetSnapshot() )# append NESymbolicLinkSnapshot
 
 

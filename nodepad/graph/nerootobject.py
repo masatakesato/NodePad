@@ -20,6 +20,11 @@ class NERootObject(NEGraphObject):
 
 
 
+    def ParentID( self ):
+        return self.ID()
+
+
+
     def SetParent( self, parent ):
         pass
 

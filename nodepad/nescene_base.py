@@ -170,6 +170,11 @@ def Compute( self, dataBlock ):
 
 
 
+    def GetParentID( self, object_id ):
+        return self.__m_NodeGraph.GetParentID( object_id )
+
+
+
     def ValidateVisibilityUpdate( self, object_id, visibility ):
         return self.__m_NodeGraph.ValidateVisibilityUpdate( object_id, visibility )
 
@@ -182,6 +187,11 @@ def Compute( self, dataBlock ):
 
     def GetConnectionIDs( self, object_id ):
         return self.__m_NodeGraph.GetConnectionIDs( object_id )
+
+
+
+    def GetAttribConnectionIDs( self, attrib_id ):
+        return self.__m_NodeGraph.GetAttribConnectionIDs( attrib_id )
 
 
 
@@ -258,6 +268,16 @@ def Compute( self, dataBlock ):
     # GUI-dependent function.
     def GetGroupIOPosition( self, object_id ):
         return None#return self.__m_Scene.CalcGroupIOOffsets( object_id )
+
+
+
+    def GetGroupMemberIDs( self, group_id ):
+        return self.__m_NodeGraph.GetGroupMemberIDs( group_id )
+
+
+
+    def GetInternalConnections( self, obj_id_list ):
+        return self.__m_NodeGraph.GetInternalConnections( obj_id_list )
 
 
 
@@ -439,40 +459,6 @@ def Compute( self, dataBlock ):
         # Remove group in GraphicsScene
         #self.__m_Scene.RemoveGroup_Exec( group_id )
 
-
-
-    def Group_Operation( self, obj_id_list, pos, size, name, object_id, parent_id ):
-
-        #-------------------------------- グループノード本体を作るオペレーション ---------------------------#
-        group = self.CreateGroup_Operation( pos, size, name, object_id, parent_id )
-
-        #--------------------------- グループに子ノードを追加するオペレーション ---------------------------#
-        for obj_id in obj_id_list:
-            self.Parent_Operation( obj_id, group.ID() )
-
-        #--------------------- グループに内包されるコネクションも子供状態にするオペレーション ------------#
-        for conn_id in group.CollectInternalConnections():
-            self.Parent_Operation( conn_id, group.ID() )
-        
-        return group
-
-
-    def Ungroup_Operation( self, group_id ):
-        
-        group = self.__m_NodeGraph.GetObjectByID( group_id, (NEGroupObject,) )
-        group_parent_id = group.ParentID()
-        connection_ids, object_ids = group.GetMemberIDs()
-        
-        # グループ内オブジェクトの親をもとに戻す
-        for obj_id in object_ids:
-            self.Parent_Operation( obj_id, group_parent_id )
-
-        # グループ内コネクションの親をもとに戻す
-        for conn_id in connection_ids:
-            self.Parent_Operation( conn_id, group_parent_id )
-
-        # グループを削除する
-        self.RemoveGroup_Operation( group_id )
 
 
     def Rename_Operation( self, node_id, newname ):

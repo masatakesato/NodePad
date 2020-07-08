@@ -19,6 +19,7 @@ class NEAttributeObject(NEGraphObject):
         self.__m_refConnections = {}
         self.__m_bLock = False
         self.__m_refData = None
+
         
 
     def Release( self ):
@@ -28,6 +29,7 @@ class NEAttributeObject(NEGraphObject):
         self.__m_refData = None
 
 
+
     # override SetParent
     def SetParent( self, parent, bRegisterAsChild=True ):
         super(NEAttributeObject, self).SetParent(parent, bRegisterAsChild)
@@ -35,11 +37,13 @@ class NEAttributeObject(NEGraphObject):
         self.__m_Desc._AttribDesc__m_ObjectID = ( parent.ID(), self.ID() )
 
 
+
     # owner node
     def ParentNode( self ):
         return self.Parent() if self._NEObject__m_ObjectType=='Attribute' else self.Parent().Parent()
         # ノードアトリビュートの場合: 自信の親(ノード)を返す.
         # それ以外(シンボリックリンク)の場合: シンボリックリンク->親(グループIO)->さらに親(グループ)を返す.
+
 
 
     # return opened space for connection
@@ -55,17 +59,6 @@ class NEAttributeObject(NEGraphObject):
         #   'ProtectedSymbolicLink': シンボリックリンクを保持するグループのIDを返す
         #   'Attribute': アトリビュートの親ノードを保持するスペース
 
-
-    #def BindConnection( self, pconn ):
-    #    self.__m_refConnections[ pconn.Key() ] = pconn
-
-
-    #def UnbindConnection( self, pconn ):
-    #    try:
-    #        self.__m_refConnections[ pconn.Key() ] = None
-    #        del self.__m_refConnections[ pconn.Key() ]
-    #    except:
-    #        pass
 
 
     def BindConnection( self, pconn ):

@@ -123,14 +123,27 @@ class NESymbolicLink(NEGraphObject):
         return self.__m_refOutputs
 
 
+
     def ExposedAttribute( self ):
         return self.__m_Attributes[ self.__m_ExposedID ]
 
     
+
+    def ExposedAttributeID( self ):
+        return self.__m_Attributes[ self.__m_ExposedID ].AttributeID()
+
+
+
     def ProtectedAttribute( self ):
         return self.__m_Attributes[ self.__m_ProtectedID ]
 
+
         
+    def ProtectedAttributeID( self ):
+        return self.__m_Attributes[ self.__m_ProtectedID ].AttributeID()
+
+
+
     def RenameAttribute( self, newkey ):
         try:
             self.SetKey( newkey )
@@ -156,6 +169,7 @@ class NESymbolicLink(NEGraphObject):
         return attrib.ID()
 
 
+
     def SourceAttributeID( self ):
         try:
             return self.ProtectedAttribute().GetConnectedAttributeIDs()[0]
@@ -164,16 +178,20 @@ class NESymbolicLink(NEGraphObject):
             return (None, None)
 
 
+
     def IDSet( self ):
         return ( self.ID(), next(iter(self.__m_refInputs)), next(iter(self.__m_refOutputs)) )
+
 
 
     def DataFlow( self ):
         return self.__m_Attributes[ self.__m_ExposedID ].DataFlow()
 
 
+
     def GetDesc( self ):
         return  self.__m_Desc
+
 
 
     def FullKey( self, suffix='' ):
@@ -182,9 +200,11 @@ class NESymbolicLink(NEGraphObject):
         return self._NEObject__m_Key + suffix
 
 
+
     def ExtractConnections( self ):
 
-        direct_connect_list = []# ( conn_id, conn.Key(), source_id, dest_id ), ...
+        direct_connect_list = []# [ (source_id, dest_id), (source_id, dest_id)... ]
+        #direct_connect_dict = {}# [ conn_id:(source_id, dest_id), conn_id:(source_id, dest_id)... ]
 
         if( self.__m_Attributes[ self.__m_ProtectedID ].HasConnections()==False ):# protectedコネクションがある場合だけ、コネクション接続情報を収集する
             return direct_connect_list
@@ -205,16 +225,20 @@ class NESymbolicLink(NEGraphObject):
         return direct_connect_list
 
 
+
     def IsInputSymbolicLink( self ):
         return self._NEObject__m_ObjectType=='InputSymbolicLink'
+
 
 
     def IsOutputSymbolicLink( self ):
         return self._NEObject__m_ObjectType=='OutputSymbolicLink'
 
 
+
     def GetSnapshot( self ):
         return NESymbolicLinkSnapshot( self )
+
 
 
 
@@ -231,28 +255,35 @@ class NESymbolicLinkSnapshot():
         self.__CollectNodeArgs( refObj )
 
 
+
     def Translation( self ):
         return self.__m_NodeArgs[0]
+
 
 
     def ObjectIDSet( self ):
         return self.__m_NodeArgs[1]
 
 
+
     def Key( self ):
         return self.__m_NodeArgs[2]
+
 
 
     def SlotIntex( self ):
         return self.__m_NodeArgs[3]
 
 
+
     def ObjectID( self ):
         return self.__m_NodeArgs[1][0]
 
 
+
     def AttribArgs( self ):
-        return self.__m_AttribArgs  
+        return self.__m_AttribArgs
+
 
 
     def __CollectNodeArgs( self, refObj ):
@@ -275,8 +306,10 @@ class NESymbolicLinkSnapshot():
         return self.__m_GroupID
 
 
+
     def AttribDesc( self ):
         return self.__m_AttribDesc
+
 
 
     def Value( self ):

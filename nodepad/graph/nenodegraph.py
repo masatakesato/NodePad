@@ -593,6 +593,17 @@ class NENodeGraph():
 
 
 
+    def GetParentID( self, object_id ):
+        try:
+            return self.__m_IDMap[ object_id ].ParentID()
+
+        except:
+            traceback.print_exc()
+            return None
+
+
+
+
     def AddGroup( self, pos, size, name, object_id, parent_id ):
         newGroup = self.__AddGroupToScene( pos, size, name, object_id, parent_id )
         return newGroup
@@ -766,6 +777,16 @@ class NENodeGraph():
 
 
 
+    def GetAttribConnectionIDs( self, attrib_id ):
+        try:
+            attrib = self.__m_IDMap[ attrib_id[0] ].AttributeByID( attrib_id[1] )
+            return attrib.ConnectionIDs()
+
+        except:
+            traceback.print_exc()
+            return []
+
+
     def IsConnectedByID( self, attrib_id1, attrib_id2 ):
 
         attrib1 = self.GetAttributeByID( attrib_id1 )
@@ -901,6 +922,34 @@ class NENodeGraph():
 
         return exposed_attribs
 
+
+
+    def GetInternalConnections( self, obj_id_list ):
+        try:
+            internal_connections = []
+            typefilter = (NENodeObject, NEGroupObject,)
+            obj_list = [ self.__m_IDMap[object_id] for object_id in obj_id_list if type(self.__m_IDMap[object_id]) in typefilter ]
+            
+            for obj in obj_list:
+                for attrib in obj.OutputAttributes().values():
+                    internal_connections += [ conn.ID() for conn in attrib.Connections().values() if( conn.Source().ParentNode().ID() in obj_id_list ) ]
+                    
+            return internal_connections
+
+        except:
+            traceback.print_exc()
+            return []
+
+
+
+    def GetGroupMemberIDs( self, group_id ):
+        try:
+            return self.__m_IDMap[ group_id ].GetMemberIDs()
+
+        except:
+            traceback.print_exc()
+            return [], []
+        
 
 
     def GetSymboliclinkIDs( self, group_id ):       

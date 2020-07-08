@@ -21,9 +21,11 @@ class NENodeObject(NEGraphObject):
         self.__m_Desc._NodeDesc__m_ObjectID = self.ID()
 
 
+
     def Release( self ):
         self.ClearAttributes()
         super(NENodeObject, self).Release()
+
 
 
     def AddAttribute( self, attribDesc, attr_id ):
@@ -34,6 +36,7 @@ class NENodeObject(NEGraphObject):
         refIOs = self.__m_refInputs if attrib.IsInputFlow() else self.__m_refOutputs
         refIOs[ attrib.ID() ] = attrib
         self.__m_LayoutDesc.AddAttribDesc( attrib.GetDesc() )
+
 
     
     def RemoveAttribute( self, attr_id ):
@@ -52,6 +55,7 @@ class NENodeObject(NEGraphObject):
             pass
 
 
+
     def ClearAttributes( self ):
         for attrib in self.__m_Attributes.values():
             if( attrib.HasChildren() ):  attrib.ClearChildren()
@@ -63,17 +67,23 @@ class NENodeObject(NEGraphObject):
 
         self.__m_Desc = None
 
+
     
     def HasAttribute( self, attr_id ):
         return attr_id in self.__m_Attributes
         #return ( attr_id in self.__m_refInputs ) or ( attr_id in self.__m_refOutputs )
 
 
+
     def NumAttributes( self ):
         return len(self.__m_Attributes)
 
+
+
     def Attributes( self ):
         return self.__m_Attributes
+
+
     
     def AttributeByID( self, query ):
         try:
@@ -81,6 +91,8 @@ class NENodeObject(NEGraphObject):
         except:
             traceback.print_exc()
             return None
+
+
 
     def AttributeByName( self, query ):
         if( query in self.__m_refInputs ):
@@ -90,12 +102,17 @@ class NENodeObject(NEGraphObject):
         return None
 
 
+
     def NumInputAttributes( self ):
         return len(self.__m_refInputs)
+
+
 
     def InputAttributes( self ):
         return self.__m_refInputs
     
+
+
     def InputAttribute( self, query ):
         try:
             return self.__m_refInputs[ query ]
@@ -104,12 +121,17 @@ class NENodeObject(NEGraphObject):
             return None
 
 
+
     def NumOutputAttributes( self ):
         return len(self.__m_refOutputs)
+
+
 
     def OutputAttributes( self ):
         return self.__m_refOutputs
     
+
+
     def OutputAttribute( self, query ):
         try:
             return self.__m_refOutputs[ query ]
@@ -143,16 +165,10 @@ class NENodeObject(NEGraphObject):
             return False
 
 
-    def InputAttributes( self ):
-        return self.__m_refInputs
-
-
-    def OutputAttributes( self ):
-        return self.__m_refOutputs
-
 
     def GetDesc( self ):
         return  self.__m_Desc
+
 
 
     def FullKey( self, suffix='' ):
@@ -160,6 +176,7 @@ class NENodeObject(NEGraphObject):
             return self._NEGraphObject__m_Parent.FullKey('|') + self._NEObject__m_Key + suffix
         else:
             return self._NEObject__m_Key + suffix
+
 
 
     def Info( self ):
@@ -214,40 +231,50 @@ class NENodeSnapshot():
         self.__CollectNodeArgs( refObj )
 
 
+
     def ObjectType( self ):
         return self.__m_NodeArgs[0]
+
 
 
     def Translation( self ):
         return self.__m_NodeArgs[1]
 
 
+
     def Size( self ):
         return self.__m_NodeArgs[2]
+
 
 
     def ObjectID( self ):
         return self.__m_NodeArgs[3]
 
 
+
     def Key( self ):
         return self.__m_NodeArgs[4]
+
 
 
     def ParentID( self ):
         return self.__m_NodeArgs[5]
 
 
+
     def ActiveAttribIDs( self ):
         return self.__m_ActiveAttribIDs
+
 
 
     def AttribNames( self ):
         return self.__m_AttribNames
 
 
+
     def AttribArgs( self ):
         return self.__m_AttribArgs
+
 
 
     def __CollectNodeArgs( self, refObj ):
