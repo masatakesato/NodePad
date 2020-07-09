@@ -170,7 +170,7 @@ class NESymbolicLink(NEGraphObject):
 
 
 
-    def SourceAttributeID( self ):
+    def ReferredAttributeID( self ):
         try:
             return self.ProtectedAttribute().GetConnectedAttributeIDs()[0]
         except:

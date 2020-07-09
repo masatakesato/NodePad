@@ -266,7 +266,7 @@ class NENodeGraph():
 
             source_attrib, dest_attrib = (attrib1, attrib2) if attrib1.IsOutputFlow() else (attrib2, attrib1)
 
-            #print( 'AddConnectionByID ' + attrib_source.FullKey() + ' ' + attrib_dest.FullKey() )
+            print( 'AddConnectionByID:', source_attrib.FullKey() + ' <---> ' + dest_attrib.FullKey() )
 
             # Create Connection Object
             newConn = self.__AddConnectionToScene( source_attrib, dest_attrib, object_id )
@@ -328,6 +328,11 @@ class NENodeGraph():
         source_attrib = conn.Source()
         dest_attrib = conn.Destination()
 
+        print('--------------before:---------------')
+        for conn_id, conn in dest_attrib.Connections().items():
+            print( conn_id, ':', conn.Source().FullKey(), ' <---> ', conn.Destination().FullKey() )
+        print('------------------------------------')
+
         # Remove connection from scene
         self.__RemoveConnectionFromScene( conn )
         
@@ -336,6 +341,12 @@ class NENodeGraph():
         dest_data = dest_attrib.Data()
         source_data.UnbindReference( dest_data )
         dest_data.UnbindReference( source_data )
+
+        #print( source_attrib.FullKey(), dest_attrib.FullKey() )
+        print('--------------after:----------------')
+        for conn_id, conn in dest_attrib.Connections().items():
+            print( conn_id, ':', conn.Source().FullKey(), ' <---> ', conn.Destination().FullKey() )
+        print('------------------------------------')
 
         dest_attrib_id = ( dest_attrib.ParentID(), dest_attrib.ID() ) if not dest_attrib.HasConnections() else None
         
@@ -895,50 +906,51 @@ class NENodeGraph():
 
 
 
-    def CollectExposedAttribs( self, obj_id_list ):
+#TODO: コネクションの分類が必要.
+#TODO: 親空間移動で
+#TODO: シンボリックリンク経由のコネクション
 
-        exposed_attribs = []
-
-        obj_list = [ self.__m_IDMap[obj_id] for obj_id in obj_id_list ]
-        obj_list.sort( key=lambda x: x.GetPosition()[1] )
-    
-        for obj in obj_list:
-            if( isinstance(obj,NEConnectionObject) ):
-                continue# コネクションオブジェクトは無視する
-
-            for j in range(obj.NumInputAttributes()):# ノード/グループ/シンボリックリンクから、グループ外部接続しているアトリビュートを抽出する
-                attrib = obj.InputAttribute(j)
-                for outerattrib in attrib.GetConnectedAttributes():
-                    if( not outerattrib.ParentNode().ID() in obj_id_list ):
-                        exposed_attribs.append( ( attrib.AttributeID(), (None, None, None) ) )# linknode_id, groupattrib_id, linknode_attrib_id
-                        break
-
-            for j in range(obj.NumOutputAttributes()):# ノード/グループ/シンボリックリンクから、グループ外部接続しているアトリビュートを抽出する
-                attrib = obj.OutputAttribute(j)
-                for outerattrib in attrib.GetConnectedAttributes():
-                    if( not outerattrib.ParentNode().ID() in obj_id_list ):
-                        exposed_attribs.append( ( attrib.AttributeID(), (None, None, None) ) )# linknode_id, groupattrib_id, linknode_attrib_id
-                        break
-
-        return exposed_attribs
-
-
-
-    def GetInternalConnections( self, obj_id_list ):
+    def CollectConnections( self, obj_id_list, parent_id ):
         try:
-            internal_connections = []
             typefilter = (NENodeObject, NEGroupObject,)
             obj_list = [ self.__m_IDMap[object_id] for object_id in obj_id_list if type(self.__m_IDMap[object_id]) in typefilter ]
-            
+            grand_parent_id = self.__m_IDMap[parent_id].ParentID()
+
+            # Gather all connections relevant to obj_id_list
+            conn_dict = {}
             for obj in obj_list:
-                for attrib in obj.OutputAttributes().values():
-                    internal_connections += [ conn.ID() for conn in attrib.Connections().values() if( conn.Source().ParentNode().ID() in obj_id_list ) ]
-                    
-            return internal_connections
+                for attrib in obj.Attributes().values():
+                    conn_dict.update( attrib.Connections() )
+
+            # Divide to open/closed category
+            closed_conn_ids = []# connections between obj_id_list nodes
+            open_attrib_info = defaultdict(list)# connection from external. attrib_in_ids[ exernal_attrib_id ] = [ (conn_id, internal_attrib_id), ... ]
+            removal_conn_info = []# connection to be removed( by parenting ) 
+
+
+            for conn_id, conn in conn_dict.items():
+                src_is_internal = conn.Source().ParentNode().ID() in obj_id_list
+                dst_is_internal = conn.Destination().ParentNode().ID() in obj_id_list
+                #symlink_flag = ( conn.Source().ParentNode().ParentID()==grand_parent_id ) and ( conn.Destination().ParentNode().ParentID()==grand_parent_id )
+
+                if( src_is_internal and dst_is_internal ):# both attributes exist in obj_id_list
+                    closed_conn_ids.append( conn_id )
+
+                elif( conn.ParentID()==grand_parent_id ):
+                    if( dst_is_internal ):# only dest attribute exists in obj_id_list -> input connection from external space
+                        open_attrib_info[ conn.DestinationAttribID() ].append( (conn_id, conn.SourceAttribID()) )
+                    else:# only dest attribute exists in obj_id_list -> input connection from external space
+                        open_attrib_info[ conn.SourceAttribID() ].append( (conn_id, conn.DestinationAttribID()) )
+
+                else:
+                    removal_conn_info.append( conn_id )
+
+
+            return closed_conn_ids, open_attrib_info, removal_conn_info
 
         except:
             traceback.print_exc()
-            return []
+            return {}, {}, []
 
 
 
@@ -1021,23 +1033,23 @@ class NENodeGraph():
 
 
 
-    def ValidateConnections( self, attrib_id ):
+    #def ValidateConnections( self, attrib_id ):
 
-        valid_connections = {}# key: conn_id, value: outer-connected attribute id
-        invalid_connections = []# Invalid connection id list. invalid inter-space connection.
+    #    valid_connections = {}# key: conn_id, value: outer-connected attribute id
+    #    invalid_connections = []# Invalid connection id list. invalid inter-space connection.
 
-        attrib = self.__m_IDMap[attrib_id[0]].AttributeByID(attrib_id[1])
-        connectable_space_id = attrib.ParentSpace().ParentID()
+    #    attrib = self.__m_IDMap[attrib_id[0]].AttributeByID(attrib_id[1])
+    #    connectable_space_id = attrib.ParentSpace().ParentID()
 
-        for conn in attrib.Connections().values():
-            outerattrib = conn.Source() if attrib.IsInputFlow() else conn.Destination()
+    #    for conn in attrib.Connections().values():
+    #        outerattrib = conn.Source() if attrib.IsInputFlow() else conn.Destination()
 
-            if( outerattrib.ParentSpace().ID() == connectable_space_id ):# gather connections only inside connectable_space
-                valid_connections[conn.ID()] = outerattrib.AttributeID()
-            else:
-                invalid_connections.append( conn.ID() )
+    #        if( outerattrib.ParentSpace().ID() == connectable_space_id ):# gather connections only inside connectable_space
+    #            valid_connections[conn.ID()] = outerattrib.AttributeID()
+    #        else:
+    #            invalid_connections.append( conn.ID() )
 
-        return valid_connections, invalid_connections
+    #    return valid_connections, invalid_connections
 
 
 

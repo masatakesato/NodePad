@@ -421,7 +421,7 @@ class SetVisibleCommand(CommandBase):
         self.__m_refNEScene.SetVisible_Operation( self.__m_ObjectID, self.__m_NewState )
 
 
-# TODO: ParentByID_Exec(現在未使用)と併せて設計実装予定.
+
 class ParentCommand(CommandBase):
 
     def __init__( self, neScene, object_id, parent_id ):

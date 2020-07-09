@@ -234,9 +234,9 @@ def Compute( self, dataBlock ):
         return self.__m_NodeGraph.ExtractSymbolicLinkConnections( object_id )
 
 
-
-    def ValidateConnections( self, attrib_id ):
-        return self.__m_NodeGraph.ValidateConnections( attrib_id )
+# TODO: Deprecate
+    #def ValidateConnections( self, attrib_id ):
+    #    return self.__m_NodeGraph.ValidateConnections( attrib_id )
 
 
 
@@ -252,11 +252,6 @@ def Compute( self, dataBlock ):
 
     def ValidateSymboliclinkUpdate( self, object_id, new_slot ):
         return self.__m_NodeGraph.ValidateSymboliclinkUpdate( object_id, new_slot )
-
-
-
-    def GetExposedAttribs( self, object_ids ):
-        return self.__m_NodeGraph.CollectExposedAttribs( object_ids )
 
 
 
@@ -276,8 +271,8 @@ def Compute( self, dataBlock ):
 
 
 
-    def GetInternalConnections( self, obj_id_list ):
-        return self.__m_NodeGraph.GetInternalConnections( obj_id_list )
+    def CollectConnections( self, obj_id_list, parend_id ):
+        return self.__m_NodeGraph.CollectConnections( obj_id_list, parend_id )
 
 
 

@@ -181,6 +181,7 @@ class NEAttributeObject(NEGraphObject):
         return False
 
 
+ 
     def IsConnectedTo( self, attrib_dest ):
 
         if( self.__m_Desc.IsOutputFlow() ):

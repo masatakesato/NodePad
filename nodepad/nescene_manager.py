@@ -417,10 +417,10 @@ class NESceneManager:
         return self.GroupByID_Exec( obj_id_list, parent_id=None )
 
 
-TODO: リアファクタリング
-TODO: コピペの挙動修正
+
 
 # TODO: 選択ノード群が複数グループに跨る場合の処理方法を決める.
+# TODO: active_symboliclink_ids is not used. Deprecate?
     def GroupByID_Exec( self, obj_id_list, parent_id, *, pos=None, size=None, name=None, object_id=None, active_symboliclink_ids=None, groupio_ids=(None, None), align_groupios=True, terminate=True ):
 
         print( 'NESceneManager::GroupByID_Exec()...' )
@@ -436,33 +436,8 @@ TODO: コピペの挙動修正
                                                                   pos=group_pos, size=size, name=name, object_id=object_id,
                                                                   groupio_ids=groupio_ids, terminate=False )
         
-        # Create SymbolicLinks and bypass connections
-        symboliclink_ids = active_symboliclink_ids if active_symboliclink_ids else self.__m_refNEScene.GetExposedAttribs( obj_id_list )
-        from_to = []# internal connection info
-        for attrib_id, id_set in symboliclink_ids:
-            # Create SymbolicLink in group
-            attrib = self.__m_refNEScene.GetAttribute( attrib_id )
-            symboliclink_id = self.CreateSymbolicLinkByID2_Exec( group_id, attrib.GetDesc(), attrib.Value(), attrib.Key(), symboliclink_idset=id_set, terminate=False )
-            symboliclink = self.__m_refNEScene.GetObjectByID( symboliclink_id )
-
-            # Change connection to symboliclink
-            conn_ids = self.__m_refNEScene.GetAttribConnectionIDs( attrib_id )
-            exposed_attrib_id = symboliclink.ExposedAttributeID()
-            protected_attrib_id = symboliclink.ProtectedAttributeID()
-            for conn_id in conn_ids:
-                conn = self.__m_refNEScene.GetObjectByID( conn_id, (NEConnectionObject,) )
-                outerattrib = conn.Source() if attrib.IsInputFlow() else conn.Destination()
-                external_attrib_id = outerattrib.AttributeID()
-                self.__m_CommandManager.executeCmd( ReconnectCommand( self.__m_refNEScene, conn_id, (exposed_attrib_id, external_attrib_id) ) )
-
-                from_to.append( ( attrib_id, protected_attrib_id ) )
-
-        # Parent NENodeObjects NEGroupObjects, and relevan NEConnectionObjects
+        # Parent NENodeObjects NEGroupObjects, and relevant NEConnectionObjects
         self.ParentByID_Exec( obj_id_list, group_id, terminate=False )
-
-        # Create new connections between symboliclink and internarl node
-        for attrib_id1, attrib_id2 in from_to:
-            self.ConnectByID_Exec( attrib_id1, attrib_id2, check=False, terminate=False )
 
         # Align GroupIO positions
         if( align_groupios ):
@@ -490,7 +465,7 @@ TODO: コピペの挙動修正
 
     def UngroupByID_Exec( self, group_id, *, terminate=True ):
 
-        print( 'NESceneManager::UngroupByID_Exec()...', end='' )
+        print( 'NESceneManager::UngroupByID_Exec()...' )
 
         if( not self.__m_refNEScene.IsType( group_id, NEGroupObject ) ):
             print( '    Aborting: No valid objects specified.' )
@@ -510,21 +485,24 @@ TODO: コピペの挙動修正
             self.__m_CommandManager.executeCmd( RenameCommand( self.__m_refNEScene, obj_id, newname ) )
 
 #=============================== Unparent =========================================#
+        print('#==================== Unparent ====================#')
         connection_ids, object_ids = self.__m_refNEScene.GetGroupMemberIDs( group_id )
         self.ParentByID_Exec( object_ids, parent_id, terminate=False )
 
 #==================== Restore connections without SymbolicLink ====================#
-
+        print('#==================== Restore connections without SymbolicLink ====================#')
         # Restore connections without SymbolicLink
         for attrib_ids in conn_info_restore:
             self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, attrib_ids, None ) )
 
 #====================== Remove SymbolicLinks and their direct connections ======================#
+        print( '#====================== Remove SymbolicLinks and their direct connections ======================#' )
         symboliclink_id_list = self.__m_refNEScene.GetSymboliclinkIDs( group_id )
         for symboliclink_id in symboliclink_id_list:
             self.RemoveSymbolicLinkByID_Exec( symboliclink_id, terminate=False )
 
 #============================== Remove GroupIO ====================================#
+        print( '#============================== Remove GroupIO ====================================#' )
         self.RemoveGroupIOByID_Exec( group_id, terminate=False )
 
         # Execute ungroup command 
@@ -638,11 +616,13 @@ TODO: コピペの挙動修正
     def RemoveSymbolicLinkByID_Exec( self, symboliclink_id, *, terminate=True ):
         
         # Remove all connections
+        print( '#=================== Remove all connections ====================#' )
         conn_id_list = self.__m_refNEScene.GetConnectionIDs( symboliclink_id )
         for conn_id in conn_id_list:
             self.__m_CommandManager.executeCmd( DisconnectCommand( self.__m_refNEScene, conn_id ) )
 
         # Remove SymbolicLink Node( and ProtectedAttribute's connection)
+        print( '#=================== Remove SymbolicLink Node( and ProtectedAttribute\'s connection) ====================#' )
         self.__m_CommandManager.executeCmd( RemoveSymbolicLinkCommand( self.__m_refNEScene, symboliclink_id ) )
         
         # Terminate command sequence
@@ -864,11 +844,10 @@ TODO: コピペの挙動修正
 
 
 
-# TODO: 現在未使用. GroupByID_Execを参考に設計実装する. シンボリックリンク生成処理の設計は時間かかる見通し.
+# TODO: シンボリックリンク生成処理の扱いを検討する.
+# TODO: 同一階層下のノード群はコネクションを維持したまま移動.
+# TODO: parent_idの親空間とのコネクションのみ、シンボリックリンクを使って置き換える
     def ParentByID_Exec( self, obj_id_list, parent_id, *, terminate=True ):
-        # 同一グループ内のコネクションは維持したまま移動する.
-        # グループを跨ぐコネクションはすべてカットする.
-
         print( 'NESceneManager::ParentByID_Exec()...' )
 
         if( self.__m_refNEScene.ObjectExists( parent_id, (NERootObject, NEGroupObject, ) )==False ):
@@ -881,27 +860,48 @@ TODO: コピペの挙動修正
             print( '    Aborting: No parentable objects selected.' )
             return False
 
-# TODO: InternalConnectionsは削除せず残す
-        inernal_conn_ids = self.__m_refNEScene.GetInternalConnections( obj_id_list )
+        closed_conn_ids, open_attrib_info, removal_conn_info = self.__m_refNEScene.CollectConnections( obj_id_list, parent_id )
+        
+#TODO: REFACTOR!!!
 
+TODO: シンボリックリンク付きのグループを複製 -> 更にグループ化 -> シンボリックリンクの名称がおかしくなる(UUIDのデフォルト値のまま) -> 手入力で治る.なんで？
+
+
+#=================== 親変更に伴ってグループ横断するようになるコネクションを削除する =================#
+        print( '#=================== Remove inter-group connections =================#' )
+        for conn_list in open_attrib_info.values():
+            for conn_id, _ in conn_list:
+                self.__m_CommandManager.executeCmd( DisconnectCommand( self.__m_refNEScene, conn_id ) )
+
+        for conn_id in removal_conn_info:
+            self.__m_CommandManager.executeCmd( DisconnectCommand( self.__m_refNEScene, conn_id ) )
+
+#=================== 親を変更する ====================================================================#
+
+        # Change parent of objects
         for object_id in obj_id_list:
-
-            print( 'ParentByID_Exec()...' )
-
-            # Remove all realted connections from node/group
-            conn_id_list = self.__m_refNEScene.GetConnectionIDs( object_id )
-            for conn_id in conn_id_list:
-                if( not conn_id in inernal_conn_ids ):
-                    self.__m_CommandManager.executeCmd( DisconnectCommand( self.__m_refNEScene, conn_id ) )
-
-            # Move to new parent 
             self.__m_CommandManager.executeCmd( ParentCommand( self.__m_refNEScene, object_id, parent_id ) )
 
-
-# TODO: InternalConnectionsもペアレント変更する
-        for conn_id in inernal_conn_ids:
+        # Change parent of closed connections
+        for conn_id in closed_conn_ids:
             self.__m_CommandManager.executeCmd( ParentCommand( self.__m_refNEScene, conn_id, parent_id ) )
 
+#=================== グループへの入力コネクション用シンボリックリンクを作成する ===============================#
+
+        for attrib_id_internal, conn_info in open_attrib_info.items():
+            # Create SymbolicLink
+            attrib = self.__m_refNEScene.GetAttribute( attrib_id_internal )
+            symboliclink_id = self.CreateSymbolicLinkByID2_Exec( parent_id, attrib.GetDesc(), attrib.Value(), attrib.Key(), symboliclink_idset=(None,None,None), terminate=False )
+            symboliclink = self.__m_refNEScene.GetObjectByID( symboliclink_id )
+
+            attrib_id_exposed = symboliclink.ExposedAttributeID()
+            attrib_id_protected = symboliclink.ProtectedAttributeID()
+            
+            for _, attrib_id_external in conn_info:
+            # Connect external attrib and exposed symboliclink attribute
+                self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (attrib_id_external, attrib_id_exposed), None ) )
+            # Connect protected symboliclink attribute and internal attribute
+                self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (attrib_id_protected, attrib_id_internal), None ) )
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )

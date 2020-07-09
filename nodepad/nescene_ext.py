@@ -229,7 +229,7 @@ class NESceneExt(NESceneBase):
 
 
 
-    # Implemented in NESceneBase
+# TODO: Depracate. Implemented in NESceneBase
     #def ValidateConnections( self, attrib_id ):
     #    return self.__m_NodeGraph.ValidateConnections( attrib_id )
 
@@ -250,12 +250,6 @@ class NESceneExt(NESceneBase):
     # Implemented in NESceneBase
     #def ValidateSymboliclinkUpdate( self, object_id, new_slot ):
     #    return self.__m_NodeGraph.ValidateSymboliclinkUpdate( object_id, new_slot )
-
-
-
-    # Implemented in NESceneBase
-    #def GetExposedAttribs( self, object_ids ):
-    #    return self.__m_NodeGraph.CollectExposedAttribs( object_ids )
 
 
 

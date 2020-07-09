@@ -821,7 +821,6 @@ class GraphicsScene(QGraphicsScene):
             elif( isinstance(item, GroupIO) ):# GroupIO上でリリース -> シンボリックリンク作成
                 if( self.CheckSymbolize(self.__m_refStartPort, item.DataFlow()) ):
                     self.__m_refCallbackFunc( 'CreateSymbolicLink', self.__m_refStartPort.PortID(), slot_index=item.BlankIndex() )
-                    #self.__m_refCallbackFunc( 'ConnectByID', self.__m_refStartPort.PortID(), item.PortID(), check=True )
 
             # __m_TempEdgeを削除する
             self.__m_GraphicsViewLayers[ self.__m_FocusViewID ].RemoveItem( self.__m_TempEdge.ID() )
