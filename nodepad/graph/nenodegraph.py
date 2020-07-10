@@ -333,10 +333,10 @@ class NENodeGraph():
         source_attrib = conn.Source()
         dest_attrib = conn.Destination()
 
-        print('--------------before:---------------')
-        for conn_id, conn in dest_attrib.Connections().items():
-            print( conn_id, ':', conn.Source().FullKey(), ' <---> ', conn.Destination().FullKey() )
-        print('------------------------------------')
+        #print( '    --------------before:---------------')
+        #for conn_id, conn in dest_attrib.Connections().items():
+        #    print( '    ', conn_id, ':', conn.Source().FullKey(), ' <---> ', conn.Destination().FullKey() )
+        #print( '    ------------------------------------')
 
         # Remove connection from scene
         self.__RemoveConnectionFromScene( conn )
@@ -347,17 +347,20 @@ class NENodeGraph():
         source_data.UnbindReference( dest_data )
         dest_data.UnbindReference( source_data )
 
-        #print( source_attrib.FullKey(), dest_attrib.FullKey() )
-        print('--------------after:----------------')
-        for conn_id, conn in dest_attrib.Connections().items():
-            print( conn_id, ':', conn.Source().FullKey(), ' <---> ', conn.Destination().FullKey() )
-        print('------------------------------------')
+        #print('    --------------after:----------------')
+        #for conn_id, conn in dest_attrib.Connections().items():
+        #    print( '    ', conn_id, ':', conn.Source().FullKey(), ' <---> ', conn.Destination().FullKey() )
+        #print('    ------------------------------------')
         
         # Propagate Dirty Flag to Destination Attribute(s).
         self.__m_Pipeline.PropagateDirty( dest_attrib.ParentID() )
 
         if( dest_attrib.HasConnections()==False ):
             dest_attrib.SetEnable(True)
+            return dest_attrib.AttributeID()
+
+        else:
+            return None
 
 
 
@@ -725,7 +728,7 @@ class NENodeGraph():
             print( '    ', group_id, attrib.ParentSpace().ID() )
 
             # Create SymbolicLink
-            parent = self.__m_IDMap[ attrib.ParentSpace().ID() ]
+            parent = self.__m_IDMap[ attrib.ParentNode().ParentID() ]
             symboliclink = self.__AddSymbolicLinkToScene( parent, attrib.GetDesc(), attrib.Value(), attrib.Key(), symboliclink_idset )
             parent.BindSymbolicLink( symboliclink, slot_index )
             
@@ -945,52 +948,7 @@ class NENodeGraph():
         return overlapped_conn_ids
 
 
-
-    def GetConnectInfo( self, attrib1_id, attrib2_id ):
-        
-        print( 'NENodeGraph::GetConnectInfo()...' )
-
-        # Gather overlapped connections
-        disconnect_info = []
-
-        attrib1 = self.GetAttributeByID( attrib1_id )
-        attrib2 = self.GetAttributeByID( attrib2_id )
-
-        if( attrib1.MultipleConnectAllowed()==False ):   disconnect_info += attrib1.ConnectionIDs()
-        if( attrib2.MultipleConnectAllowed()==False ):   disconnect_info += attrib2.ConnectionIDs()
-
-        # 
-        
-        src_attrib, dest_attrib = (attrib1, attrib2) if attrib1.IsOutputFlow() else (attrib2, attrib1)
-        symlink_info = None
-
-        srcParent = src_attrib.ParentSpace()
-        destParent = dest_attrib.ParentSpace()
-
-        # sourceもdestも同じ階層にいる場合はコネクション生成のみ
-        if( srcParent==destParent ):
-            print( '    Need to AddConnection: %s <---> %s' % (src_attrib.FullKey(), dest_attrib.FullKey()) )
-
-        # sourceがdestよりも一つ上の階層の場合は、destをシンボリックリンク化してsourceと接続する
-# TODO: destが既にシンボリックリンク化済みかどうかチェックする
-        elif( srcParent == destParent.Parent() ):
-            symlink_info = ( destParent.ID(), dest_attrib.GetDesc(), dest_attrib.Value(), dest_attrib.Key() )
-            print( '    Need to Symbolize: %s' % dest_attrib.FullKey() )
-
-        # destがsourceよりも一つ上の階層の場合は、sourceをシンボリックリンクを通してdestと接続する
-# TODO: sourceが既にシンボリックリンク化済みかどうかをチェックする
-        elif( srcParent.Parent() == destParent ):
-            symlink_info = ( srcParent.ID(), src_attrib.GetDesc(), src_attrib.Value(), src_attrib.Key() )
-            print( '    Need to Symbolize: %s' % src_attrib.FullKey() )
-
-        # Unable to connect
-        #else:
-        #   symlink_info = None
-
-        return src_attrib.AttributeID(), dest_attrib.AttributeID(), disconnect_info, symlink_info
-
-
-
+TODO: Refactor  in_attrib_info out_attrib_info open_attrib_info
     def CollectConnections( self, obj_id_list, parent_id ):
         try:
             typefilter = (NENodeObject, NEGroupObject,)

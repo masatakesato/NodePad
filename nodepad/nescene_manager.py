@@ -217,34 +217,11 @@ class NESceneManager:
         if( check==True ):
             if( self.__m_refNEScene.IsConnectable( attrib1_id, attrib2_id, checkloop=True )==False ):
                 return False
-       
-        #####################################################################################################################################
-        
-#TODO: アトリビュートに対応するシンボリックリンクが既に存在する場合に、重複生成を避ける
-# 複数のシンボリックリンクが生成されている可能性もあるのでは???
-
-        #src_attrib_id, dest_attrib_id, disconnect_info, symlink_info = self.__m_refNEScene.GetConnectInfo( attrib1_id, attrib2_id )
-        
-        #for conn_id in disconnect_info:
-        #    self.__m_CommandManager.executeCmd( DisconnectCommand( self.__m_refNEScene, conn_id ) )# Remove Connection
-        
-        #if( symlink_info ):
-        #    # Create SymbolicLink
-        #    symboliclink_id, in_id, out_id = self.CreateSymbolicLinkByID2_Exec( symlink_info[0], symlink_info[1], symlink_info[2], symlink_info[3], terminate=False )
-        #    # Connect src_attrb <---> symboliclink input
-        #    self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (src_attrib_id, (symboliclink_id, in_id)), object_id ) )
-        #    # Connect symboliclink output <---> dest_attrib
-        #    self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, ((symboliclink_id, out_id), dest_attrib_id), object_id ) )
-        #else:
-        #    # Create Connection
-        #    self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (src_attrib_id, dest_attrib_id), object_id ) )
-
-        #####################################################################################################################################
 
         # Disconnect overlapped connections
         overlapped_conn_ids = self.__m_refNEScene.GetOverlappedConnections( [attrib1_id, attrib2_id] )
         for conn_id in overlapped_conn_ids:
-            self.__m_CommandManager.executeCmd( DisconnectCommand( self.__m_refNEScene, conn_id ) )# Remove Connection
+            self.__m_CommandManager.executeCmd( DisconnectCommand( self.__m_refNEScene, conn_id ) )
 
         # Create Connection
         self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (attrib1_id, attrib2_id), object_id ) )
@@ -441,7 +418,6 @@ class NESceneManager:
 
 
 
-
 # TODO: 選択ノード群が複数グループに跨る場合の処理方法を決める.
 # TODO: active_symboliclink_ids is not used. Deprecate?
     def GroupByID_Exec( self, obj_id_list, parent_id, *, pos=None, size=None, name=None, object_id=None, active_symboliclink_ids=None, groupio_ids=(None, None), align_groupios=True, terminate=True ):
@@ -502,36 +478,33 @@ class NESceneManager:
         for symboliclink_id in symboliclink_id_list:# extract symboliclinks' actual from/to attribute id
             conn_info_restore += self.__m_refNEScene.ExtractSymbolicLinkConnections( symboliclink_id )
 
-#============== Resolve node name confliction caused by ungrouping ================#
+        # Resolve node name confliction caused by ungrouping
         rename_dict = self.__m_refNEScene.ResolveChildNames( group_id )
         for obj_id, newname in rename_dict.items():
             self.__m_CommandManager.executeCmd( RenameCommand( self.__m_refNEScene, obj_id, newname ) )
 
-#=============================== Unparent =========================================#
-        print('#==================== Unparent ====================#')
+        # Unparent child Nodes/Groups. Relevant Connections are also removed.
+        # print( '#==================== Unparent Child Nodes/Groups ====================#' )
         connection_ids, object_ids = self.__m_refNEScene.GetGroupMemberIDs( group_id )
         self.ParentByID_Exec( object_ids, parent_id, terminate=False )
 
-#==================== Restore connections without SymbolicLink ====================#
-        print('#==================== Restore connections without SymbolicLink ====================#')
-        # Restore connections without SymbolicLink
+        # Restore connections
+        #print( '#==================== Restore connections ====================#' )
         for attrib_ids in conn_info_restore:
             self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, attrib_ids, None ) )
 
-#====================== Remove SymbolicLinks and their direct connections ======================#
-        print( '#====================== Remove SymbolicLinks and their direct connections ======================#' )
+        # Remove SymbolicLinks and their direct connections
+        #print( '#====================== Remove SymbolicLinks and their direct connections ======================#' )
         symboliclink_id_list = self.__m_refNEScene.GetSymboliclinkIDs( group_id )
         for symboliclink_id in symboliclink_id_list:
             self.RemoveSymbolicLinkByID_Exec( symboliclink_id, terminate=False )
 
-
-
-#============================== Remove GroupIO ====================================#
-        print( '#============================== Remove GroupIO ====================================#' )
+        # Remove GroupIOs
+        #print( '#============================== Remove GroupIO ====================================#' )
         self.RemoveGroupIOByID_Exec( group_id, terminate=False )
 
-        # Execute ungroup command
-        print( '#============================== Remove Group ====================================#' )
+        # Remove Group
+        #print( '#============================== Remove Group ====================================#' )
         self.__m_CommandManager.executeCmd( RemoveGroupCommand( self.__m_refNEScene, group_id ) )
         
 
@@ -604,8 +577,10 @@ class NESceneManager:
         group_id = attrib.ParentNode().ParentID()
 
         # Create SymbolicLink( and ProtectedAttribute's Connection )
-        command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand( self.__m_refNEScene, group_id, attrib.GetDesc(), attrib.Value(), attrib.Key(), symboliclink_idset, slot_index ) )
-        symboliclink = self.__m_refNEScene.GetObjectByID( command._CreateSymbolicLinkCommand__m_Snapshot.ObjectID(), (NESymbolicLink,) )
+        #command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand( self.__m_refNEScene, group_id, attrib.GetDesc(), attrib.Value(), attrib.Key(), symboliclink_idset, slot_index ) )
+        #symboliclink = self.__m_refNEScene.GetObjectByID( command._CreateSymbolicLinkCommand__m_Snapshot.ObjectID(), (NESymbolicLink,) )
+        command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand2( self.__m_refNEScene, group_id, attrib_id, symboliclink_idset, slot_index ) )
+        symboliclink = self.__m_refNEScene.GetObjectByID( command._CreateSymbolicLinkCommand2__m_Snapshot.ObjectID(), (NESymbolicLink,) )
         
         # Create ProtectedAttribute Connection
         self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (symboliclink.ProtectedAttribute().AttributeID(), attrib_id), conn_id ) )
@@ -617,14 +592,14 @@ class NESceneManager:
 
 
 
-    def CreateSymbolicLinkByID2_Exec( self, group_id, attrib_desc, value, name, *, symboliclink_idset=(None,None,None), slot_index=-1, terminate=True ):
-    #def CreateSymbolicLinkByID2_Exec( self, group_id, attrib_id, *, symboliclink_idset=(None,None,None), slot_index=-1, terminate=True ):
+    #def CreateSymbolicLinkByID2_Exec( self, group_id, attrib_desc, value, name, *, symboliclink_idset=(None,None,None), slot_index=-1, terminate=True ):
+    def CreateSymbolicLinkByID2_Exec( self, group_id, attrib_id, *, symboliclink_idset=(None,None,None), slot_index=-1, terminate=True ):
 
         # Create SymbolicLink( and ProtectedAttribute's Connection )
-        command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand( self.__m_refNEScene, group_id, attrib_desc, value, name, symboliclink_idset, slot_index ) )
-        snapshot = command._CreateSymbolicLinkCommand__m_Snapshot
-        #command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand2( self.__m_refNEScene, group_id, attrib_id, symboliclink_idset, slot_index ) )
-        #snapshot = command._CreateSymbolicLinkCommand2__m_Snapshot
+        #command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand( self.__m_refNEScene, group_id, attrib_desc, value, name, symboliclink_idset, slot_index ) )
+        #snapshot = command._CreateSymbolicLinkCommand__m_Snapshot
+        command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand2( self.__m_refNEScene, group_id, attrib_id, symboliclink_idset, slot_index ) )
+        snapshot = command._CreateSymbolicLinkCommand2__m_Snapshot
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -904,20 +879,18 @@ class NESceneManager:
         for conn_id in closed_conn_ids:
             self.__m_CommandManager.executeCmd( ParentCommand( self.__m_refNEScene, conn_id, parent_id ) )
 
-#=================== グループへの入力コネクション用シンボリックリンクを作成する ===============================#
-
+        #=================== グループへの入力コネクション用シンボリックリンクを作成する ===============================#
         for attrib_id_internal, conn_info in open_attrib_info.items():
             # Create SymbolicLink
-            attrib = self.__m_refNEScene.GetAttribute( attrib_id_internal )
-            attrib_id_protected, attrib_id_exposed = self.CreateSymbolicLinkByID2_Exec( parent_id, attrib.GetDesc(), attrib.Value(), attrib.Key(), symboliclink_idset=(None,None,None), terminate=False )
-            #attrib_id_protected, attrib_id_exposed = self.CreateSymbolicLinkByID2_Exec( parent_id, attrib_id_internal, symboliclink_idset=(None,None,None), terminate=False )
+            #attrib = self.__m_refNEScene.GetAttribute( attrib_id_internal )
+            #attrib_id_protected, attrib_id_exposed = self.CreateSymbolicLinkByID2_Exec( parent_id, attrib.GetDesc(), attrib.Value(), attrib.Key(), symboliclink_idset=(None,None,None), terminate=False )
+            attrib_id_protected, attrib_id_exposed = self.CreateSymbolicLinkByID2_Exec( parent_id, attrib_id_internal, symboliclink_idset=(None,None,None), terminate=False )
             
             for _, attrib_id_external in conn_info:
-            # Connect external attrib and exposed symboliclink attribute
+                # Connect external attrib and exposed symboliclink attribute
                 self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (attrib_id_external, attrib_id_exposed), None ) )
-            # Connect protected symboliclink attribute and internal attribute
+                # Connect protected symboliclink attribute and internal attribute
                 self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (attrib_id_protected, attrib_id_internal), None ) )
-
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -1031,7 +1004,6 @@ class NESceneManager:
             self.TranslateByID_Exec( refObjIDs[snapshot.ObjectID()], newPos, relative=True, terminate=False )
 
 
-
         return duplicant_ids
 ######################################################################################################################
 #
@@ -1066,23 +1038,21 @@ class NESceneManager:
         self.__m_CopySnapshot.Clear()
 
 
-    def Open( self, filepath ):
 
+    def Open( self, filepath ):
         if( self.Import( filepath ) ):
             # Keep Filepath
             self.__m_Filepath = filepath
-            
             # Clear history
             self.__m_CommandManager.Clear()
+
     
 
     def Save( self, filepath ):
-
         self.__m_Filepath = filepath
-
         self.Export( filepath )
-        
         self.__m_CommandManager.SetReadout()
+
 
 
     def Import( self, filepath, offset=(0,0) ):
@@ -1105,11 +1075,13 @@ class NESceneManager:
         return False
 
 
+
     def Export( self, filepath ):
         snapshot = SnapshotCommand()
         snapshot.Init( self.__m_refNEScene, self.__m_refNEScene.GetChildrenIDs( self.__m_refNEScene.GetRootID() ) )
         snapshot.ExportCommand( filepath )
         snapshot.Release()
+
         
 
 # TODO: 複数グループを跨ぐノード群を、階層構造を維持したままエクスポートする方法を考える.
@@ -1123,18 +1095,22 @@ class NESceneManager:
         snapshot.Release()
 
 
+
     def Undo( self ):
         self.__m_CommandManager.undo()
+
 
 
     def Redo( self ):
         self.__m_CommandManager.redo()
 
 
+
     def Cut( self ):
         selected_ids = self.__m_refNEScene.GetSelectedObjectIDs()
         if( selected_ids ):
             self.CutByID_Exec( selected_ids, self.__m_refNEScene.CurrentEditSpaceID() )
+
 
 
 # TODO: 複数グループを跨ぐノード群を、階層構造を維持したままコピー可能にする方法を考える.
@@ -1144,20 +1120,25 @@ class NESceneManager:
             self.CopyByID_Exec( selected_ids, self.__m_refNEScene.CurrentEditSpaceID() )
 
 
+
     def Paste( self ):
         self.PasteByID_Exec( self.__m_refNEScene.CurrentEditSpaceID() )
+
 
 
     def Duplicate( self ):
         self.DuplicateByID_Exec( self.__m_refNEScene.GetSelectedObjectIDs(), parent_id=self.__m_refNEScene.CurrentEditSpaceID() )
 
 
+
     def Delete( self ):
         self.DeleteByID_Exec( self.__m_refNEScene.GetSelectedObjectIDs() )
 
 
+
     def Group( self ):
         self.GroupByID_Exec( self.__m_refNEScene.GetSelectedObjectIDs(), parent_id=self.__m_refNEScene.CurrentEditSpaceID() )
+
 
 
     def Ungroup( self ):

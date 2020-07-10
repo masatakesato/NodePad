@@ -318,7 +318,6 @@ class NESceneExt(NESceneBase):
 
     # GUI-dependent function.
     def __UpdateAttributeEditor( self, object_id=None ):
-        #super(NESceneExt, self).__UpdateAttributeEditor( object_id )  <- Do nothing
         try:
             # get object and desc from obj_id
             obj_id = object_id if object_id else self.__m_AttributeEditor.ActiveObjectID()
@@ -332,6 +331,8 @@ class NESceneExt(NESceneBase):
             desc = obj.GetDesc()
             if( desc==None ):
                 return False
+
+            print( 'NESceneExt::__UpdateAttributeEditor()...', obj.FullKey() )
 
             self.__m_AttributeEditor.DeinitializeWidget()
 
@@ -394,7 +395,7 @@ class NESceneExt(NESceneBase):
 
 
     def Disconnect_Operation( self, conn_id ):
-        super(NESceneExt, self).Disconnect_Operation( conn_id )
+        dest_attrib_id = super(NESceneExt, self).Disconnect_Operation( conn_id )
         # Disconnect in NodeGraph
         #dest_attrib_id = self.__m_NodeGraph.RemoveConnectionByID( conn_id )
         
@@ -403,6 +404,8 @@ class NESceneExt(NESceneBase):
 
         # Update AttributeEditorWidget.
         #self.__m_AttributeEditor.SetEnabled_Exec( dest_attrib_id, True )
+        if( dest_attrib_id ):
+            self.__m_AttributeEditor.SetEnabled_Exec( dest_attrib_id, True )
 
 
 

@@ -199,10 +199,6 @@ def Compute( self, dataBlock ):
         return self.__m_NodeGraph.CollectOverlappedConnectionsByID( attrib_ids )
 
 
-    def GetConnectInfo( self, attrib1_id, attrib2_id ):
-        return self.__m_NodeGraph.GetConnectInfo( attrib1_id, attrib2_id )
-
-
 
     def GetAttribute( self, attrib_id ):
         return self.__m_NodeGraph.GetAttributeByID( attrib_id )
@@ -323,7 +319,9 @@ def Compute( self, dataBlock ):
 
     def UpdateSelection( self ):
         print( 'NESceneBase::UpdateSelection()...' )
-        pass#self.__m_Scene.UpdateSelection( self.__m_SelectionList.Iter() )
+        #self.__m_Scene.UpdateSelection( self.__m_SelectionList.Iter() )
+
+
 
 
 
@@ -403,7 +401,7 @@ def Compute( self, dataBlock ):
 
     def Disconnect_Operation( self, conn_id ):
         # Disconnect in NodeGraph
-        self.__m_NodeGraph.RemoveConnectionByID( conn_id )
+        return self.__m_NodeGraph.RemoveConnectionByID( conn_id )
 
         # Disconnect in GraphicsScene
         #self.__m_Scene.Disconnect_Exec( conn_id )
