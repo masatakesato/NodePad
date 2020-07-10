@@ -115,8 +115,15 @@ class NESymbolicLink(NEGraphObject):
             return None
 
 
+
     def InputAttributes( self ):
         return self.__m_refInputs
+
+
+
+    def InputAttribute( self ):
+        return set(self.__m_refInputs.values())[0]
+
 
 
     def OutputAttributes( self ):
@@ -124,23 +131,18 @@ class NESymbolicLink(NEGraphObject):
 
 
 
+    def OutputAttribute( self ):
+        return set(self.__m_refOutputs.values())[0]
+
+
+
     def ExposedAttribute( self ):
         return self.__m_Attributes[ self.__m_ExposedID ]
-
-    
-
-    def ExposedAttributeID( self ):
-        return self.__m_Attributes[ self.__m_ExposedID ].AttributeID()
 
 
 
     def ProtectedAttribute( self ):
         return self.__m_Attributes[ self.__m_ProtectedID ]
-
-
-        
-    def ProtectedAttributeID( self ):
-        return self.__m_Attributes[ self.__m_ProtectedID ].AttributeID()
 
 
 
@@ -281,6 +283,26 @@ class NESymbolicLinkSnapshot():
 
 
 
+    def InputID( self ):
+        return self.__m_NodeArgs[1][1]
+
+
+
+    def OutputID( self ):
+        return self.__m_NodeArgs[1][2]
+
+
+
+    #def ProtectedAttribID( self ):
+    #    return (self.__m_AttribArgs[0][0:2])
+        
+
+
+    #def ExposedAttribID( self ):
+    #    return (self.__m_AttribArgs[1][0:2])
+
+
+
     def AttribArgs( self ):
         return self.__m_AttribArgs
 
@@ -288,7 +310,7 @@ class NESymbolicLinkSnapshot():
 
     def __CollectNodeArgs( self, refObj ):
 
-        object_id = refObj.IDSet()[0]
+        object_id = refObj.ID()#refObj.IDSet()[0]
         
         # Node Creation params( source_attrib_id, position, object_id(self, and child attributes), name )
         self.__m_NodeArgs = ( refObj.GetPosition(), refObj.IDSet(), refObj.Key(), refObj.SlotIndex() )

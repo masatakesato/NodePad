@@ -906,6 +906,49 @@ class NENodeGraph():
 
 
 
+
+    def GetConnectInfo( self, attrib1_id, attrib2_id ):
+        
+        print( 'NENodeGraph::GetConnectInfo()...' )
+
+        # Gather overlapped connections
+        disconnect_info = []
+
+        attrib1 = self.GetAttributeByID( attrib1_id )
+        attrib2 = self.GetAttributeByID( attrib2_id )
+
+        if( attrib1.MultipleConnectAllowed()==False ):   disconnect_info += attrib1.ConnectionIDs()
+        if( attrib2.MultipleConnectAllowed()==False ):   disconnect_info += attrib2.ConnectionIDs()
+
+        # 
+        
+        src_attrib, dest_attrib = (attrib1, attrib2) if attrib1.IsOutputFlow() else (attrib2, attrib1)
+        symlink_info = None
+
+        srcParent = src_attrib.ParentSpace()
+        destParent = dest_attrib.ParentSpace()
+
+        # sourceもdestも同じ階層にいる場合はコネクション生成のみ
+        if( srcParent==destParent ):
+            print( '    Need to AddConnection: %s <---> %s' % (src_attrib.FullKey(), dest_attrib.FullKey()) )
+
+        # sourceがdestよりも一つ上の階層の場合は、コネクションと入力シンボリックリンクを生成する
+        elif( srcParent == destParent.Parent() ):
+            symlink_info = ( destParent.ID(), dest_attrib.GetDesc(), dest_attrib.Value(), dest_attrib.Key() )
+            print( '    Need to Symbolize: %s' % dest_attrib.FullKey() )
+
+        # destがsourceよりも一つ上の階層の場合は、コネクションと出力シンボリックリンクを生成する
+        elif( srcParent.Parent() == destParent ):
+            symlink_info = ( srcParent.ID(), src_attrib.GetDesc(), src_attrib.Value(), src_attrib.Key() )
+            print( '    Need to Symbolize: %s' % src_attrib.FullKey() )
+
+        # Unable to connect
+        #else:
+        #   symlink_info = None
+
+        return src_attrib.AttributeID(), dest_attrib.AttributeID(), disconnect_info, symlink_info
+
+
 #TODO: コネクションの分類が必要.
 #TODO: 親空間移動で
 #TODO: シンボリックリンク経由のコネクション

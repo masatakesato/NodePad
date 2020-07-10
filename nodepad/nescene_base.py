@@ -199,6 +199,10 @@ def Compute( self, dataBlock ):
         return self.__m_NodeGraph.CollectOverlappedConnectionsByID( attrib_ids )
 
 
+    def GetConnectInfo( self, attrib1_id, attrib2_id ):
+        return self.__m_NodeGraph.GetConnectInfo( attrib1_id, attrib2_id )
+
+
 
     def GetAttribute( self, attrib_id ):
         return self.__m_NodeGraph.GetAttributeByID( attrib_id )
