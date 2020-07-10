@@ -397,10 +397,7 @@ class NESceneExt(NESceneBase):
         super(NESceneExt, self).Disconnect_Operation( conn_id )
         # Disconnect in NodeGraph
         #dest_attrib_id = self.__m_NodeGraph.RemoveConnectionByID( conn_id )
-
-        # Set Attribute's Lock/Unlock state in NodeGraph
-        #self.__m_NodeGraph.LockAttributeByID( dest_attrib_id, True )
-
+        
         # Disconnect in GraphicsScene
         self.__m_Scene.Disconnect_Exec( conn_id )
 
@@ -560,6 +557,22 @@ class NESceneExt(NESceneBase):
         self.__UpdateAttributeEditor()
 
         return symboliclink
+
+
+
+    def CreateSymbolicLink_Operation2( self, group_id, attrib_id, symboliclink_idset=(None,None,None), slot_index=-1 ):
+        symboliclink = super(NESceneExt, self).CreateSymbolicLink_Operation2( group_id, attrib_id, symboliclink_idset, slot_index )
+        # Create Symboliclink in NodeGraph
+        #symboliclink = self.__m_NodeGraph.ActivateSymbolicLinkByID( group_id, attribdesc, value, name, symboliclink_idset, slot_index )
+        
+        # Create Symboliclink in GraphicsScene
+        self.__m_Scene.ActivateSymbolicLink_Exec( symboliclink.ParentID(), symboliclink.Key(), symboliclink.GetDesc(), symboliclink.SlotIndex() )# slot_index )
+        
+        # Update AttributeEditorWidget
+        self.__UpdateAttributeEditor()
+
+        return symboliclink
+
 
 
 

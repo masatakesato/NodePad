@@ -280,6 +280,9 @@ class NENodeGraph():
             # Propagate Dirty Flag to Destination Attribute(s).
             self.__m_Pipeline.PropagateDirty( dest_attrib.ParentID() )
 
+            # Lock Destination Attribute
+            dest_attrib.SetEnable( False )
+
             return newConn
 
         except:
@@ -325,6 +328,8 @@ class NENodeGraph():
         
         conn = self.__m_IDMap[ conn_id ]
 
+        print( 'NENodeGraph::RemoveConnectionByID()...', conn.Source().FullKey(), ' <---> ', conn.Destination().FullKey() )
+
         source_attrib = conn.Source()
         dest_attrib = conn.Destination()
 
@@ -347,13 +352,12 @@ class NENodeGraph():
         for conn_id, conn in dest_attrib.Connections().items():
             print( conn_id, ':', conn.Source().FullKey(), ' <---> ', conn.Destination().FullKey() )
         print('------------------------------------')
-
-        dest_attrib_id = ( dest_attrib.ParentID(), dest_attrib.ID() ) if not dest_attrib.HasConnections() else None
         
         # Propagate Dirty Flag to Destination Attribute(s).
         self.__m_Pipeline.PropagateDirty( dest_attrib.ParentID() )
 
-        return dest_attrib_id
+        if( dest_attrib.HasConnections()==False ):
+            dest_attrib.SetEnable(True)
 
 
 
@@ -711,6 +715,42 @@ class NENodeGraph():
 
 
 
+    def ActivateSymbolicLinkByID2( self, group_id, attrib_id, symboliclink_idset, slot_index=-1 ):
+        try:
+            print( 'NENodeGraph::ActivateSymbolicLinkByID()...' )
+
+            attrib = self.GetAttributeByID( attrib_id )
+            #if( attrib==None ):
+            #    return None
+            print( '    ', group_id, attrib.ParentSpace().ID() )
+
+            # Create SymbolicLink
+            parent = self.__m_IDMap[ attrib.ParentSpace().ID() ]
+            symboliclink = self.__AddSymbolicLinkToScene( parent, attrib.GetDesc(), attrib.Value(), attrib.Key(), symboliclink_idset )
+            parent.BindSymbolicLink( symboliclink, slot_index )
+            
+            # Allocate DataBlock
+            dataBuffer = self.__m_Pipeline.AllocateDataBlock( symboliclink.GetDesc() )
+        
+            for attrib in symboliclink.InputAttributes().values():
+                data = dataBuffer.Inputs()[ attrib.ID() ]
+                attrib.BindData(data)
+
+            for attrib in symboliclink.OutputAttributes().values():
+                data = dataBuffer.Outputs()[ attrib.ID() ]
+                attrib.BindData(data)
+           
+            # Register Compute Func
+            self.__m_Pipeline.RegisterComputeFunc( symboliclink.ID(), None )
+
+            return symboliclink
+
+        except:
+            traceback.print_exc()
+            return None
+
+
+
     def DeactivateSymbolicLinkByID( self, symboliclink_id ):
         try:
             symboliclink = self.GetObjectByID( symboliclink_id, (NESymbolicLink,) )
@@ -906,7 +946,6 @@ class NENodeGraph():
 
 
 
-
     def GetConnectInfo( self, attrib1_id, attrib2_id ):
         
         print( 'NENodeGraph::GetConnectInfo()...' )
@@ -932,12 +971,14 @@ class NENodeGraph():
         if( srcParent==destParent ):
             print( '    Need to AddConnection: %s <---> %s' % (src_attrib.FullKey(), dest_attrib.FullKey()) )
 
-        # sourceがdestよりも一つ上の階層の場合は、コネクションと入力シンボリックリンクを生成する
+        # sourceがdestよりも一つ上の階層の場合は、destをシンボリックリンク化してsourceと接続する
+# TODO: destが既にシンボリックリンク化済みかどうかチェックする
         elif( srcParent == destParent.Parent() ):
             symlink_info = ( destParent.ID(), dest_attrib.GetDesc(), dest_attrib.Value(), dest_attrib.Key() )
             print( '    Need to Symbolize: %s' % dest_attrib.FullKey() )
 
-        # destがsourceよりも一つ上の階層の場合は、コネクションと出力シンボリックリンクを生成する
+        # destがsourceよりも一つ上の階層の場合は、sourceをシンボリックリンクを通してdestと接続する
+# TODO: sourceが既にシンボリックリンク化済みかどうかをチェックする
         elif( srcParent.Parent() == destParent ):
             symlink_info = ( srcParent.ID(), src_attrib.GetDesc(), src_attrib.Value(), src_attrib.Key() )
             print( '    Need to Symbolize: %s' % src_attrib.FullKey() )
@@ -949,15 +990,12 @@ class NENodeGraph():
         return src_attrib.AttributeID(), dest_attrib.AttributeID(), disconnect_info, symlink_info
 
 
-#TODO: コネクションの分類が必要.
-#TODO: 親空間移動で
-#TODO: シンボリックリンク経由のコネクション
 
     def CollectConnections( self, obj_id_list, parent_id ):
         try:
             typefilter = (NENodeObject, NEGroupObject,)
             obj_list = [ self.__m_IDMap[object_id] for object_id in obj_id_list if type(self.__m_IDMap[object_id]) in typefilter ]
-            grand_parent_id = self.__m_IDMap[parent_id].ParentID()
+            grand_parent_id = self.__m_IDMap[parent_id].ParentID()# シンボリックリンク生成可能な親空間 
 
             # Gather all connections relevant to obj_id_list
             conn_dict = {}
@@ -968,8 +1006,10 @@ class NENodeGraph():
             # Divide to open/closed category
             closed_conn_ids = []# connections between obj_id_list nodes
             open_attrib_info = defaultdict(list)# connection from external. attrib_in_ids[ exernal_attrib_id ] = [ (conn_id, internal_attrib_id), ... ]
-            removal_conn_info = []# connection to be removed( by parenting ) 
+            in_attrib_info = defaultdict(list) # input attributes connected to external nodes. attrib_in_ids[ internal_attrib_id ] = [ (conn_id, external_attrib_id), ... ]
+            out_attrib_info = defaultdict(list) # output attributes connected to external nodes. attrib_in_ids[ exernal_attrib_id ] = [ (conn_id, internal_attrib_id), ... ]
 
+            removal_conn_info = []# connection to be removed while paranting operation.
 
             for conn_id, conn in conn_dict.items():
                 src_is_internal = conn.Source().ParentNode().ID() in obj_id_list
@@ -981,15 +1021,19 @@ class NENodeGraph():
 
                 elif( conn.ParentID()==grand_parent_id ):
                     if( dst_is_internal ):# only dest attribute exists in obj_id_list -> input connection from external space
+                        in_attrib_info[ conn.DestinationAttribID() ].append( (conn_id, conn.SourceAttribID()) )
                         open_attrib_info[ conn.DestinationAttribID() ].append( (conn_id, conn.SourceAttribID()) )
+                        removal_conn_info.append( conn_id )
                     else:# only dest attribute exists in obj_id_list -> input connection from external space
+                        out_attrib_info[ conn.SourceAttribID() ].append( (conn_id, conn.DestinationAttribID()) )
                         open_attrib_info[ conn.SourceAttribID() ].append( (conn_id, conn.DestinationAttribID()) )
+                        removal_conn_info.append( conn_id )
 
                 else:
                     removal_conn_info.append( conn_id )
 
 
-            return closed_conn_ids, open_attrib_info, removal_conn_info
+            return closed_conn_ids, open_attrib_info, removal_conn_info, in_attrib_info, out_attrib_info
 
         except:
             traceback.print_exc()

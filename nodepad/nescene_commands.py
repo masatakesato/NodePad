@@ -475,6 +475,34 @@ class CreateSymbolicLinkCommand(CommandBase):
 
         
 
+class CreateSymbolicLinkCommand2(CommandBase):
+
+    def __init__( self, neScene, group_id, attrib_id, symboliclink_idset, slot_index ):
+        super(CreateSymbolicLinkCommand2, self).__init__()
+
+        self.__m_refNEScene = neScene
+        self.__m_Snapshot = None
+        
+        self.__m_GroupID = group_id
+        self.__m_AttribID = attrib_id
+        self.__m_ObjectIDSet = symboliclink_idset
+        self.__m_SlotIndex = slot_index
+
+
+    def execute( self ):
+        self.__m_Snapshot = self.__m_refNEScene.CreateSymbolicLink_Operation2( self.__m_GroupID, self.__m_AttribID, self.__m_ObjectIDSet, self.__m_SlotIndex ).GetSnapshot()
+        
+    def undo( self ):
+        print( 'CreateSymbolicLinkCommand2::undo()...' )
+        self.__m_refNEScene.RemoveSymbolicLink_Operation( self.__m_Snapshot.ObjectID() )
+
+    def redo( self ):
+        print( 'CreateSymbolicLinkCommand2::redo()...' )
+        self.__m_refNEScene.CreateSymbolicLink_Operation2( self.__m_Snapshot.GroupID(), self.__m_AttribID, self.__m_Snapshot.ObjectIDSet(), self.__m_Snapshot.SlotIntex() )
+
+
+
+
 class RemoveSymbolicLinkCommand(CommandBase):
 
     def __init__( self, neScene, object_id ):

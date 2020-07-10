@@ -388,8 +388,8 @@ def Compute( self, dataBlock ):
         # Create Connection in NodeGraph
         newConn = self.__m_NodeGraph.AddConnectionByID( attrib1_id, attrib2_id, object_id )
         
-        # Set Attribute's Lock/Unlock state in NodeGraph
-        self.__m_NodeGraph.LockAttributeByID( newConn.DestinationAttribID(), False )
+        # AddConnectionByID() deals with this process. Set Attribute's Lock/Unlock state in NodeGraph
+        #self.__m_NodeGraph.LockAttributeByID( newConn.DestinationAttribID(), False )
         
         # Create Connection in GraphicsScene
         #self.__m_Scene.Connect_Exec( newConn.Key(), newConn.ID(), newConn.SourceAttribID(), newConn.DestinationAttribID(), newConn.ParentID() )
@@ -403,11 +403,7 @@ def Compute( self, dataBlock ):
 
     def Disconnect_Operation( self, conn_id ):
         # Disconnect in NodeGraph
-        dest_attrib_id = self.__m_NodeGraph.RemoveConnectionByID( conn_id )
-
-        # Set Attribute's Lock/Unlock state in NodeGraph
-        #self.__m_NodeGraph.LockAttributeByID( dest_attrib_id, True )
-        self.LockAttribute_Operation( dest_attrib_id, True )
+        self.__m_NodeGraph.RemoveConnectionByID( conn_id )
 
         # Disconnect in GraphicsScene
         #self.__m_Scene.Disconnect_Exec( conn_id )
@@ -552,6 +548,21 @@ def Compute( self, dataBlock ):
         #self.__UpdateAttributeEditor()
 
         return symboliclink
+
+
+
+    def CreateSymbolicLink_Operation2( self, group_id, attrib_id, symboliclink_idset=(None,None,None), slot_index=-1 ):
+        # Create Symboliclink in NodeGraph
+        symboliclink = self.__m_NodeGraph.ActivateSymbolicLinkByID2( group_id, attrib_id, symboliclink_idset, slot_index )
+        
+        # Create Symboliclink in GraphicsScene
+        #self.__m_Scene.ActivateSymbolicLink_Exec( symboliclink.ParentID(), symboliclink.Key(), symboliclink.GetDesc(), symboliclink.SlotIndex() )# slot_index )
+        
+        # Update AttributeEditorWidget
+        #self.__UpdateAttributeEditor()
+
+        return symboliclink
+
 
 
     def RemoveSymbolicLink_Operation( self, symboliclink_id ):

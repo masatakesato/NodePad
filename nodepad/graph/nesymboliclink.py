@@ -283,23 +283,23 @@ class NESymbolicLinkSnapshot():
 
 
 
-    def InputID( self ):
-        return self.__m_NodeArgs[1][1]
+    #def InputID( self ):
+    #    return self.__m_NodeArgs[1][1]
 
 
 
-    def OutputID( self ):
-        return self.__m_NodeArgs[1][2]
+    #def OutputID( self ):
+    #    return self.__m_NodeArgs[1][2]
 
 
 
-    #def ProtectedAttribID( self ):
-    #    return (self.__m_AttribArgs[0][0:2])
+    def ProtectedAttribID( self ):
+        return (self.__m_AttribArgs[0][0:2])
         
 
 
-    #def ExposedAttribID( self ):
-    #    return (self.__m_AttribArgs[1][0:2])
+    def ExposedAttribID( self ):
+        return (self.__m_AttribArgs[1][0:2])
 
 
 
