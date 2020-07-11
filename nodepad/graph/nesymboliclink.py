@@ -148,9 +148,11 @@ class NESymbolicLink(NEGraphObject):
 
     def RenameAttribute( self, newkey ):
         try:
+            # Udpdate self key
             self.SetKey( newkey )
-            self.__m_Attributes[ self.__m_ExposedID ].GetDesc().SetName( newkey )
-            self.__m_Attributes[ self.__m_ProtectedID ].GetDesc().SetName( newkey )      
+            # Sey newkey to Exposed/Proceted Atttibutes
+            for attrib in self.__m_Attributes.values():
+                attrib.SetKey( newkey )  
             return True
 
         except:
@@ -164,6 +166,7 @@ class NESymbolicLink(NEGraphObject):
         attrib = NEAttributeObject( attribDesc, attr_id, self.ID() )
         attrib.SetParent( self, False )
 
+        #print( 'NESymbolicLink::__AddAttribute()......... attribDesc.Name():', attribDesc.Name() )
         self.__m_Attributes[ attrib.ID() ] = attrib
         self.__m_KeyMap[ self.__key[ attribDesc.AttributeType() ] ] = attrib.ID()
         self.__m_LayoutDesc.AddAttribDesc( attrib.GetDesc() )

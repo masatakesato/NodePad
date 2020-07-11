@@ -25,6 +25,7 @@ class NEGroupIOObject(NEGraphObject):
         self.__m_SymbolicLinkArray = NEObjectArray()# key: uuid/name/index, value: NESymbolicLink
 
 
+
     def Release( self ):
         for linknode in self.__m_SymbolicLinkArray.values(): linknode.Release()
         self.__m_SymbolicLinkArray.clear()
@@ -32,22 +33,27 @@ class NEGroupIOObject(NEGraphObject):
         super(NEGroupIOObject, self).Release()
 
 
+
     #def HasAttribute( self, attr_id ):
     #    return len(self.__m_SymbolicLinkArray) > 0
+
 
 
     def NumAttributes( self ):
         return len(self.__m_refAttributes)
 
 
+
     def Attributes( self ):
-        return self.__m_refAttributes 
+        return self.__m_refAttributes
+
 
     
     def Attribute( self, query ):
         if( query in self.__m_SymbolicLinkArray ):
             return self.__m_SymbolicLinkArray[ query ].ExposedAttribute()
         return None
+
 
 
     def RenameAttribute( self, attr_id, newkey ):
@@ -62,12 +68,15 @@ class NEGroupIOObject(NEGraphObject):
         return True
 
 
+
     def DataFlow( self ):
         return self.__m_DataFlow
 
 
+
     def GetDesc( self ):
         return  self.__m_Desc
+
 
 
     def FullKey( self, suffix='' ):
@@ -77,8 +86,10 @@ class NEGroupIOObject(NEGraphObject):
             return self._NEObject__m_Key + suffix
 
 
+
     def NumSymbolicLinks( self ):
         return len(self.__m_SymbolicLinkArray)
+
 
 
     def SymbolicLink( self, query ):
@@ -89,8 +100,10 @@ class NEGroupIOObject(NEGraphObject):
             return None
 
 
+
     def SymbolicLinks( self ):
         return self.__m_SymbolicLinkArray
+
 
 
     # シンボリックリンクが既に存在するかどうかチェック
@@ -99,6 +112,7 @@ class NEGroupIOObject(NEGraphObject):
             if( attrib.AttributeID() in linknode.ProtectedAttribute().GetConnectedAttributeIDs() ):
                 return True
         return False
+
 
 
     def BindSymbolicLink( self, refSymbolicLink, reserved_slot_index=-1 ):
@@ -121,6 +135,7 @@ class NEGroupIOObject(NEGraphObject):
             #print( i, self.__m_SymbolicLinkArray[i].SlotIndex() )
 
 
+
     def UnbindSymbolicLink( self, refSymbolicLink ):
         
         refAttrib = refSymbolicLink.ExposedAttribute()
@@ -141,10 +156,12 @@ class NEGroupIOObject(NEGraphObject):
             #print( i, self.__m_SymbolicLinkArray[i].SlotIndex() )
 
 
+
     def UnbindAllSymbolicLinks( self ):
-        keys = set(self.__m_SymbolicLinkArray.keys())
+        keys = set( self.__m_SymbolicLinkArray.keys() )
         for k in keys:
-            self.UnbindSymbolicLink(self.__m_SymbolicLinkArray[k])
+            self.UnbindSymbolicLink( self.__m_SymbolicLinkArray[k] )
+
 
 
     def SetSymbolicLinkSlotIndex( self, src_idx, dst_idx ):
@@ -161,6 +178,7 @@ class NEGroupIOObject(NEGraphObject):
         self.__m_LayoutDesc.ChangeOrder( src_idx, dst_idx, self.__m_SymbolicLinkArray[ dst_idx ].ExposedAttribute().DataFlow() )
 
 
+
     def Info( self ):
         print( '//------------- GroupIO: ' + self.FullKey() + ' -------------//' )
         self.__m_SymbolicLinkArray.Info()
@@ -168,13 +186,17 @@ class NEGroupIOObject(NEGraphObject):
         #    print( '    ' + attrib.Key() )
 
 
+
     def GetSnapshot( self ):
         return NEGroupIOSnapshot( self )
+
 
 
     def SetKey( self, key ):
         print( 'Rename forbidden...' )
         return False
+
+
 
 
 class NEGroupIOSnapshot():
@@ -183,24 +205,30 @@ class NEGroupIOSnapshot():
         self.__m_NodeArgs = (refObj.ObjectType(), refObj.GetPosition(), refObj.ID(), refObj.Key(), refObj.ParentID(), refObj.DataFlow() )
 
 
+
     def ObjectType( self ):
         return self.__m_NodeArgs[0]
+
 
 
     def Translation( self ):
         return self.__m_NodeArgs[1]
 
 
+
     def ObjectID( self ):
         return self.__m_NodeArgs[2]
+
 
 
     def Key( self ):
         return self.__m_NodeArgs[3]
 
 
+
     def ParentID( self ):
         return self.__m_NodeArgs[4]
+
 
 
     def DataFlow( self ):

@@ -326,7 +326,7 @@ class NESceneExt(NESceneBase):
             if( desc==None ):
                 return False
 
-            print( 'NESceneExt::__UpdateAttributeEditor()...', obj.FullKey() )
+            #print( 'NESceneExt::__UpdateAttributeEditor()...', obj.FullKey() )
 
             self.__m_AttributeEditor.DeinitializeWidget()
 

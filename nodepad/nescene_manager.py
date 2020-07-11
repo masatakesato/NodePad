@@ -63,8 +63,6 @@ class NESceneManager:
             'CheckSymbolizeByID': self.CheckSymbolizeByID,
 
             'CreateGroup': self.CreateGroup_Exec,# TODO: 試験実装.
-            #'CreateGroupIOByID': CreateGroupIOByID_Exec, # 非公開
-            #'RemoveGroupIOByID': RemoveGroupIOByID_Exec, # 非公開
 
             'EditGroupByID': self.EditGroupByID, # Open node edit window for group
         }
@@ -470,7 +468,6 @@ class NESceneManager:
             print( '    Aborting: No valid objects specified.' )
             return False
 
-
         parent_id = self.__m_refNEScene.GetParentID( group_id )# get parent space id after ungrouping
         symboliclink_id_list = self.__m_refNEScene.GetSymboliclinkIDs( group_id )# gather symboliclink ids
 
@@ -484,29 +481,29 @@ class NESceneManager:
             self.__m_CommandManager.executeCmd( RenameCommand( self.__m_refNEScene, obj_id, newname ) )
 
         # Unparent child Nodes/Groups. Relevant Connections are also removed.
-        # print( '#==================== Unparent Child Nodes/Groups ====================#' )
+        # print( '#==================== Unparent child Nodes/Groups ====================#' )
         connection_ids, object_ids = self.__m_refNEScene.GetGroupMemberIDs( group_id )
         self.ParentByID_Exec( object_ids, parent_id, terminate=False )
 
-        # Restore connections
-        #print( '#==================== Restore connections ====================#' )
-        for attrib_ids in conn_info_restore:
-            self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, attrib_ids, None ) )
-
-        # Remove SymbolicLinks and their direct connections
-        #print( '#====================== Remove SymbolicLinks and their direct connections ======================#' )
-        symboliclink_id_list = self.__m_refNEScene.GetSymboliclinkIDs( group_id )
+        # Remove SymbolicLinks and their direct Connections
+        #print( '#================ Remove SymbolicLinks and their direct Connections ===============#' )
         for symboliclink_id in symboliclink_id_list:
             self.RemoveSymbolicLinkByID_Exec( symboliclink_id, terminate=False )
 
         # Remove GroupIOs
         #print( '#============================== Remove GroupIO ====================================#' )
-        self.RemoveGroupIOByID_Exec( group_id, terminate=False )
+        groupio_ids = self.__m_refNEScene.GetGroupIOIDs( group_id )
+        for gio_id in groupio_ids:
+            self.__m_CommandManager.executeCmd( RemoveGroupIOCommand( self.__m_refNEScene, gio_id ) )
 
         # Remove Group
         #print( '#============================== Remove Group ====================================#' )
         self.__m_CommandManager.executeCmd( RemoveGroupCommand( self.__m_refNEScene, group_id ) )
-        
+
+        # Restore Connections of unparented Node/Groups
+        #print( '#================= Restore Connections of unparented Node/Groups ================#' )
+        for attrib_ids in conn_info_restore:
+            self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, attrib_ids, None ) )
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -518,18 +515,17 @@ class NESceneManager:
     def CreateGroup_Exec( self, parent_id, *, pos=(0,0), size=None, name=None, object_id=None, groupio_ids=(None, None), terminate=True ):
 
         # Group Createion Command
-        command = self.__m_CommandManager.executeCmd( CreateGroupCommand( self.__m_refNEScene, pos, size, name, parent_id, object_id ) )
-        group_id = command._CreateGroupCommand__m_Snapshot.ObjectID()
+        group_id = self.__m_CommandManager.executeCmd( CreateGroupCommand( self.__m_refNEScene, pos, size, name, parent_id, object_id ) )._CreateGroupCommand__m_Snapshot.ObjectID()
 
         # GroupIO Creation Command
-        groupio_pos = ( (-150, 0), (150, 0) )# Generate GroupIOs' default position
-        groupin_id = self.CreateGroupIOByID_Exec( DataFlow.Input, groupio_pos[0], group_id, object_id=groupio_ids[0], terminate=False )
-        groupout_id = self.CreateGroupIOByID_Exec( DataFlow.Output, groupio_pos[1], group_id, object_id=groupio_ids[1], terminate=False )
+        group_io_pos = ( (-150, 0), (150, 0) )# Generate GroupIOs' default position
+        group_in_id = self.__m_CommandManager.executeCmd( CreateGroupIOCommand( self.__m_refNEScene, DataFlow.Input, group_io_pos[0], groupio_ids[0], group_id ) )._CreateGroupIOCommand__m_Snapshot.ObjectID()
+        group_out_id = self.__m_CommandManager.executeCmd( CreateGroupIOCommand( self.__m_refNEScene, DataFlow.Output, group_io_pos[1], groupio_ids[1], group_id ) )._CreateGroupIOCommand__m_Snapshot.ObjectID()
         
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
 
-        return group_id, groupin_id, groupout_id
+        return group_id, group_in_id, group_out_id
 
 
 
@@ -641,33 +637,6 @@ class NESceneManager:
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
 
         return True
-
-
-
-    def CreateGroupIOByID_Exec( self, dataflow, pos, group_id, *, object_id=None, terminate=False ):
-        
-        print( 'NESceneManager::CreateGroupIOByID_Exec()...' )
-        
-        command = self.__m_CommandManager.executeCmd( CreateGroupIOCommand( self.__m_refNEScene, dataflow, pos, object_id, group_id ) )
-        groupio_id = command._CreateGroupIOCommand__m_Snapshot.ObjectID()
-
-        # Terminate command sequence
-        if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
-
-        return groupio_id
-
-
-
-    def RemoveGroupIOByID_Exec( self, group_id, terminate=False ):
-
-        print( 'NESceneManager::RemoveGroupIOByID_Exec()...' )
-                
-        gio_ids = self.__m_refNEScene.GetGroupIOIDs( group_id )
-        for gio_id in gio_ids:
-            self.__m_CommandManager.executeCmd( RemoveGroupIOCommand( self.__m_refNEScene, gio_id ) )
-
-        # Terminate command sequence
-        if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
 
 
 
@@ -949,7 +918,6 @@ class NESceneManager:
                 value = snapshot.Value()
                 #name=snapshot.Key()
                 self.CreateSymbolicLinkByDesc_Exec( group_id, attribdesc, value, str(newObjectIDSet[0]), symboliclink_idset=newObjectIDSet, slot_index=snapshot.SlotIntex(), terminate=False )
-                #self.__CreateSymbolicLinkFromDescByID_Exec( group_id, attribdesc, value, name=str(newObjectIDSet[0]), symboliclink_idset=newObjectIDSet, slot_index=snapshot.SlotIntex(), terminate=False )
                 for attribArg in snapshot.AttribArgs():
                     self.SetAttributeByID_Exec( (refObjIDs[attribArg[0]], refObjIDs[attribArg[1]]), attribArg[2], terminate=False )
 

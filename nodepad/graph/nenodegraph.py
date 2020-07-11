@@ -164,6 +164,7 @@ class NENodeGraph():
         return self.__m_Root.ID()
 
 
+
     #########################################################################
     #               Object Create/Delete Operation(public func)             #
     #########################################################################
@@ -669,7 +670,7 @@ class NENodeGraph():
 
 
     def ParentByID( self, object_id, parent_id ):
-        # print( 'NENodeGraph::ParentByID()...' )
+        
         try:
             print('NENodeGraph::ParentByID()...Parenting %s to %s' % (self.__m_IDMap[object_id].Key(), self.__m_IDMap[parent_id].Key()) )
 
@@ -692,9 +693,9 @@ class NENodeGraph():
 
 
     def ActivateSymbolicLinkByID( self, group_id, attribdesc, value, name, symboliclink_idset, slot_index=-1 ):
-        # print( 'NENodeGraph::ActivateSymbolicLinkByID()...' )
+
         try:
-            print( 'NENodeGraph::ActivateSymbolicLinkByID()...' )
+            #print( 'NENodeGraph::ActivateSymbolicLinkByID()...' )
 
             # Create SymbolicLink
             parent = self.__m_IDMap[ group_id ]
