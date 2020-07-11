@@ -573,17 +573,14 @@ class NESceneManager:
             return False
 
         # Collect attribute's exsiting connections (for symboliclink bypassing)
-        attrib = self.__m_refNEScene.GetAttribute( attrib_id )
-        group_id = attrib.ParentNode().ParentID()
-
-        # Create SymbolicLink( and ProtectedAttribute's Connection )
-        #command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand( self.__m_refNEScene, group_id, attrib.GetDesc(), attrib.Value(), attrib.Key(), symboliclink_idset, slot_index ) )
-        #symboliclink = self.__m_refNEScene.GetObjectByID( command._CreateSymbolicLinkCommand__m_Snapshot.ObjectID(), (NESymbolicLink,) )
-        command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand2( self.__m_refNEScene, group_id, attrib_id, symboliclink_idset, slot_index ) )
-        symboliclink = self.__m_refNEScene.GetObjectByID( command._CreateSymbolicLinkCommand2__m_Snapshot.ObjectID(), (NESymbolicLink,) )
+        parentid, desc, value, name = self.__m_refNEScene.GetSymbolocLinkInitialParams( attrib_id )
         
+        # Create SymbolicLink( and ProtectedAttribute's Connection )
+        command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand( self.__m_refNEScene, parent_id, desc, value, name, symboliclink_idset, slot_index ) )
+        snapshot = command._CreateSymbolicLinkCommand__m_Snapshot
+
         # Create ProtectedAttribute Connection
-        self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (symboliclink.ProtectedAttribute().AttributeID(), attrib_id), conn_id ) )
+        self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (snapshot.ProtectedAttributeID(), attrib_id), conn_id ) )
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -592,14 +589,11 @@ class NESceneManager:
 
 
 
-    #def CreateSymbolicLinkByID2_Exec( self, group_id, attrib_desc, value, name, *, symboliclink_idset=(None,None,None), slot_index=-1, terminate=True ):
-    def CreateSymbolicLinkByID2_Exec( self, group_id, attrib_id, *, symboliclink_idset=(None,None,None), slot_index=-1, terminate=True ):
-
+    def CreateSymbolicLinkByDesc_Exec( self, group_id, attrib_desc, value, name, *, symboliclink_idset=(None,None,None), slot_index=-1, terminate=True ):
+  
         # Create SymbolicLink( and ProtectedAttribute's Connection )
-        #command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand( self.__m_refNEScene, group_id, attrib_desc, value, name, symboliclink_idset, slot_index ) )
-        #snapshot = command._CreateSymbolicLinkCommand__m_Snapshot
-        command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand2( self.__m_refNEScene, group_id, attrib_id, symboliclink_idset, slot_index ) )
-        snapshot = command._CreateSymbolicLinkCommand2__m_Snapshot
+        command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand( self.__m_refNEScene, group_id, attrib_desc, value, name, symboliclink_idset, slot_index ) )
+        snapshot = command._CreateSymbolicLinkCommand__m_Snapshot
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -619,18 +613,12 @@ class NESceneManager:
     def RemoveSymbolicLinkByID_Exec( self, symboliclink_id, *, terminate=True ):
         
         # Remove all connections
-        print( '#=================== RemoveSymbolicLinkByID_Exec::Remove all connections ====================#' )
-        conn_id_list = self.__m_refNEScene.GetConnectionIDs( symboliclink_id )
-
-        print( 'Connections to remove...' )
-        for conn_id in conn_id_list:
-            conn = self.__m_refNEScene.GetObjectByID( conn_id )
-            print( '  ', conn.Source().FullKey(), ' <---> ', conn.Destination().FullKey() )
+        #print( '#=================== RemoveSymbolicLinkByID_Exec::Remove all connections ====================#' )
+        for conn_id in self.__m_refNEScene.GetConnectionIDs( symboliclink_id ):
             self.__m_CommandManager.executeCmd( DisconnectCommand( self.__m_refNEScene, conn_id ) )
-            print('*********')
 
         # Remove SymbolicLink Node( and ProtectedAttribute's connection)
-        print( '#=================== Remove SymbolicLink Node( and ProtectedAttribute\'s connection) ====================#' )
+        #print( '#=================== Remove SymbolicLink Node( and ProtectedAttribute\'s connection) ====================#' )
         self.__m_CommandManager.executeCmd( RemoveSymbolicLinkCommand( self.__m_refNEScene, symboliclink_id ) )
         
         # Terminate command sequence
@@ -692,8 +680,8 @@ class NESceneManager:
     def DeleteByID_Exec( self, obj_id_list, *, terminate=True ):
         # dont need explicit filtering. obj_id_list loop identifies object types.
         #obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject, NEConnectionObject, NESymbolicLink), parent_id=None )
-
-        for obj_id in obj_id_list:
+        
+        for obj_id in obj_id_list:#sorted( set(obj_id_list), key=obj_id_list.index ):
             obj_type = self.__m_refNEScene.GetType( obj_id )
 
             if( obj_type==None ):
@@ -865,32 +853,30 @@ class NESceneManager:
             print( '    Aborting: No parentable objects selected.' )
             return False
 
-        closed_conn_ids, open_attrib_info, removal_conn_info, in_attrib_info, out_attrib_info = self.__m_refNEScene.CollectConnections( obj_id_list, parent_id )
+        closed_conn_ids, open_attrib_info, removal_conn_info = self.__m_refNEScene.CollectConnections( obj_id_list, parent_id )
         
         #print( '#=================== Remove inter-group connections =================#' )
         for conn_id in removal_conn_info:
             self.__m_CommandManager.executeCmd( DisconnectCommand( self.__m_refNEScene, conn_id ) )
 
-        # Change Parent of Nodes/Groups
+        # Change Parent of Nodes/Groups and Connections
         for object_id in obj_id_list:
             self.__m_CommandManager.executeCmd( ParentCommand( self.__m_refNEScene, object_id, parent_id ) )
 
-        # Change Parent of Closed Connections
         for conn_id in closed_conn_ids:
             self.__m_CommandManager.executeCmd( ParentCommand( self.__m_refNEScene, conn_id, parent_id ) )
 
-        #=================== グループへの入力コネクション用シンボリックリンクを作成する ===============================#
+        # Create SymbolicLinks and Connections
         for attrib_id_internal, conn_info in open_attrib_info.items():
             # Create SymbolicLink
-            #attrib = self.__m_refNEScene.GetAttribute( attrib_id_internal )
-            #attrib_id_protected, attrib_id_exposed = self.CreateSymbolicLinkByID2_Exec( parent_id, attrib.GetDesc(), attrib.Value(), attrib.Key(), symboliclink_idset=(None,None,None), terminate=False )
-            attrib_id_protected, attrib_id_exposed = self.CreateSymbolicLinkByID2_Exec( parent_id, attrib_id_internal, symboliclink_idset=(None,None,None), terminate=False )
-            
+            _, desc, value, name = self.__m_refNEScene.GetSymbolocLinkInitialParams( attrib_id_internal )
+            symlink_id_protected, symlink_id_exposed = self.CreateSymbolicLinkByDesc_Exec( parent_id, desc, value, name, symboliclink_idset=(None,None,None), terminate=False )
+
             for _, attrib_id_external in conn_info:
                 # Connect external attrib and exposed symboliclink attribute
-                self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (attrib_id_external, attrib_id_exposed), None ) )
+                self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (attrib_id_external, symlink_id_exposed), None ) )
                 # Connect protected symboliclink attribute and internal attribute
-                self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (attrib_id_protected, attrib_id_internal), None ) )
+                self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (symlink_id_protected, attrib_id_internal), None ) )
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -911,22 +897,6 @@ class NESceneManager:
 
     def EditGroupByID( self, *args, **kwargs ):
         self.__m_refEditGroupCallback( *args, **kwargs )
-
-
-
-    # Symboliclink creation method spedified to snapshot.
-    def __CreateSymbolicLinkFromDescByID_Exec( self, group_id, attirbdesc, value, *, name=None, symboliclink_idset=(None,None,None), slot_index=-1, terminate=True ):
-
-        if( self.__m_refNEScene.ObjectExists( group_id, (NEGroupObject,) )==False ):
-            return False
-
-        # Create SymbolicLink( and ProtectedAttribute's Connection )
-        self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand( self.__m_refNEScene, group_id, attirbdesc, value, name, symboliclink_idset, slot_index ) )
-        
-        # Terminate command sequence
-        if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
-        
-        return True
 
 
 
@@ -978,7 +948,8 @@ class NESceneManager:
                 attribdesc = snapshot.AttribDesc()
                 value = snapshot.Value()
                 #name=snapshot.Key()
-                self.__CreateSymbolicLinkFromDescByID_Exec( group_id, attribdesc, value, name=str(newObjectIDSet[0]), symboliclink_idset=newObjectIDSet, slot_index=snapshot.SlotIntex(), terminate=False )
+                self.CreateSymbolicLinkByDesc_Exec( group_id, attribdesc, value, str(newObjectIDSet[0]), symboliclink_idset=newObjectIDSet, slot_index=snapshot.SlotIntex(), terminate=False )
+                #self.__CreateSymbolicLinkFromDescByID_Exec( group_id, attribdesc, value, name=str(newObjectIDSet[0]), symboliclink_idset=newObjectIDSet, slot_index=snapshot.SlotIntex(), terminate=False )
                 for attribArg in snapshot.AttribArgs():
                     self.SetAttributeByID_Exec( (refObjIDs[attribArg[0]], refObjIDs[attribArg[1]]), attribArg[2], terminate=False )
 
@@ -1001,7 +972,7 @@ class NESceneManager:
             pos = snapshot.Translation()
             offsetflag = float( snapshot.ObjectID() in dest_space_children ) #float( snapshot.ObjectID() in snapshotCommand.SellectedIDs())
             newPos = ( pos[0] + offset[0] * offsetflag, pos[1] + offset[1] * offsetflag )# Slide Default position if object is selected 
-            self.TranslateByID_Exec( refObjIDs[snapshot.ObjectID()], newPos, relative=True, terminate=False )
+            self.TranslateByID_Exec( refObjIDs[snapshot.ObjectID()], newPos, relative=False, terminate=False )
 
 
         return duplicant_ids

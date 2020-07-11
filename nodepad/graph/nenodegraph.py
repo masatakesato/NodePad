@@ -520,11 +520,18 @@ class NENodeGraph():
 
 
 
-    def AttributeExisitsByID( self, attrib_id ):
+    def GetSymbolocLinkInitialParams( self, attrib_id ):
         try:
-            return self.__m_IDMap[ attrib_id[0] ].AttributeExistsByID( attrib_id[1] )
+            attrib = self.GetAttributeByID( attrib_id )
+            if( attrib==None ):
+                return None
+
+            return attrib.ParentNode().ParentID(), attrib.GetDesc(), attrib.Value(), attrib.Key()
+
+
         except:
-            return False
+            traceback.print_exc()
+            return None
 
 
 
@@ -603,11 +610,7 @@ class NENodeGraph():
 
 
     def GetObjectTypeByID( self, obj_id ):
-        try:
-            return type(self.__m_IDMap[ obj_id ])
-        except:
-            traceback.print_exc()
-            return None
+        return type(self.__m_IDMap[ obj_id ]) if obj_id in self.__m_IDMap else None
 
 
 
@@ -691,45 +694,11 @@ class NENodeGraph():
     def ActivateSymbolicLinkByID( self, group_id, attribdesc, value, name, symboliclink_idset, slot_index=-1 ):
         # print( 'NENodeGraph::ActivateSymbolicLinkByID()...' )
         try:
+            print( 'NENodeGraph::ActivateSymbolicLinkByID()...' )
+
             # Create SymbolicLink
             parent = self.__m_IDMap[ group_id ]
             symboliclink = self.__AddSymbolicLinkToScene( parent, attribdesc, value, name, symboliclink_idset )
-            parent.BindSymbolicLink( symboliclink, slot_index )
-            
-            # Allocate DataBlock
-            dataBuffer = self.__m_Pipeline.AllocateDataBlock( symboliclink.GetDesc() )
-        
-            for attrib in symboliclink.InputAttributes().values():
-                data = dataBuffer.Inputs()[ attrib.ID() ]
-                attrib.BindData(data)
-
-            for attrib in symboliclink.OutputAttributes().values():
-                data = dataBuffer.Outputs()[ attrib.ID() ]
-                attrib.BindData(data)
-           
-            # Register Compute Func
-            self.__m_Pipeline.RegisterComputeFunc( symboliclink.ID(), None )
-
-            return symboliclink
-
-        except:
-            traceback.print_exc()
-            return None
-
-
-
-    def ActivateSymbolicLinkByID2( self, group_id, attrib_id, symboliclink_idset, slot_index=-1 ):
-        try:
-            print( 'NENodeGraph::ActivateSymbolicLinkByID()...' )
-
-            attrib = self.GetAttributeByID( attrib_id )
-            #if( attrib==None ):
-            #    return None
-            print( '    ', group_id, attrib.ParentSpace().ID() )
-
-            # Create SymbolicLink
-            parent = self.__m_IDMap[ attrib.ParentNode().ParentID() ]
-            symboliclink = self.__AddSymbolicLinkToScene( parent, attrib.GetDesc(), attrib.Value(), attrib.Key(), symboliclink_idset )
             parent.BindSymbolicLink( symboliclink, slot_index )
             
             # Allocate DataBlock
@@ -948,7 +917,7 @@ class NENodeGraph():
         return overlapped_conn_ids
 
 
-TODO: Refactor  in_attrib_info out_attrib_info open_attrib_info
+
     def CollectConnections( self, obj_id_list, parent_id ):
         try:
             typefilter = (NENodeObject, NEGroupObject,)
@@ -963,35 +932,28 @@ TODO: Refactor  in_attrib_info out_attrib_info open_attrib_info
 
             # Divide to open/closed category
             closed_conn_ids = []# connections between obj_id_list nodes
-            open_attrib_info = defaultdict(list)# connection from external. attrib_in_ids[ exernal_attrib_id ] = [ (conn_id, internal_attrib_id), ... ]
-            in_attrib_info = defaultdict(list) # input attributes connected to external nodes. attrib_in_ids[ internal_attrib_id ] = [ (conn_id, external_attrib_id), ... ]
-            out_attrib_info = defaultdict(list) # output attributes connected to external nodes. attrib_in_ids[ exernal_attrib_id ] = [ (conn_id, internal_attrib_id), ... ]
-
+            open_attrib_info = defaultdict(list)# connection from external. attrib_in_ids[ attrib_id to symbolize ] = [ (conn_id, internal_attrib_id), ... ]
             removal_conn_info = []# connection to be removed while paranting operation.
 
             for conn_id, conn in conn_dict.items():
                 src_is_internal = conn.Source().ParentNode().ID() in obj_id_list
                 dst_is_internal = conn.Destination().ParentNode().ID() in obj_id_list
-                #symlink_flag = ( conn.Source().ParentNode().ParentID()==grand_parent_id ) and ( conn.Destination().ParentNode().ParentID()==grand_parent_id )
-
+                
                 if( src_is_internal and dst_is_internal ):# both attributes exist in obj_id_list
                     closed_conn_ids.append( conn_id )
 
                 elif( conn.ParentID()==grand_parent_id ):
                     if( dst_is_internal ):# only dest attribute exists in obj_id_list -> input connection from external space
-                        in_attrib_info[ conn.DestinationAttribID() ].append( (conn_id, conn.SourceAttribID()) )
                         open_attrib_info[ conn.DestinationAttribID() ].append( (conn_id, conn.SourceAttribID()) )
                         removal_conn_info.append( conn_id )
                     else:# only dest attribute exists in obj_id_list -> input connection from external space
-                        out_attrib_info[ conn.SourceAttribID() ].append( (conn_id, conn.DestinationAttribID()) )
                         open_attrib_info[ conn.SourceAttribID() ].append( (conn_id, conn.DestinationAttribID()) )
                         removal_conn_info.append( conn_id )
 
                 else:
                     removal_conn_info.append( conn_id )
 
-
-            return closed_conn_ids, open_attrib_info, removal_conn_info, in_attrib_info, out_attrib_info
+            return closed_conn_ids, open_attrib_info, removal_conn_info
 
         except:
             traceback.print_exc()
@@ -1249,11 +1211,9 @@ TODO: Refactor  in_attrib_info out_attrib_info open_attrib_info
 
             while( curr_id != root_id ):
                 if( curr_id == ancestor_id ):
-                    print( 'True', self.__m_IDMap[ object_id ].Key() )
                     return True
                 curr_id = self.__m_IDMap[ curr_id ].ParentID()
 
-            print( 'False' )
             return False
 
         except:

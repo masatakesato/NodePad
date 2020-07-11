@@ -210,8 +210,9 @@ def Compute( self, dataBlock ):
 
 
 
-    def AttributeExisits( self, attrib_id ):
-        return self.__m_NodeGraph.AttributeExisitsByID( attrib_id )
+    # Gather attribute parameters for symboliclink generation
+    def GetSymbolocLinkInitialParams( self, attrib_id ):
+        return self.__m_NodeGraph.GetSymbolocLinkInitialParams( attrib_id )
 
 
 
@@ -535,23 +536,10 @@ def Compute( self, dataBlock ):
         return obj#prev_parent_id, new_pos
 
 
+
     def CreateSymbolicLink_Operation( self, group_id, attribdesc, value, name=None, symboliclink_idset=(None,None,None), slot_index=-1 ):
         # Create Symboliclink in NodeGraph
         symboliclink = self.__m_NodeGraph.ActivateSymbolicLinkByID( group_id, attribdesc, value, name, symboliclink_idset, slot_index )
-        
-        # Create Symboliclink in GraphicsScene
-        #self.__m_Scene.ActivateSymbolicLink_Exec( symboliclink.ParentID(), symboliclink.Key(), symboliclink.GetDesc(), symboliclink.SlotIndex() )# slot_index )
-        
-        # Update AttributeEditorWidget
-        #self.__UpdateAttributeEditor()
-
-        return symboliclink
-
-
-
-    def CreateSymbolicLink_Operation2( self, group_id, attrib_id, symboliclink_idset=(None,None,None), slot_index=-1 ):
-        # Create Symboliclink in NodeGraph
-        symboliclink = self.__m_NodeGraph.ActivateSymbolicLinkByID2( group_id, attrib_id, symboliclink_idset, slot_index )
         
         # Create Symboliclink in GraphicsScene
         #self.__m_Scene.ActivateSymbolicLink_Exec( symboliclink.ParentID(), symboliclink.Key(), symboliclink.GetDesc(), symboliclink.SlotIndex() )# slot_index )

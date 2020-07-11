@@ -327,7 +327,9 @@ class NEGroupObject(NEGraphObject):
 
 
     def Info( self ):
-        print( '//------------- Group: ' + self.FullKey() + ' -------------//' )
+
+        print( '//------------- Group Info: ' + self.FullKey() + ' -------------//' )
+
         if( self.Parent() ):
             print( 'Parent: %s' % self.Parent().Key() )
 
@@ -344,6 +346,9 @@ class NEGroupObject(NEGraphObject):
             print( 'Output SymbolicLinks:' )
             for v in self.__m_refGroupIOs[ DataFlow.Output ].SymbolicLinks().values():
                 print( '    %s' % v.Key() )
+
+        print( '//--------------------------------------------------------------//' )
+
 
 
     def GetSnapshot( self ):

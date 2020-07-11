@@ -127,6 +127,7 @@ class CreateNodeCommand(CommandBase):
 
 
 
+
 class RemoveNodeCommand(CommandBase):
 
     def __init__( self, neScene, object_id ):
@@ -150,6 +151,7 @@ class RemoveNodeCommand(CommandBase):
     def redo( self ):
         print( 'RemoveNodeCommand::redo()...' )
         self.__m_refNEScene.RemoveNode_Operation( self.__m_Snapshot.ObjectID() )
+
 
 
 
@@ -178,6 +180,7 @@ class ConnectCommand(CommandBase):
 
 
 
+
 class DisconnectCommand(CommandBase):
 
     def __init__( self, neScene, object_id ):
@@ -198,6 +201,7 @@ class DisconnectCommand(CommandBase):
     def redo( self ):
         print( 'DisconnectCommand::redo()...' )
         self.__m_refNEScene.Disconnect_Operation( self.__m_Snapshot.ObjectID() )
+
 
 
 
@@ -301,6 +305,7 @@ class SetAttributeCommand(CommandBase):
 
 
 
+
 class LockAttributeCommand(CommandBase):
 
     def __init__( self, neScene, attrib_id, state ):
@@ -322,6 +327,7 @@ class LockAttributeCommand(CommandBase):
     def redo( self ):
         print( 'LockAttributeCommand::redo()...' )
         self.__m_refNEScene.LockAttribute_Operation( self.__m_ObjectID, self.__m_NewState )
+
 
 
 
@@ -349,6 +355,7 @@ class RenameCommand(CommandBase):
 
 
 
+
 class RenameAttributeCommand(CommandBase):
 
     def __init__( self, neScene, object_id, new_name ):
@@ -370,6 +377,7 @@ class RenameAttributeCommand(CommandBase):
     def redo( self ):
         print( 'RenameAttributeCommand::redo()...' )
         self.__m_refNEScene.RenameAttribute_Operation( self.__m_ObjectID, self.__m_NewName )
+
 
 
 
@@ -398,6 +406,7 @@ class TranslateCommand(CommandBase):
 
 
 
+
 class SetVisibleCommand(CommandBase):
 
     def __init__( self, neScene, object_id, flag ):
@@ -419,6 +428,7 @@ class SetVisibleCommand(CommandBase):
     def redo( self ):
         print( 'SetVisibleCommand::redo()...' )
         self.__m_refNEScene.SetVisible_Operation( self.__m_ObjectID, self.__m_NewState )
+
 
 
 
@@ -473,33 +483,6 @@ class CreateSymbolicLinkCommand(CommandBase):
         print( 'CreateSymbolicLinkCommand::redo()...' )
         self.__m_refNEScene.CreateSymbolicLink_Operation( self.__m_Snapshot.GroupID(), self.__m_Snapshot.AttribDesc(), self.__m_Snapshot.Value(), self.__m_Snapshot.Key(), self.__m_Snapshot.ObjectIDSet(), self.__m_Snapshot.SlotIntex() )
 
-        
-
-class CreateSymbolicLinkCommand2(CommandBase):
-
-    def __init__( self, neScene, group_id, attrib_id, symboliclink_idset, slot_index ):
-        super(CreateSymbolicLinkCommand2, self).__init__()
-
-        self.__m_refNEScene = neScene
-        self.__m_Snapshot = None
-        
-        self.__m_GroupID = group_id
-        self.__m_AttribID = attrib_id
-        self.__m_ObjectIDSet = symboliclink_idset
-        self.__m_SlotIndex = slot_index
-
-
-    def execute( self ):
-        self.__m_Snapshot = self.__m_refNEScene.CreateSymbolicLink_Operation2( self.__m_GroupID, self.__m_AttribID, self.__m_ObjectIDSet, self.__m_SlotIndex ).GetSnapshot()
-        
-    def undo( self ):
-        print( 'CreateSymbolicLinkCommand2::undo()...' )
-        self.__m_refNEScene.RemoveSymbolicLink_Operation( self.__m_Snapshot.ObjectID() )
-
-    def redo( self ):
-        print( 'CreateSymbolicLinkCommand2::redo()...' )
-        self.__m_refNEScene.CreateSymbolicLink_Operation2( self.__m_Snapshot.GroupID(), self.__m_AttribID, self.__m_Snapshot.ObjectIDSet(), self.__m_Snapshot.SlotIntex() )
-
 
 
 
@@ -527,6 +510,7 @@ class RemoveSymbolicLinkCommand(CommandBase):
 
 
 
+
 class SetSymbolicLinkSlotIndexCommand(CommandBase):
 
     def __init__( self, neScene, object_id, slot_index ):
@@ -548,6 +532,7 @@ class SetSymbolicLinkSlotIndexCommand(CommandBase):
     def redo( self ):
         print( 'SetSymbolicLinkSlotIndexCommand::redo()...' )
         self.__m_refNEScene.SetSymbolicLinkSlotIndex_Operation( self.__m_ObjectID, self.__m_NewValue )
+
 
 
 
@@ -577,6 +562,7 @@ class CreateGroupIOCommand(CommandBase):
 
 
 
+
 class RemoveGroupIOCommand(CommandBase):
 
     def __init__( self, neScene, object_id ):
@@ -596,6 +582,7 @@ class RemoveGroupIOCommand(CommandBase):
     def redo( self ):
         print( 'RemoveGroupIOCommand::redo()...' )
         self.__m_refNEScene.RemoveGroupIO_Operation( self.__m_Snapshot.ObjectID() )
+
 
 
 
@@ -624,7 +611,6 @@ class SelectCommand():
 
 
 # TODO: 複数グループを跨いで選択したノード群をどうやってスナップショット化するか考える.
-
 class SnapshotCommand():
 
     def __init__( self ):
