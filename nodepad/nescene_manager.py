@@ -921,6 +921,9 @@ class NESceneManager:
                 for attribArg in snapshot.AttribArgs():
                     self.SetAttributeByID_Exec( (refObjIDs[attribArg[0]], refObjIDs[attribArg[1]]), attribArg[2], terminate=False )
 
+            elif( isinstance(snapshot, NEParentSnapshot) ):
+                print( 'TODO: NEParentSnapshot detected...' )
+
 
         # Assign actual name to Node, Group and Symboliclink if possible
         includetypes = ( NENodeSnapshot, NEGroupSnapshot, NESymbolicLinkSnapshot )
@@ -932,7 +935,7 @@ class NESceneManager:
 
 
         # Translate Duplicated Node/Groups to appropriate position.
-        excludetypes = ( NEConnectionSnapshot, NESymbolicLinkSnapshot )
+        excludetypes = ( NEConnectionSnapshot, NESymbolicLinkSnapshot, NEParentSnapshot )
         dest_space_children = self.__m_refNEScene.GetObjectByID( dest_space_id, (NERootObject, NEGroupObject,) ).Children()
         for snapshot in snapshotCommand.Snapshots():
             if( type(snapshot) in excludetypes ):

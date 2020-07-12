@@ -334,11 +334,6 @@ class NENodeGraph():
         source_attrib = conn.Source()
         dest_attrib = conn.Destination()
 
-        #print( '    --------------before:---------------')
-        #for conn_id, conn in dest_attrib.Connections().items():
-        #    print( '    ', conn_id, ':', conn.Source().FullKey(), ' <---> ', conn.Destination().FullKey() )
-        #print( '    ------------------------------------')
-
         # Remove connection from scene
         self.__RemoveConnectionFromScene( conn )
         
@@ -347,11 +342,6 @@ class NENodeGraph():
         dest_data = dest_attrib.Data()
         source_data.UnbindReference( dest_data )
         dest_data.UnbindReference( source_data )
-
-        #print('    --------------after:----------------')
-        #for conn_id, conn in dest_attrib.Connections().items():
-        #    print( '    ', conn_id, ':', conn.Source().FullKey(), ' <---> ', conn.Destination().FullKey() )
-        #print('    ------------------------------------')
         
         # Propagate Dirty Flag to Destination Attribute(s).
         self.__m_Pipeline.PropagateDirty( dest_attrib.ParentID() )
@@ -528,7 +518,6 @@ class NENodeGraph():
                 return None
 
             return attrib.ParentNode().ParentID(), attrib.GetDesc(), attrib.Value(), attrib.Key()
-
 
         except:
             traceback.print_exc()
@@ -1206,7 +1195,7 @@ class NENodeGraph():
     # check if ancestor_id is ancestor of object_id
     def IsAncestorOf( self, ancestor_id, object_id ):
         try:
-            print( 'NENodeGraph::IsAncestorOf()...' )
+            #print( 'NENodeGraph::IsAncestorOf()...' )
             root_id = self.__m_Root.ID()
             curr_id = self.__m_IDMap[ object_id ].ParentID()
 
@@ -1572,8 +1561,7 @@ class NENodeGraph():
                 if( curr_id in descendants[ parent_id ] ):# 既に登録済みの親子階層に到達した場合は終了.
                     break
                 descendants[ parent_id ].append( curr_id )
-                curr_id = parent_id
-                
+                curr_id = parent_id                
 
         for obj_id, child_ids in descendants.items():
             print( 'descendants[ \'%s\' ] = [ ' % (id_map[obj_id].Key()), end='' )

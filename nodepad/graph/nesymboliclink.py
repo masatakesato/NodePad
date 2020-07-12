@@ -313,7 +313,7 @@ class NESymbolicLinkSnapshot():
 
     def __CollectNodeArgs( self, refObj ):
 
-        object_id = refObj.ID()#refObj.IDSet()[0]
+        object_id = refObj.ID()
         
         # Node Creation params( source_attrib_id, position, object_id(self, and child attributes), name )
         self.__m_NodeArgs = ( refObj.GetPosition(), refObj.IDSet(), refObj.Key(), refObj.SlotIndex() )

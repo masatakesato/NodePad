@@ -6,7 +6,7 @@ from .history.commandbase import CommandBase
 
 from .graph.neconnectionobject import NEConnectionSnapshot
 from .graph.nenodeobject import NENodeObject, NENodeSnapshot
-from .graph.negroupobject import NEGroupObject, NEGroupSnapshot
+from .graph.negroupobject import NEGroupObject, NEGroupSnapshot, NEParentSnapshot
 from .graph.nesymboliclink import NESymbolicLinkSnapshot
 from .graph.negroupioobject import NEGroupIOSnapshot
 
@@ -642,7 +642,7 @@ class SnapshotCommand():
 
 
 ################################################################################################################
-# TODO: 複数親空間を跨ぐノード群選択時のスナップショット収集コード. 2020.01.30
+# TODO: 複数親空間を跨ぐノード群選択時のスナップショット収集コード.
 
         print('//===================== Initializing Snapshots(new version) ===================//' )
         snapshot_gen_list, descendants = neScene.NodeGraph().PrepareSnapshot( obj_id_list )
@@ -653,19 +653,19 @@ class SnapshotCommand():
             #refObj = neScene.GetObjectByID( obj_id )
 
             if( isinstance(refObj, NENodeObject) ):
-                print( 'CreateNodeByID_Exec()...%s' % refObj.Key() )
+                print( 'CreateNodeByID_Exec()...%s' % refObj.FullKey() )
                 self.__CollectCreateNodeArgs(refObj)
 
             elif( isinstance(refObj, NEGroupObject) ):
-                #print( 'CreateGroupByID_Exec()...%s' % refObj.Key() )
-                if( not descendants[ refObj.ID() ] ): # detected leaf group
-#TODO: Implement Partial descendant selection.
-                    self.__CollectGroupArgs( refObj )
+                print( 'CreateGroupByID_Exec()...%s' % refObj.FullKey() )
+                if( not descendants[ refObj.ID() ] ): # Include all children if NEGroupObject is leaf
+                    self.__CollectGroupArgsRecursive( refObj )
                 else:
                     self.__CollectCreateGroupArgs( refObj )
-                #for child_id in descendants[ refObj.ID() ]:
-                #    refChild = neScene.GetObjectByID( child_id )
-                #    print( '        ParentByID_Exec()...%s' % refChild.Key() )
+                    for child_id in descendants[ refObj.ID() ]:
+                        refChild = neScene.GetObjectByID( child_id )
+                        print( 'Append Parent Snapshot...%s' % refChild.FullKey() )
+                    self.__CollectParentingSnapshots( refObj, descendants[ refObj.ID() ] )
 
             self.__m_SelectedObjectIDs.add( refObj.ID() )
 
@@ -714,7 +714,7 @@ class SnapshotCommand():
         for attrib in refObj.Attributes().values():
             self.__m_ObjectIDs[attrib.ID()] = None
 
-        print( 'CreateNodeByID_Exec()...%s' % refObj.Key() )
+        print( 'Append Node Snapshot...%s' % refObj.FullKey() )
         self.__m_Snapshots.append( refObj.GetSnapshot() )# append NENodeSnapshot
 
 
@@ -734,7 +734,7 @@ class SnapshotCommand():
                     if( conn.Source().Parent() in obj_list ):
                         print( conn.ID() in self.__m_ObjectIDs )
                         self.__m_ObjectIDs[conn.ID()] = None
-                        print( 'ConnecteateByID_Exec()...%s' % conn.Key() )
+                        print( 'Append Connect Snapshot...%s' % conn.FullKey() )
                         self.__m_Snapshots.append( conn.GetSnapshot() )# append NEConnectionSnapshot
 
 
@@ -760,27 +760,32 @@ class SnapshotCommand():
 
     # Snapshot generation method for single NEGroupSnapshot. Does not deal with descendants.
     def __CollectCreateGroupArgs( self, refObj ):
-        # Reserve ObjectID slots
+        # Reserve ObjectID slot for NEGroupObject
         self.__m_ObjectIDs[refObj.ID()] = None
 
         # Append NEGroupSnapshot first.
         print( 'Append Group Snapshot...%s' % refObj.Key() )
         self.__m_Snapshots.append( refObj.GetSnapshot() )# append NEGroupSnapshot
+TODO: スナップショットに全子供ノードの情報が自動登録される.
+TODO: 部分選択した子ノードだけ残したい場合はどうする?
+TODO:    案1: NEGroupSnapshot作成時に、子供ノードを選択できるようにする？  一旦こちらで実装
+TODO:    案2: ParentSnapshotに処理委譲する？ 上記で成功したらこちらへ移行
 
-        print( refObj.GroupInput().ID() in self.__m_ObjectIDs, refObj.GroupOutput().ID() in  self.__m_ObjectIDs )
-        # Append NEGroupIOSnapshot for reoroducing GroupIO's position.
-        self.__m_ObjectIDs[ refObj.GroupInput().ID() ] = None# symboliclink id
-        self.__m_ObjectIDs[ refObj.GroupOutput().ID() ] = None# input attrib id
+        #print( refObj.GroupInput().ID() in self.__m_ObjectIDs, refObj.GroupOutput().ID() in  self.__m_ObjectIDs )
+        # Reserve ObjectID slots for NEGroupIOObjects
+        self.__m_ObjectIDs[ refObj.GroupInput().ID() ] = None# Input GroupIO
+        self.__m_ObjectIDs[ refObj.GroupOutput().ID() ] = None# Output GroupIO
         print( 'Append GroupIn Snapshot...%s' % refObj.GroupInput().Key() )
-        self.__m_Snapshots.append( refObj.GroupInput().GetSnapshot() )# append NEGroupIOSnapshot
+        self.__m_Snapshots.append( refObj.GroupInput().GetSnapshot() )# append GroupIn's snapshot
         print( 'Append GroupOut Snapshot...%s' % refObj.GroupOutput().Key() )
-        self.__m_Snapshots.append( refObj.GroupOutput().GetSnapshot() )# append NEGroupIOSnapshot
+        self.__m_Snapshots.append( refObj.GroupOutput().GetSnapshot() )# append GroupOut's snapshot
 
-        # Reserve ObjectID slots for symbolic links, and append NESymbolicLinkSnapshot.
+        # Append NESymbolicLinkSnapshot.
         for groupio in refObj.GroupIOs():
             for idx in range( groupio.NumSymbolicLinks() ):
                 symboliclink = groupio.SymbolicLink(idx)
                 id_set = symboliclink.IDSet()
+                # Reserve ObjectID slots for symboliclink and input/output attributes.
                 self.__m_ObjectIDs[id_set[0]] = None# symboliclink id
                 self.__m_ObjectIDs[id_set[1]] = None# input attrib id
                 self.__m_ObjectIDs[id_set[2]] = None# output attrib id
@@ -789,23 +794,24 @@ class SnapshotCommand():
 
 
 
-    # Snapshot generation method for NEGroupSnapshot and its all descendants.
-    def __CollectGroupArgs( self, refObj ):
-        self.__ConstructSnapshotTree( refObj )
-
-
-
-    def __ConstructSnapshotTree( self, obj ):
+    def __CollectGroupArgsRecursive( self, refObj ):
         
-        for child in obj.Children().values():
-            self.__ConstructSnapshotTree( child )
+        # Descend to child first
+        for child in refObj.Children().values():
+            self.__CollectGroupArgsRecursive( child )
+
+        # Append snapshot after reaching leaf node.
+        if( isinstance(refObj, NENodeObject) ):
+            self.__CollectCreateNodeArgs( refObj )
+
+        elif( isinstance(refObj, NEGroupObject) ):
+            self.__CollectCreateGroupArgs( refObj )
 
 
-        if( isinstance(obj, NENodeObject) ):
-            self.__CollectCreateNodeArgs( obj )
 
-        elif( isinstance(obj, NEGroupObject) ):
-            self.__CollectCreateGroupArgs( obj )
+    def __CollectParentingSnapshots( self, refObj, descendant_ids ):
+        children = [ child for child in refObj.Children().values() if child.ID() in descendant_ids ]
+        self.__m_Snapshots.append( NEParentSnapshot( refObj.ID(), children ) )# append GroupOut's snapshot
 
 
 
