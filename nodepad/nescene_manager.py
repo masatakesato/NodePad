@@ -416,13 +416,14 @@ class NESceneManager:
 
 
 
+# TODO: 既に階層関係を持ったノード/グループ同士の再グループ化ルールを決める
 # TODO: 選択ノード群が複数グループに跨る場合の処理方法を決める.
 # TODO: active_symboliclink_ids is not used. Deprecate?
     def GroupByID_Exec( self, obj_id_list, parent_id, *, pos=None, size=None, name=None, object_id=None, active_symboliclink_ids=None, groupio_ids=(None, None), align_groupios=True, terminate=True ):
 
         print( 'NESceneManager::GroupByID_Exec()...' )
 
-        obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject), parent_id=parent_id )
+        obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject), parent_id=None )#parent_id )
         if( not obj_id_list ):
             print( '    Aborting: No valid objects specified.' )
             return False
@@ -714,7 +715,7 @@ class NESceneManager:
 
         print( 'NESceneManager::CutByID_Exec()...' )
 
-        obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject), parent_id=parent_id )
+        obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject), parent_id=None )#parent_id )
         if( not obj_id_list ):
             print( '    Aborting: No valid objects specified.' )
             return
@@ -731,7 +732,7 @@ class NESceneManager:
 
         print( 'NESceneManager::CopyByID_Exec()...' )
 
-        obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject), parent_id=parent_id )
+        obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject), parent_id=None )#parent_id )
         if( not obj_id_list ):
             print( '    Aborting: No valid objects specified.' )
             return
@@ -1033,7 +1034,7 @@ class NESceneManager:
 # TODO: 複数グループを跨ぐノード群を、階層構造を維持したままエクスポートする方法を考える.
     def ExportSelection( self, filepath ):
         # 編集中グループ内のノードに限定してエクスポート
-        obj_id_list = self.__m_refNEScene.FilterObjectIDs( self.__m_refNEScene.GetSelectedObjectIDs(), typefilter=(NENodeObject, NEGroupObject), parent_id=self.__m_refNEScene.CurrentEditSpaceID() )
+        obj_id_list = self.__m_refNEScene.FilterObjectIDs( self.__m_refNEScene.GetSelectedObjectIDs(), typefilter=(NENodeObject, NEGroupObject), parent_id=None )# self.__m_refNEScene.CurrentEditSpaceID() )
         
         snapshot = SnapshotCommand()
         snapshot.Init( self.__m_refNEScene, obj_id_list )
@@ -1055,6 +1056,7 @@ class NESceneManager:
     def Cut( self ):
         selected_ids = self.__m_refNEScene.GetSelectedObjectIDs()
         if( selected_ids ):
+# TODO: parent_id is unused at CutByID_Exec
             self.CutByID_Exec( selected_ids, self.__m_refNEScene.CurrentEditSpaceID() )
 
 
@@ -1063,6 +1065,7 @@ class NESceneManager:
     def Copy( self ):
         selected_ids = self.__m_refNEScene.GetSelectedObjectIDs()
         if( selected_ids ):
+# TODO: parent_id is unused at CopyByID_Exec
             self.CopyByID_Exec( selected_ids, self.__m_refNEScene.CurrentEditSpaceID() )
 
 
@@ -1073,6 +1076,7 @@ class NESceneManager:
 
 
     def Duplicate( self ):
+# TODO: parent_id is unused at DuplicateByID_Exec
         self.DuplicateByID_Exec( self.__m_refNEScene.GetSelectedObjectIDs(), parent_id=self.__m_refNEScene.CurrentEditSpaceID() )
 
 

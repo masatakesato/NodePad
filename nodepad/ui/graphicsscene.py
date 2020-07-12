@@ -501,7 +501,7 @@ class GraphicsScene(QGraphicsScene):
     def __Cut( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.clearSelection()
-        self.__m_refCallbackFunc( 'CutByID', item_id_list, parent_id=self.__m_FocusViewID )
+        self.__m_refCallbackFunc( 'CutByID', item_id_list, parent_id=None )#self.__m_FocusViewID )
 
 
 
@@ -519,7 +519,7 @@ class GraphicsScene(QGraphicsScene):
 
     def __Duplicate( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
-        self.__m_refCallbackFunc( 'DuplicateByID', item_id_list, parent_id=self.__m_FocusViewID )
+        self.__m_refCallbackFunc( 'DuplicateByID', item_id_list, parent_id=None )#self.__m_FocusViewID )
 
 
 
