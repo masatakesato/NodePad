@@ -669,7 +669,7 @@ class SnapshotCommand():
 
             self.__m_SelectedObjectIDs.add( refObj.ID() )
 
-        self.__CollectConnectArgs( refObj_list )
+        self.__CollectConnectArgs( refObj_list, descendants )
 
 ################################################################################################################
 
@@ -719,37 +719,45 @@ class SnapshotCommand():
 
 
 
-    def __CollectConnectArgs( self, refObjs ):
+    def __CollectConnectArgs( self, refObjs, descendants ):
 
         # 選択オブジェクト群に従属する全てのノード/グループをリスト化する
         # リスト内で閉じたコネクションを全て抽出する
         obj_list = []
 
         for refObj in refObjs:
-            self.__CollectChildrenForConnectArgs( refObj, obj_list )
+            self.__CollectChildrenForConnectArgs( refObj, obj_list, descendants )
         
         for obj in set(obj_list):# setしてlist内オブジェクトの重複をなくす
             for dest_attrib in obj.InputAttributes().values():
                 for conn in dest_attrib.Connections().values():
                     if( conn.Source().Parent() in obj_list ):
-                        print( conn.ID() in self.__m_ObjectIDs )
                         self.__m_ObjectIDs[conn.ID()] = None
                         print( 'Append Connect Snapshot...%s' % conn.FullKey() )
                         self.__m_Snapshots.append( conn.GetSnapshot() )# append NEConnectionSnapshot
 
 
     
-    def __CollectChildrenForConnectArgs( self, node, obj_list ):
+    def __CollectChildrenForConnectArgs( self, node, obj_list, descendants ):
 
         nodes_to_visit = [node]
 
         while( nodes_to_visit ):
+            # pop currentnode from nodes_to_visit
             currentnode = nodes_to_visit.pop()
-            for obj in currentnode.Children().values():
-                nodes_to_visit.append(obj)
+
+            # append children of cuddentnode to nodes_to_visit
+            if( not descendants[ currentnode.ID() ] ):  # if no descendants specified(leaf group), append all children to nodes_to_visit
+                for obj in currentnode.Children().values():
+                    nodes_to_visit.append(obj)
+            else:                                       # else append specified descendants to nodes_to_visit 
+                for obj in currentnode.Children().values():
+                    if( obj.ID() in descendants[ currentnode.ID() ] ):
+                        nodes_to_visit.append(obj)
         
             if( isinstance(currentnode, NENodeObject) ):
                 obj_list.append( currentnode )
+
             elif( isinstance(currentnode, NEGroupObject) ):
                 for groupio in currentnode.GroupIOs():
                     obj_list += list( groupio.SymbolicLinks().values() )
@@ -763,16 +771,11 @@ class SnapshotCommand():
         # Reserve ObjectID slot for NEGroupObject
         self.__m_ObjectIDs[refObj.ID()] = None
 
-        # Append NEGroupSnapshot first.
+        # Append NEGroupSnapshot.
         print( 'Append Group Snapshot...%s' % refObj.Key() )
         self.__m_Snapshots.append( refObj.GetSnapshot() )# append NEGroupSnapshot
-TODO: スナップショットに全子供ノードの情報が自動登録される.
-TODO: 部分選択した子ノードだけ残したい場合はどうする?
-TODO:    案1: NEGroupSnapshot作成時に、子供ノードを選択できるようにする？  一旦こちらで実装
-TODO:    案2: ParentSnapshotに処理委譲する？ 上記で成功したらこちらへ移行
 
-        #print( refObj.GroupInput().ID() in self.__m_ObjectIDs, refObj.GroupOutput().ID() in  self.__m_ObjectIDs )
-        # Reserve ObjectID slots for NEGroupIOObjects
+        # Append ObjectID slots for NEGroupIOObjects
         self.__m_ObjectIDs[ refObj.GroupInput().ID() ] = None# Input GroupIO
         self.__m_ObjectIDs[ refObj.GroupOutput().ID() ] = None# Output GroupIO
         print( 'Append GroupIn Snapshot...%s' % refObj.GroupInput().Key() )
@@ -806,6 +809,7 @@ TODO:    案2: ParentSnapshotに処理委譲する？ 上記で成功したら�
 
         elif( isinstance(refObj, NEGroupObject) ):
             self.__CollectCreateGroupArgs( refObj )
+            self.__CollectParentingSnapshots( refObj, refObj.ChildrenID() )
 
 
 

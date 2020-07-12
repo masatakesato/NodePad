@@ -108,6 +108,7 @@ class NEGroupObject(NEGraphObject):
         obj.SetTranslation( ( obj_pos2[0], obj_pos2[1] ) )
 
 
+
     def GetMemberIDs( self ):
         connection_ids = set()
         object_ids = set()
@@ -378,14 +379,10 @@ class NEGroupObject(NEGraphObject):
 
 class NEGroupSnapshot():
 
-    def __init__( self, refObj, children_ids=None ):
-TODO: children_idsでどの子供を含めるかを指定する.
-#     None: 全部
-#     [ any_ids,... ]: リスト指定のみ
-#     []: 子ノードなし
+    def __init__( self, refObj ):
 
         self.__m_NodeArgs = None
-        self.__m_MemberIDs = None
+        #self.__m_MemberIDs = None
         
         self.__CollectNodeArgs( refObj )
 
@@ -421,17 +418,17 @@ TODO: children_idsでどの子供を含めるかを指定する.
 
 
 
-    def MemberIDs( self ):
-        return self.__m_MemberIDs
+    #def MemberIDs( self ):
+    #    return self.__m_MemberIDs
 
 
 
     def __CollectNodeArgs( self, refObj ):
 
-        excludetypes = ( NEConnectionObject, NEGroupIOObject, NESymbolicLink )
+        #excludetypes = ( NEConnectionObject, NEGroupIOObject, NESymbolicLink )
 
         self.__m_NodeArgs = (refObj.ObjectType(), refObj.GetPosition(), refObj.GetSize(), refObj.ID(), refObj.Key(), refObj.ParentID() )
-        self.__m_MemberIDs = [ obj.ID() for obj in refObj.Children().values() if not type(obj) in excludetypes ]# ConnectionObject, GroupIOObjectはスナップショットから除外
+        #self.__m_MemberIDs = [ obj.ID() for obj in refObj.Children().values() if not type(obj) in excludetypes ]# ConnectionObject, GroupIOObjectはスナップショットから除外
 
 
 
@@ -441,25 +438,17 @@ class NEParentSnapshot():
 
     def __init__( self, parent_id, obj_list ):
 
-        self.__m_NodeArgs = None
+        excludetypes = ( NEConnectionObject, NEGroupIOObject, NESymbolicLink )
+
         self.__m_ParentID = parent_id
-        self.__m_MemberIDs = None
-        
-        self.__CollectNodeArgs( obj_list )
+        self.__m_MemberIDs = [ obj.ID() for obj in obj_list if not type(obj) in excludetypes ]# ConnectionObject, GroupIOObject, NESymbolicLinkはスナップショットから除外
 
 
 
     def ParentID( self ):
-        return self.__m_NodeArgs[0]
+        return self.__m_ParentID
 
 
 
     def MemberIDs( self ):
-        return self.__m_MemberIDs
-
-
-
-    def __CollectNodeArgs( self, obj_list ):
-
-        excludetypes = ( NEConnectionObject, NEGroupIOObject, NESymbolicLink )
-        self.__m_MemberIDs = [ obj.ID() for obj in obj_list if not type(obj) in excludetypes ]# ConnectionObject, GroupIOObject, NESymbolicLinkはスナップショットから除外
+        return iter( self.__m_MemberIDs )

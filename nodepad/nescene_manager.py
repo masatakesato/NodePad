@@ -569,14 +569,14 @@ class NESceneManager:
             return False
 
         # Collect attribute's exsiting connections (for symboliclink bypassing)
-        parentid, desc, value, name = self.__m_refNEScene.GetSymbolocLinkInitialParams( attrib_id )
+        parent_id, desc, value, name = self.__m_refNEScene.GetSymbolocLinkInitialParams( attrib_id )
         
         # Create SymbolicLink( and ProtectedAttribute's Connection )
         command = self.__m_CommandManager.executeCmd( CreateSymbolicLinkCommand( self.__m_refNEScene, parent_id, desc, value, name, symboliclink_idset, slot_index ) )
         snapshot = command._CreateSymbolicLinkCommand__m_Snapshot
 
         # Create ProtectedAttribute Connection
-        self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (snapshot.ProtectedAttributeID(), attrib_id), conn_id ) )
+        self.__m_CommandManager.executeCmd( ConnectCommand( self.__m_refNEScene, (snapshot.ProtectedAttribID(), attrib_id), conn_id ) )
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -880,12 +880,13 @@ class NESceneManager:
             snapshot = refSnapshots[i]
             
             if( isinstance(snapshot, NEGroupSnapshot) ):
-                obj_id_list = [ refObjIDs[member_id] for member_id in snapshot.MemberIDs() ]
+                #obj_id_list = [ refObjIDs[member_id] for member_id in snapshot.MemberIDs() ]
                 newObjectID = refObjIDs[snapshot.ObjectID()]
                 #parentID = dest_space_id
                 groupIOIDs = ( refObjIDs[ refSnapshots[i+1].ObjectID() ], refObjIDs[ refSnapshots[i+2].ObjectID() ] )# GroupIO2個分のuuidを取り出す.
                 #name=snapshot.Key(),
-                self.GroupByID_Exec( obj_id_list, pos=(0,0), name=str(newObjectID), parent_id=dest_space_id, object_id=newObjectID, groupio_ids=groupIOIDs, align_groupios=False, terminate=False )
+                #self.GroupByID_Exec( obj_id_list, pos=(0,0), name=str(newObjectID), parent_id=dest_space_id, object_id=newObjectID, groupio_ids=groupIOIDs, align_groupios=False, terminate=False )
+                self.CreateGroup_Exec( dest_space_id, name=str(newObjectID), object_id=newObjectID, groupio_ids=groupIOIDs, terminate=False )
                 i+=2 # skip GroupIO snapshots
 
             elif( isinstance(snapshot, NENodeSnapshot) ):
@@ -923,6 +924,9 @@ class NESceneManager:
 
             elif( isinstance(snapshot, NEParentSnapshot) ):
                 print( 'TODO: NEParentSnapshot detected...' )
+                parent_id = refObjIDs[ snapshot.ParentID() ]
+                obj_id_list = [ refObjIDs[obj_id] for obj_id in snapshot.MemberIDs() ]
+                self.ParentByID_Exec( obj_id_list, parent_id, terminate=False )
 
 
         # Assign actual name to Node, Group and Symboliclink if possible
