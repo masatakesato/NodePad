@@ -1076,7 +1076,6 @@ class NESceneManager:
 
 
     def Duplicate( self ):
-# TODO: parent_id is unused at DuplicateByID_Exec
         self.DuplicateByID_Exec( self.__m_refNEScene.GetSelectedObjectIDs(), parent_id=self.__m_refNEScene.CurrentEditSpaceID() )
 
 
