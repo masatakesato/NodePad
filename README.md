@@ -73,7 +73,3 @@ cd nodepad
 python nodepad
 ```
 
-## License
-
-------
-

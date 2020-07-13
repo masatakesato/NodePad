@@ -130,13 +130,18 @@ def Compute( self, dataBlock ):
 
 
 
-    def GetChildrenIDs( self, object_id ):
-        return self.__m_NodeGraph.GetObjectByID( object_id, c_IDMapSupportTypes ).ChildrenID()
+    def GetChildrenIDs( self, object_id, typefilter=c_IDMapSupportTypes ):
+        return self.__m_NodeGraph.GetObjectByID( object_id, typefilter ).ChildrenID()
 
 
 
     def GetDescendantIDs( self, object_id ):
         return self.__m_NodeGraph.CollectAllDescendantIDsByID( object_id )
+
+
+
+    def FilterDescendants( self, obj_id_list, parent_id ):
+        return self.__m_NodeGraph.FilterDescendants( obj_id_list, parent_id )
 
 
 
@@ -165,6 +170,11 @@ def Compute( self, dataBlock ):
 
 
 
+    def GetParentID( self, object_id ):
+        return self.__m_NodeGraph.GetParentID( object_id )
+
+
+
     def ValidateVisibilityUpdate( self, object_id, visibility ):
         return self.__m_NodeGraph.ValidateVisibilityUpdate( object_id, visibility )
 
@@ -177,6 +187,11 @@ def Compute( self, dataBlock ):
 
     def GetConnectionIDs( self, object_id ):
         return self.__m_NodeGraph.GetConnectionIDs( object_id )
+
+
+
+    def GetAttribConnectionIDs( self, attrib_id ):
+        return self.__m_NodeGraph.GetAttribConnectionIDs( attrib_id )
 
 
 
@@ -195,8 +210,9 @@ def Compute( self, dataBlock ):
 
 
 
-    def AttributeExisits( self, attrib_id ):
-        return self.__m_NodeGraph.AttributeExisitsByID( attrib_id )
+    # Gather attribute parameters for symboliclink generation
+    def GetSymbolocLinkInitialParams( self, attrib_id ):
+        return self.__m_NodeGraph.GetSymbolocLinkInitialParams( attrib_id )
 
 
 
@@ -219,9 +235,9 @@ def Compute( self, dataBlock ):
         return self.__m_NodeGraph.ExtractSymbolicLinkConnections( object_id )
 
 
-
-    def ValidateConnections( self, attrib_id ):
-        return self.__m_NodeGraph.ValidateConnections( attrib_id )
+# TODO: Deprecate
+    #def ValidateConnections( self, attrib_id ):
+    #    return self.__m_NodeGraph.ValidateConnections( attrib_id )
 
 
 
@@ -240,11 +256,6 @@ def Compute( self, dataBlock ):
 
 
 
-    def GetExposedAttribs( self, object_ids ):
-        return self.__m_NodeGraph.CollectExposedAttribs( object_ids )
-
-
-
     def GetGroupIOIDs( self, object_id ):
         return self.__m_NodeGraph.GetGroupIOIDs( object_id )
 
@@ -253,6 +264,16 @@ def Compute( self, dataBlock ):
     # GUI-dependent function.
     def GetGroupIOPosition( self, object_id ):
         return None#return self.__m_Scene.CalcGroupIOOffsets( object_id )
+
+
+
+    def GetGroupMemberIDs( self, group_id ):
+        return self.__m_NodeGraph.GetGroupMemberIDs( group_id )
+
+
+
+    def CollectConnections( self, obj_id_list, parend_id ):
+        return self.__m_NodeGraph.CollectConnections( obj_id_list, parend_id )
 
 
 
@@ -292,14 +313,16 @@ def Compute( self, dataBlock ):
 
 
 
-    def IsNewName( self, object_id, newname ):
-        return self.__m_NodeGraph.IsNewName( object_id, newname )
+    def IsValidNewName( self, object_id, newname ):
+        return self.__m_NodeGraph.IsValidNewName( object_id, newname )
 
 
 
     def UpdateSelection( self ):
         print( 'NESceneBase::UpdateSelection()...' )
-        pass#self.__m_Scene.UpdateSelection( self.__m_SelectionList.Iter() )
+        #self.__m_Scene.UpdateSelection( self.__m_SelectionList.Iter() )
+
+
 
 
 
@@ -364,8 +387,8 @@ def Compute( self, dataBlock ):
         # Create Connection in NodeGraph
         newConn = self.__m_NodeGraph.AddConnectionByID( attrib1_id, attrib2_id, object_id )
         
-        # Set Attribute's Lock/Unlock state in NodeGraph
-        self.__m_NodeGraph.LockAttributeByID( newConn.DestinationAttribID(), False )
+        # AddConnectionByID() deals with this process. Set Attribute's Lock/Unlock state in NodeGraph
+        #self.__m_NodeGraph.LockAttributeByID( newConn.DestinationAttribID(), False )
         
         # Create Connection in GraphicsScene
         #self.__m_Scene.Connect_Exec( newConn.Key(), newConn.ID(), newConn.SourceAttribID(), newConn.DestinationAttribID(), newConn.ParentID() )
@@ -379,11 +402,7 @@ def Compute( self, dataBlock ):
 
     def Disconnect_Operation( self, conn_id ):
         # Disconnect in NodeGraph
-        dest_attrib_id = self.__m_NodeGraph.RemoveConnectionByID( conn_id )
-
-        # Set Attribute's Lock/Unlock state in NodeGraph
-        #self.__m_NodeGraph.LockAttributeByID( dest_attrib_id, True )
-        self.LockAttribute_Operation( dest_attrib_id, True )
+        return self.__m_NodeGraph.RemoveConnectionByID( conn_id )
 
         # Disconnect in GraphicsScene
         #self.__m_Scene.Disconnect_Exec( conn_id )
@@ -434,40 +453,6 @@ def Compute( self, dataBlock ):
         # Remove group in GraphicsScene
         #self.__m_Scene.RemoveGroup_Exec( group_id )
 
-
-
-    def Group_Operation( self, obj_id_list, pos, size, name, object_id, parent_id ):
-
-        #-------------------------------- グループノード本体を作るオペレーション ---------------------------#
-        group = self.CreateGroup_Operation( pos, size, name, object_id, parent_id )
-
-        #--------------------------- グループに子ノードを追加するオペレーション ---------------------------#
-        for obj_id in obj_id_list:
-            self.Parent_Operation( obj_id, group.ID() )
-
-        #--------------------- グループに内包されるコネクションも子供状態にするオペレーション ------------#
-        for conn_id in group.CollectInternalConnections():
-            self.Parent_Operation( conn_id, group.ID() )
-        
-        return group
-
-
-    def Ungroup_Operation( self, group_id ):
-        
-        group = self.__m_NodeGraph.GetObjectByID( group_id, (NEGroupObject,) )
-        group_parent_id = group.ParentID()
-        connection_ids, object_ids = group.GetMemberIDs()
-        
-        # グループ内オブジェクトの親をもとに戻す
-        for obj_id in object_ids:
-            self.Parent_Operation( obj_id, group_parent_id )
-
-        # グループ内コネクションの親をもとに戻す
-        for conn_id in connection_ids:
-            self.Parent_Operation( conn_id, group_parent_id )
-
-        # グループを削除する
-        self.RemoveGroup_Operation( group_id )
 
 
     def Rename_Operation( self, node_id, newname ):
@@ -551,6 +536,7 @@ def Compute( self, dataBlock ):
         return obj#prev_parent_id, new_pos
 
 
+
     def CreateSymbolicLink_Operation( self, group_id, attribdesc, value, name=None, symboliclink_idset=(None,None,None), slot_index=-1 ):
         # Create Symboliclink in NodeGraph
         symboliclink = self.__m_NodeGraph.ActivateSymbolicLinkByID( group_id, attribdesc, value, name, symboliclink_idset, slot_index )
@@ -562,6 +548,7 @@ def Compute( self, dataBlock ):
         #self.__UpdateAttributeEditor()
 
         return symboliclink
+
 
 
     def RemoveSymbolicLink_Operation( self, symboliclink_id ):
@@ -611,9 +598,9 @@ def Compute( self, dataBlock ):
 
 
     # returns True if selection changed, else False.
-    def Select_Operation_Multi( self, obj_id_list, option ):
+    def Select_Operation( self, obj_id_list, option ):
         try:
-            print( 'NESceneBase::Select_Operation_Multi()...' )
+            print( 'NESceneBase::Select_Operation()...' )
 
             self.__m_SelectionList.Exec( *obj_id_list, **option )
 

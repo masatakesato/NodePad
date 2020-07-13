@@ -25,11 +25,13 @@ class NEGroupObject(NEGraphObject):
         self.__m_refAttributes = {}
 
 
+
     def Release( self ):
         self.__m_refAttributes.clear()
         self.__m_refGroupIOs.clear()
 
         super(NEGroupObject, self).Release()
+
 
 
     def AddMember( self, obj ):
@@ -39,21 +41,34 @@ class NEGroupObject(NEGraphObject):
         
         obj.SetParent(self)
         
-        # transforma pos from world space to obj's parent space.
-        space = self
-        pos_stack = []
-        while( space != None ):
-            pos_stack.append( space.GetPosition() )
-            space = space.Parent()
+        #============= transforma pos from world space to obj's parent space. ====================#
+# TODO: DEPRECATE! Use Transfom matrices instead. 2020.08.30
+        #space = self
+        #pos_stack = []
+        #while( space != None ):
+        #    pos_stack.append( space.GetPosition() )
+        #    space = space.Parent()
 
-        obj_pos = list(obj.GetPosition())
+        #obj_pos = list(obj.GetPosition())
+        #print( 'obj_pos before:', obj_pos[0], obj_pos[1] )
+        #for pos in reversed(pos_stack):
+        #    obj_pos[0] -= pos[0]
+        #    obj_pos[1] -= pos[1]
+        #print( 'obj_pos after:', obj_pos[0], obj_pos[1] )
 
-        for pos in reversed(pos_stack):
-            obj_pos[0] -= pos[0]
-            obj_pos[1] -= pos[1]
+        ####################### Transformation using derived matrix #############################
+        obj_pos2 = self._NEGraphObject__m_MatDerived * obj.GetPositionAsVec3()
+        #print( 'obj_pos_asvec3:', obj.GetPositionAsVec3()[0:3] )
+        #print( 'obj_pos_transformed:', obj_pos2[0], obj_pos2[1] )
+        #self._NEGraphObject__m_MatDerived.Print()
+        #########################################################################################
 
-        obj.SetTranslation( ( obj_pos[0], obj_pos[1] ) )
+        #obj.SetTranslation( ( obj_pos[0], obj_pos[1] ) )
+        obj.SetTranslation( ( obj_pos2[0], obj_pos2[1] ) )
 
+
+
+        
 
 
 
@@ -67,20 +82,30 @@ class NEGroupObject(NEGraphObject):
 
         obj.SetParent(None)
 
-        # transforma pos form obj's parent space to world space.
-        space = self
-        pos_stack = []
-        while( space != None ):
-            pos_stack.append( space.GetPosition() )
-            space = space.Parent()
+        #============= transforma pos form obj's parent space to world space. ====================#
+# TODO: DEPRECATE! Use Transfom matrices instead. 2020.08.30
+        #space = self
+        #pos_stack = []
+        #while( space != None ):
+        #    pos_stack.append( space.GetPosition() )
+        #    space = space.Parent()
 
-        obj_pos = list(obj.GetPosition())
+        #obj_pos = list(obj.GetPosition())
+        #print( 'obj_pos before:', obj_pos[0], obj_pos[1] )
+        #for pos in pos_stack:
+        #    obj_pos[0] += pos[0]
+        #    obj_pos[1] += pos[1]
+        #print( 'obj_pos after:', obj_pos[0], obj_pos[1] )
 
-        for pos in pos_stack:
-            obj_pos[0] += pos[0]
-            obj_pos[1] += pos[1]
+        ####################### Transformation using derived matrix #############################
+        obj_pos2 = self._NEGraphObject__m_MatWorld * obj.GetPositionAsVec3()
+        #print( 'obj_pos_asvec3:', obj.GetPositionAsVec3()[0:3] )
+        #print( 'obj_pos_transformed:', obj_pos2[0], obj_pos2[1] )
+        #self._NEGraphObject__m_MatDerived.Print()
+        #########################################################################################
 
-        obj.SetTranslation( ( obj_pos[0], obj_pos[1] ) )
+        #obj.SetTranslation( ( obj_pos[0], obj_pos[1] ) )
+        obj.SetTranslation( ( obj_pos2[0], obj_pos2[1] ) )
 
 
 
@@ -93,16 +118,20 @@ class NEGroupObject(NEGraphObject):
         return connection_ids, object_ids
 
 
+
     def HasAttribute( self, attr_id ):
         return attr_id in self.__m_refAttributes
+
 
 
     def NumAttributes( self ):
         return len(self.__m_refAttributes)
 
 
+
     def Attributes( self ):
-        return self.__m_refAttributes 
+        return self.__m_refAttributes
+
 
     
     def AttributeByID( self, query ):
@@ -113,14 +142,18 @@ class NEGroupObject(NEGraphObject):
             return None
 
 
+
     def AttributeByName( self, query ):
         attrib = self.__m_refGroupIOs[ DataFlow.Input ].Attribute( query )
         if( attrib ): return attrib
         return self.__m_refGroupIOs[ DataFlow.Output ].Attribute( query )
 
 
+
     def NumInputAttributes( self ):
         return self.__m_refGroupIOs[ DataFlow.Input ].NumAttributes() if DataFlow.Input in self.__m_refGroupIOs else 0
+
+
 
     def InputAttributes( self ):
         try:
@@ -129,12 +162,17 @@ class NEGroupObject(NEGraphObject):
             traceback.print_exc()
             return {}
 
+
+
     def InputAttribute( self, query ):
         return self.__m_refGroupIOs[ DataFlow.Input ].Attribute( query )
 
 
+
     def NumOutputAttributes( self ):
         return self.__m_refGroupIOs[ DataFlow.Output ].NumAttributes() if DataFlow.Output in self.__m_refGroupIOs else 0
+
+
 
     def OutputAttributes( self ):
         try:
@@ -143,8 +181,11 @@ class NEGroupObject(NEGraphObject):
             traceback.print_exc()
             return {}
 
+
+
     def OutputAttribute( self, query ):
         return self.__m_refGroupIOs[ DataFlow.Output ].Attribute( query )
+
 
 
     def RenameAttribute( self, attr_id, newkey ):
@@ -154,10 +195,12 @@ class NEGroupObject(NEGraphObject):
         except:
             traceback.print_exc()
             return False
+
     
 
     def GroupIOs( self ):
         return list( self.__m_refGroupIOs.values() )
+
 
 
     def GroupIOIDs( self ):
@@ -169,6 +212,7 @@ class NEGroupObject(NEGraphObject):
         return  self.__m_Desc
 
 
+
     def FullKey( self, suffix='' ):
         if( self._NEGraphObject__m_Parent ):
             return self._NEGraphObject__m_Parent.FullKey('|') + self._NEObject__m_Key + suffix
@@ -176,9 +220,11 @@ class NEGroupObject(NEGraphObject):
             return self._NEObject__m_Key + suffix
 
 
+
     def UngroupChildren( self ):
         for key in self.ChildrenID():
             self.Children()[key].SetParent( self.Parent() )
+
 
 
     def GroupInput( self ):
@@ -189,12 +235,14 @@ class NEGroupObject(NEGraphObject):
             return None
 
 
+
     def GroupOutput( self ):
         try:
             return self.__m_refGroupIOs[ DataFlow.Output ]
         except:
             traceback.print_exc()
             return None
+
 
 
     # シンボリックリンク化できるかどうかチェック.
@@ -218,8 +266,8 @@ class NEGroupObject(NEGraphObject):
         if( self.__m_refGroupIOs[ DataFlow.Output ].SymbolicLinkExists( attrib )==True ):
             return False
 
-
         return True
+
 
 
     def BindSymbolicLink( self, refSymbolicLink, reserved_slot_index=-1 ):
@@ -233,6 +281,7 @@ class NEGroupObject(NEGraphObject):
         self.__m_refGroupIOs[ refSymbolicLink.DataFlow() ].BindSymbolicLink( refSymbolicLink, slot_index )
 
 
+
     def UnbindSymbolicLink( self, refSymbolicLink ):
         
         refAttrib = refSymbolicLink.ExposedAttribute()
@@ -244,12 +293,14 @@ class NEGroupObject(NEGraphObject):
         self.__m_LayoutDesc.RemoveAttribDesc( refAttrib.GetDesc() )
 
 
+
     def UnbindAllSymbolicLinks( self ):
         try:
             self.__m_refGroupIOs[ DataFlow.Input ].UnbindAllSymbolicLinks()
             self.__m_refGroupIOs[ DataFlow.Output ].UnbindAllSymbolicLinks()
         except:
             traceback.print_exc()
+
 
 
     def SetSymbolicLinkSlotIndex( self, refSymbolicLink, slot_index ):
@@ -263,6 +314,7 @@ class NEGroupObject(NEGraphObject):
             return False
 
 
+
     def CollectInternalConnections( self ):
 
         internal_connections = []
@@ -274,8 +326,11 @@ class NEGroupObject(NEGraphObject):
         return internal_connections
 
 
+
     def Info( self ):
-        print( '//------------- Group: ' + self.FullKey() + ' -------------//' )
+
+        print( '//------------- Group Info: ' + self.FullKey() + ' -------------//' )
+
         if( self.Parent() ):
             print( 'Parent: %s' % self.Parent().Key() )
 
@@ -292,6 +347,9 @@ class NEGroupObject(NEGraphObject):
             print( 'Output SymbolicLinks:' )
             for v in self.__m_refGroupIOs[ DataFlow.Output ].SymbolicLinks().values():
                 print( '    %s' % v.Key() )
+
+        print( '//--------------------------------------------------------------//' )
+
 
 
     def GetSnapshot( self ):
@@ -324,43 +382,73 @@ class NEGroupSnapshot():
     def __init__( self, refObj ):
 
         self.__m_NodeArgs = None
-        self.__m_MemberIDs = None
+        #self.__m_MemberIDs = None
         
         self.__CollectNodeArgs( refObj )
+
 
 
     def ObjectType( self ):
         return self.__m_NodeArgs[0]
 
 
+
     def Translation( self ):
         return self.__m_NodeArgs[1]
+
 
 
     def Size( self ):
         return self.__m_NodeArgs[2]
 
 
+
     def ObjectID( self ):
         return self.__m_NodeArgs[3]
+
 
 
     def Key( self ):
         return self.__m_NodeArgs[4]
 
 
+
     def ParentID( self ):
         return self.__m_NodeArgs[5]
 
 
-    def MemberIDs( self ):
-        return self.__m_MemberIDs
+
+    #def MemberIDs( self ):
+    #    return self.__m_MemberIDs
+
 
 
     def __CollectNodeArgs( self, refObj ):
 
-        excludetypes = ( NEConnectionObject, NEGroupIOObject )
-        object_id = refObj.ID()
+        #excludetypes = ( NEConnectionObject, NEGroupIOObject, NESymbolicLink )
 
-        self.__m_NodeArgs = (refObj.ObjectType(), refObj.GetPosition(), refObj.GetSize(), object_id, refObj.Key(), refObj.ParentID() )
-        self.__m_MemberIDs = [ obj.ID() for obj in refObj.Children().values() if not type(obj) in excludetypes ]# ConnectionObject, GroupIOObjectはスナップショットから除外
+        self.__m_NodeArgs = (refObj.ObjectType(), refObj.GetPosition(), refObj.GetSize(), refObj.ID(), refObj.Key(), refObj.ParentID() )
+        #self.__m_MemberIDs = [ obj.ID() for obj in refObj.Children().values() if not type(obj) in excludetypes ]# ConnectionObject, GroupIOObjectはスナップショットから除外
+
+
+
+
+
+class NEParentSnapshot():
+
+    def __init__( self, parent_id, obj_list ):
+
+        excludetypes = ( NEConnectionObject, NEGroupIOObject, NESymbolicLink )
+
+        self.__m_ParentID = parent_id
+        self.__m_MemberIDs = [ obj.ID() for obj in obj_list if not type(obj) in excludetypes ]# ConnectionObject, GroupIOObject, NESymbolicLinkはスナップショットから除外
+
+
+
+    def ParentID( self ):
+        return self.__m_ParentID
+
+
+
+    def MemberIDs( self ):
+        return iter( self.__m_MemberIDs )

@@ -1,4 +1,4 @@
-﻿from collections import defaultdict
+﻿from collections import defaultdict, deque
 import traceback
 
 
@@ -18,6 +18,7 @@ from .nesymboliclink import NESymbolicLink
 from .negroupioobject import NEGroupIOObject
 
 from .keymap import KeyMap
+
 
 
 
@@ -89,11 +90,13 @@ c_IDMapSupportTypes = (
     NESymbolicLink, )
 
 
+
 c_KeyMapSupportTypes = (
     NENodeObject,
     NEGroupObject,
     NEGroupIOObject,
     NESymbolicLink, )
+
 
 
 c_RenamableTypes = (    
@@ -107,6 +110,7 @@ c_EditableTypes = (
     NENodeObject,
     NEGroupObject,
     NEGroupIOObject, )
+
 
 
 
@@ -158,6 +162,7 @@ class NENodeGraph():
 
     def GetRootID( self ):
         return self.__m_Root.ID()
+
 
 
     #########################################################################
@@ -262,7 +267,7 @@ class NENodeGraph():
 
             source_attrib, dest_attrib = (attrib1, attrib2) if attrib1.IsOutputFlow() else (attrib2, attrib1)
 
-            #print( 'AddConnectionByID ' + attrib_source.FullKey() + ' ' + attrib_dest.FullKey() )
+            print( 'AddConnectionByID:', source_attrib.FullKey() + ' <---> ' + dest_attrib.FullKey() )
 
             # Create Connection Object
             newConn = self.__AddConnectionToScene( source_attrib, dest_attrib, object_id )
@@ -275,6 +280,9 @@ class NENodeGraph():
 
             # Propagate Dirty Flag to Destination Attribute(s).
             self.__m_Pipeline.PropagateDirty( dest_attrib.ParentID() )
+
+            # Lock Destination Attribute
+            dest_attrib.SetEnable( False )
 
             return newConn
 
@@ -321,6 +329,8 @@ class NENodeGraph():
         
         conn = self.__m_IDMap[ conn_id ]
 
+        print( 'NENodeGraph::RemoveConnectionByID()...', conn.Source().FullKey(), ' <---> ', conn.Destination().FullKey() )
+
         source_attrib = conn.Source()
         dest_attrib = conn.Destination()
 
@@ -332,13 +342,16 @@ class NENodeGraph():
         dest_data = dest_attrib.Data()
         source_data.UnbindReference( dest_data )
         dest_data.UnbindReference( source_data )
-
-        dest_attrib_id = ( dest_attrib.ParentID(), dest_attrib.ID() ) if not dest_attrib.HasConnections() else None
         
         # Propagate Dirty Flag to Destination Attribute(s).
         self.__m_Pipeline.PropagateDirty( dest_attrib.ParentID() )
 
-        return dest_attrib_id
+        if( dest_attrib.HasConnections()==False ):
+            dest_attrib.SetEnable(True)
+            return dest_attrib.AttributeID()
+
+        else:
+            return None
 
 
 
@@ -498,11 +511,17 @@ class NENodeGraph():
 
 
 
-    def AttributeExisitsByID( self, attrib_id ):
+    def GetSymbolocLinkInitialParams( self, attrib_id ):
         try:
-            return self.__m_IDMap[ attrib_id[0] ].AttributeExistsByID( attrib_id[1] )
+            attrib = self.GetAttributeByID( attrib_id )
+            if( attrib==None ):
+                return None
+
+            return attrib.ParentNode().ParentID(), attrib.GetDesc(), attrib.Value(), attrib.Key()
+
         except:
-            return False
+            traceback.print_exc()
+            return None
 
 
 
@@ -570,7 +589,7 @@ class NENodeGraph():
 
 
 
-    def GetObjectID( self, name, typefilter ):#=c_KeyMapSupportTypes ):
+    def GetObjectID( self, name, typefilter ):
         try:
             obj = self.__m_KeyMap.GetObject(name)
             return obj.ID() if type(obj) in typefilter else None
@@ -581,11 +600,18 @@ class NENodeGraph():
 
 
     def GetObjectTypeByID( self, obj_id ):
+        return type(self.__m_IDMap[ obj_id ]) if obj_id in self.__m_IDMap else None
+
+
+
+    def GetParentID( self, object_id ):
         try:
-            return type(self.__m_IDMap[ obj_id ])
+            return self.__m_IDMap[ object_id ].ParentID()
+
         except:
             traceback.print_exc()
             return None
+
 
 
 
@@ -633,15 +659,17 @@ class NENodeGraph():
 
 
     def ParentByID( self, object_id, parent_id ):
-        # print( 'NENodeGraph::ParentByID()...' )
+        
         try:
             print('NENodeGraph::ParentByID()...Parenting %s to %s' % (self.__m_IDMap[object_id].Key(), self.__m_IDMap[parent_id].Key()) )
 
             # Remove from current parent.
             prev_parent_id = self.__m_IDMap[object_id].ParentID()
+            self.__UpdateTransform( prev_parent_id )# Update relevant transform matrices
             self.__m_IDMap[prev_parent_id].RemoveMember( object_id )
 
             # Add to new parent
+            self.__UpdateTransform( parent_id )# Update relevant transform matrices
             self.__m_IDMap[parent_id].AddMember( self.__m_IDMap[object_id] )
             
             #return prev_parent_id, self.__m_IDMap[object_id].GetPosition()# RemoveMemberの影響で位置座標がワールド空間に戻っている
@@ -654,8 +682,10 @@ class NENodeGraph():
 
 
     def ActivateSymbolicLinkByID( self, group_id, attribdesc, value, name, symboliclink_idset, slot_index=-1 ):
-        # print( 'NENodeGraph::ActivateSymbolicLinkByID()...' )
+
         try:
+            #print( 'NENodeGraph::ActivateSymbolicLinkByID()...' )
+
             # Create SymbolicLink
             parent = self.__m_IDMap[ group_id ]
             symboliclink = self.__AddSymbolicLinkToScene( parent, attribdesc, value, name, symboliclink_idset )
@@ -758,6 +788,16 @@ class NENodeGraph():
         except:
             return []
 
+
+
+    def GetAttribConnectionIDs( self, attrib_id ):
+        try:
+            attrib = self.__m_IDMap[ attrib_id[0] ].AttributeByID( attrib_id[1] )
+            return attrib.ConnectionIDs()
+
+        except:
+            traceback.print_exc()
+            return []
 
 
     def IsConnectedByID( self, attrib_id1, attrib_id2 ):
@@ -868,33 +908,57 @@ class NENodeGraph():
 
 
 
-    def CollectExposedAttribs( self, obj_id_list ):
+    def CollectConnections( self, obj_id_list, parent_id ):
+        try:
+            typefilter = (NENodeObject, NEGroupObject,)
+            obj_list = [ self.__m_IDMap[object_id] for object_id in obj_id_list if type(self.__m_IDMap[object_id]) in typefilter ]
+            grand_parent_id = self.__m_IDMap[parent_id].ParentID()# シンボリックリンク生成可能な親空間 
 
-        exposed_attribs = []
+            # Gather all connections relevant to obj_id_list
+            conn_dict = {}
+            for obj in obj_list:
+                for attrib in obj.Attributes().values():
+                    conn_dict.update( attrib.Connections() )
 
-        obj_list = [ self.__m_IDMap[obj_id] for obj_id in obj_id_list ]
-        obj_list.sort( key=lambda x: x.GetPosition()[1] )
-    
-        for obj in obj_list:
-            if( isinstance(obj,NEConnectionObject) ):
-                continue# コネクションオブジェクトは無視する
+            # Divide to open/closed category
+            closed_conn_ids = []# connections between obj_id_list nodes
+            open_attrib_info = defaultdict(list)# connection from external. attrib_in_ids[ attrib_id to symbolize ] = [ (conn_id, internal_attrib_id), ... ]
+            removal_conn_info = []# connection to be removed while paranting operation.
 
-            for j in range(obj.NumInputAttributes()):# ノード/グループ/シンボリックリンクから、グループ外部接続しているアトリビュートを抽出する
-                attrib = obj.InputAttribute(j)
-                for outerattrib in attrib.GetConnectedAttributes():
-                    if( not outerattrib.ParentNode().ID() in obj_id_list ):
-                        exposed_attribs.append( ( attrib.AttributeID(), (None, None, None) ) )# linknode_id, groupattrib_id, linknode_attrib_id
-                        break
+            for conn_id, conn in conn_dict.items():
+                src_is_internal = conn.Source().ParentNode().ID() in obj_id_list
+                dst_is_internal = conn.Destination().ParentNode().ID() in obj_id_list
+                
+                if( src_is_internal and dst_is_internal ):# both attributes exist in obj_id_list
+                    closed_conn_ids.append( conn_id )
 
-            for j in range(obj.NumOutputAttributes()):# ノード/グループ/シンボリックリンクから、グループ外部接続しているアトリビュートを抽出する
-                attrib = obj.OutputAttribute(j)
-                for outerattrib in attrib.GetConnectedAttributes():
-                    if( not outerattrib.ParentNode().ID() in obj_id_list ):
-                        exposed_attribs.append( ( attrib.AttributeID(), (None, None, None) ) )# linknode_id, groupattrib_id, linknode_attrib_id
-                        break
+                elif( conn.ParentID()==grand_parent_id ):
+                    if( dst_is_internal ):# only dest attribute exists in obj_id_list -> input connection from external space
+                        open_attrib_info[ conn.DestinationAttribID() ].append( (conn_id, conn.SourceAttribID()) )
+                        removal_conn_info.append( conn_id )
+                    else:# only dest attribute exists in obj_id_list -> input connection from external space
+                        open_attrib_info[ conn.SourceAttribID() ].append( (conn_id, conn.DestinationAttribID()) )
+                        removal_conn_info.append( conn_id )
 
-        return exposed_attribs
+                else:
+                    removal_conn_info.append( conn_id )
 
+            return closed_conn_ids, open_attrib_info, removal_conn_info
+
+        except:
+            traceback.print_exc()
+            return {}, {}, []
+
+
+
+    def GetGroupMemberIDs( self, group_id ):
+        try:
+            return self.__m_IDMap[ group_id ].GetMemberIDs()
+
+        except:
+            traceback.print_exc()
+            return [], []
+        
 
 
     def GetSymboliclinkIDs( self, group_id ):       
@@ -906,7 +970,7 @@ class NENodeGraph():
 
 
 
-    def FilterObjects(  self, obj_id_list, *, typefilter, parent_id ):
+    def FilterObjects( self, obj_id_list, *, typefilter, parent_id ):
         try:
             # Filter by type only if typefilters is specified
             obj_ids_filtered = [ obj_id for obj_id in obj_id_list if type(self.__m_IDMap[obj_id]) in typefilter ] if typefilter else obj_id_list
@@ -918,7 +982,22 @@ class NENodeGraph():
             return [ obj_id for obj_id in obj_ids_filtered if self.__m_IDMap[obj_id].ParentID()==parent_id ]
 
         except:
+            traceback.print_exc()
+            return []
 
+
+
+    def FilterDescendants( self, obj_id_list, parent_id ):
+        try:
+            direct_children = self.__m_IDMap[ parent_id ].Children()
+
+            return [ obj_id for obj_id in obj_id_list if
+                    ( type(self.__m_IDMap[obj_id]) in (NENodeObject, NEGroupObject) ) and    # include nodegraph and group only
+                    ( self.IsAncestorOf(obj_id, parent_id) == False ) and                   # exclude parent_id's ancestors
+                    ( obj_id != parent_id ) and                                              # exclude parent_id self
+                    ( not obj_id in direct_children ) ]                                      # exclude parent_id's children
+
+        except:
             traceback.print_exc()
             return []
 
@@ -942,31 +1021,32 @@ class NENodeGraph():
 
 
 
-    def IsNewName( self, object_id, name ):
+    def IsValidNewName( self, object_id, name ):
         try:
-            return self.__m_IDMap[ object_id ].Key() != name
-        except:        
+            return  ( self.__m_IDMap[ object_id ].Key() != name ) and ( name )# and ( not name.isspace() )
+        except:
+            traceback.print_exc()
             return False
 
 
 
-    def ValidateConnections( self, attrib_id ):
+    #def ValidateConnections( self, attrib_id ):
 
-        valid_connections = {}# key: conn_id, value: outer-connected attribute id
-        invalid_connections = []# Invalid connection id list. invalid inter-space connection.
+    #    valid_connections = {}# key: conn_id, value: outer-connected attribute id
+    #    invalid_connections = []# Invalid connection id list. invalid inter-space connection.
 
-        attrib = self.__m_IDMap[attrib_id[0]].AttributeByID(attrib_id[1])
-        connectable_space_id = attrib.ParentSpace().ParentID()
+    #    attrib = self.__m_IDMap[attrib_id[0]].AttributeByID(attrib_id[1])
+    #    connectable_space_id = attrib.ParentSpace().ParentID()
 
-        for conn in attrib.Connections().values():
-            outerattrib = conn.Source() if attrib.IsInputFlow() else conn.Destination()
+    #    for conn in attrib.Connections().values():
+    #        outerattrib = conn.Source() if attrib.IsInputFlow() else conn.Destination()
 
-            if( outerattrib.ParentSpace().ID() == connectable_space_id ):# gather connections only inside connectable_space
-                valid_connections[conn.ID()] = outerattrib.AttributeID()
-            else:
-                invalid_connections.append( conn.ID() )
+    #        if( outerattrib.ParentSpace().ID() == connectable_space_id ):# gather connections only inside connectable_space
+    #            valid_connections[conn.ID()] = outerattrib.AttributeID()
+    #        else:
+    #            invalid_connections.append( conn.ID() )
 
-        return valid_connections, invalid_connections
+    #    return valid_connections, invalid_connections
 
 
 
@@ -1109,6 +1189,33 @@ class NENodeGraph():
         except:
             traceback.print_exc()
             return None
+
+
+
+    # check if ancestor_id is ancestor of object_id
+    def IsAncestorOf( self, ancestor_id, object_id ):
+        try:
+            #print( 'NENodeGraph::IsAncestorOf()...' )
+            root_id = self.__m_Root.ID()
+            curr_id = self.__m_IDMap[ object_id ].ParentID()
+
+            while( curr_id != root_id ):
+                if( curr_id == ancestor_id ):
+                    return True
+                curr_id = self.__m_IDMap[ curr_id ].ParentID()
+
+            return False
+
+        except:
+            traceback.print_exc()
+            return False
+
+
+
+    # check if object_id is descendant of descendant_id
+    def IsDescendantOf( self, object_id, descendant_id ):
+        return self.IsAncestorOf( descendant_id, object_id )
+
 
 
 
@@ -1339,6 +1446,33 @@ class NENodeGraph():
 
 
 
+    def __UpdateTransform( self, object_id ):
+        try:
+            obj = self.__m_IDMap[ object_id ]
+            if( isinstance(obj,NERootObject) ):
+                return
+
+            #print( '//---------- NENodeGraph::__UpdateTransform()... ----------//' )
+        
+            # Gather parents to space_stack[ space, parent, grandparent... ]
+            space_deque = deque()
+            while( not isinstance(obj,NERootObject) ):
+                space_deque.appendleft( obj )
+                obj = obj.Parent()
+
+            
+            # Propagate transform update.
+            for i, val in enumerate(space_deque):
+                if( val.IsDirty() ):# If 'Dirty' ancestor found, propagate transform to descendants.
+                    for j in range(i, len(space_deque)):
+                        space_deque[j].UpdateTransform()
+                    break
+
+        except:
+            traceback.print_exc()
+
+
+
     # Resolve UnderScore. currley must be fullpath
     def __ResolveKeyConflict( self, currkey ):
 
@@ -1427,8 +1561,7 @@ class NENodeGraph():
                 if( curr_id in descendants[ parent_id ] ):# 既に登録済みの親子階層に到達した場合は終了.
                     break
                 descendants[ parent_id ].append( curr_id )
-                curr_id = parent_id
-                
+                curr_id = parent_id                
 
         for obj_id, child_ids in descendants.items():
             print( 'descendants[ \'%s\' ] = [ ' % (id_map[obj_id].Key()), end='' )

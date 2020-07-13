@@ -501,7 +501,7 @@ class GraphicsScene(QGraphicsScene):
     def __Cut( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.clearSelection()
-        self.__m_refCallbackFunc( 'CutByID', item_id_list, parent_id=self.__m_FocusViewID )
+        self.__m_refCallbackFunc( 'CutByID', item_id_list, parent_id=None )#self.__m_FocusViewID )
 
 
 
@@ -519,7 +519,7 @@ class GraphicsScene(QGraphicsScene):
 
     def __Duplicate( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
-        self.__m_refCallbackFunc( 'DuplicateByID', item_id_list, parent_id=self.__m_FocusViewID )
+        self.__m_refCallbackFunc( 'DuplicateByID', item_id_list, parent_id=None )#self.__m_FocusViewID )
 
 
 
@@ -686,6 +686,12 @@ class GraphicsScene(QGraphicsScene):
         # http://stackoverflow.com/questions/18428095/qt4-qmenu-addaction-connect-function-with-arguments
         # use "lambda:" for parametrized functions
 
+        # test implementation for creating empty group
+        action = QAction( 'Empty Group', self )
+        action.triggered.connect( functools.partial( callback, 'CreateGroup', self.__m_FocusViewID, pos=(pos.x(), pos.y()), size=None ) )
+        
+        menu.addAction( action )
+
         menu.exec(event.screenPos())
 
 
@@ -814,7 +820,7 @@ class GraphicsScene(QGraphicsScene):
                 self.__m_refCallbackFunc( 'ConnectByID', self.__m_refStartPort.PortID(), item.PortID(), check=True )
             elif( isinstance(item, GroupIO) ):# GroupIO上でリリース -> シンボリックリンク作成
                 if( self.CheckSymbolize(self.__m_refStartPort, item.DataFlow()) ):
-                    self.__m_refCallbackFunc( 'CreateSymbolicLinkByID', self.__m_refStartPort.PortID(), slot_index=item.BlankIndex() )
+                    self.__m_refCallbackFunc( 'CreateSymbolicLink', self.__m_refStartPort.PortID(), slot_index=item.BlankIndex() )
 
             # __m_TempEdgeを削除する
             self.__m_GraphicsViewLayers[ self.__m_FocusViewID ].RemoveItem( self.__m_TempEdge.ID() )

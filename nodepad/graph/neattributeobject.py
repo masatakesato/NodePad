@@ -19,6 +19,7 @@ class NEAttributeObject(NEGraphObject):
         self.__m_refConnections = {}
         self.__m_bLock = False
         self.__m_refData = None
+
         
 
     def Release( self ):
@@ -28,6 +29,7 @@ class NEAttributeObject(NEGraphObject):
         self.__m_refData = None
 
 
+
     # override SetParent
     def SetParent( self, parent, bRegisterAsChild=True ):
         super(NEAttributeObject, self).SetParent(parent, bRegisterAsChild)
@@ -35,11 +37,13 @@ class NEAttributeObject(NEGraphObject):
         self.__m_Desc._AttribDesc__m_ObjectID = ( parent.ID(), self.ID() )
 
 
+
     # owner node
     def ParentNode( self ):
         return self.Parent() if self._NEObject__m_ObjectType=='Attribute' else self.Parent().Parent()
         # ノードアトリビュートの場合: 自信の親(ノード)を返す.
         # それ以外(シンボリックリンク)の場合: シンボリックリンク->親(グループIO)->さらに親(グループ)を返す.
+
 
 
     # return opened space for connection
@@ -56,20 +60,10 @@ class NEAttributeObject(NEGraphObject):
         #   'Attribute': アトリビュートの親ノードを保持するスペース
 
 
-    #def BindConnection( self, pconn ):
-    #    self.__m_refConnections[ pconn.Key() ] = pconn
-
-
-    #def UnbindConnection( self, pconn ):
-    #    try:
-    #        self.__m_refConnections[ pconn.Key() ] = None
-    #        del self.__m_refConnections[ pconn.Key() ]
-    #    except:
-    #        pass
-
 
     def BindConnection( self, pconn ):
         self.__m_refConnections[ pconn.ID() ] = pconn
+
 
 
     def UnbindConnection( self, pconn ):
@@ -80,77 +74,100 @@ class NEAttributeObject(NEGraphObject):
             pass
 
 
+
     def ClearConnection( self ):
         self.__m_refConnections.clear()
+
 
 
     def GetDesc( self ):
         return  self.__m_Desc
 
 
+
     def DataFlow( self ):
         return self.__m_Desc.DataFlow()
+
 
 
     def IsInputFlow( self ):
         return self.__m_Desc.IsInputFlow()
 
 
+
     def IsOutputFlow( self ):
         return self.__m_Desc.IsOutputFlow()
+
 
 
     def MultipleConnectAllowed( self ):
         return self.__m_Desc.MultipleConnectAllowed()
 
 
+
     def Connections( self ):
         return self.__m_refConnections
+
 
 
     def ConnectionIDs( self ):
         return [ v.ID() for v in self.__m_refConnections.values() ]
 
 
+
     def Value( self ):
         return self.__m_refData.Value()
+
 
 
     def SetValue( self, value ):
         self.__m_refData.SetValue( value )
 
 
+
     def Data( self ):
         return self.__m_refData
+
 
 
     def BindData( self, data ):
         self.__m_refData = data
 
 
+
     def UnbindData( self ):
         self.__m_refData = None
+
 
 
     def DataType( self ):
         return self.__m_Desc.DataType()
 
 
+
     def SetEditable( self, state ):
         self.__m_Desc.SetEditale( state )
+
+
 
     def IsEditable( self ):
         return self.__m_Desc.IsEditable()
 
+
+
     def SetEnable( self, state ):
         self.__m_Desc.SetEnable( state )
+
+
 
     def Enabled( self ):
         return self.__m_Desc.Enabled()
 
 
+
     def AttributeID( self ):
         return self.__m_Desc._AttribDesc__m_ObjectID
+
 
 
     def FullKey( self, suffix='' ):
@@ -158,6 +175,7 @@ class NEAttributeObject(NEGraphObject):
             return self._NEGraphObject__m_Parent.FullKey('.') + self._NEObject__m_Key + suffix
         else:
             return self._NEObject__m_Key + suffix
+
 
 
     def IsConnected( self, attrib ):
@@ -177,6 +195,7 @@ class NEAttributeObject(NEGraphObject):
         return False
 
 
+
     def IsConnectedFrom( self, attrib_src ):
 
         if( self.__m_Desc.IsInputFlow() ):
@@ -188,6 +207,7 @@ class NEAttributeObject(NEGraphObject):
         return False
 
 
+ 
     def IsConnectedTo( self, attrib_dest ):
 
         if( self.__m_Desc.IsOutputFlow() ):
@@ -199,11 +219,13 @@ class NEAttributeObject(NEGraphObject):
         return False
 
 
+
     def GetConnectionFrom( self, attrib_src ):
         for conn in self.__m_refConnections.values():
             if( conn.Source() == attrib_src ):
                 return conn
         return None
+
 
 
     def GetConnectionTo( self, attrib_dest ):
@@ -213,32 +235,40 @@ class NEAttributeObject(NEGraphObject):
         return None
 
 
+
     def GetConnectedAttributes( self ):
         return [ (conn.Source() if self.__m_Desc.IsInputFlow() else conn.Destination()) for conn in self.__m_refConnections.values() ]
+
 
 
     def GetSourceAttributes( self ):
         return [ conn.Source() for conn in self.__m_refConnections.values() ]
 
 
+
     def GetDestinationAttributes( self ):
         return [ conn.Destination() for conn in self.__m_refConnections.values() ]
+
 
 
     def GetConnectedAttributeIDs( self ):
         return [ (conn.Source().AttributeID() if self.__m_Desc.IsInputFlow() else conn.Destination().AttributeID()) for conn in self.__m_refConnections.values() ]
 
 
+
     def GetSourceAttributeIDs( self ):
         return [ conn.Source().AttributeID() for conn in self.__m_refConnections.values() ]
+
 
 
     def GetDestinationAttributeIDs( self ):
         return [ conn.Destination().AttributeID() for conn in self.__m_refConnections.values() ]
 
 
+
     def HasConnections( self ):
         return bool( self.__m_refConnections )
+
 
 
     def IsConnectable( self, attrib ):
@@ -260,12 +290,13 @@ class NEAttributeObject(NEGraphObject):
             print( 'Unable to connect: Different DataType...' )
             return False
 
-
         return True
+
 
 
     def IsLocked( self ):
         return self.__m_bLock
+
 
 
     def Info( self ):
@@ -276,3 +307,10 @@ class NEAttributeObject(NEGraphObject):
         else:
             for conn in self.__m_refConnections.values():
                 print( '     ' + conn.FullKey() )
+
+
+
+    def SetKey( self, key ):
+        print( 'NEAttributeObject::SetKey()... %s' % key )
+        self.__m_Desc.SetName( key )
+        return super(NEAttributeObject, self).SetKey( key )

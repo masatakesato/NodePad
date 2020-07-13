@@ -200,12 +200,6 @@ class NESceneExt(NESceneBase):
 
 
     # Implemented in NESceneBase
-    #def AttributeExisits( self, attrib_id ):
-    #    return self.__m_NodeGraph.AttributeExisitsByID( attrib_id )
-
-
-
-    # Implemented in NESceneBase
     #def ValidateAttributeUpdate( self, attrib_id, new_value ):
     #    return self.__m_NodeGraph.ValidateAttributeUpdate( attrib_id, new_value )
 
@@ -229,7 +223,7 @@ class NESceneExt(NESceneBase):
 
 
 
-    # Implemented in NESceneBase
+# TODO: Depracate. Implemented in NESceneBase
     #def ValidateConnections( self, attrib_id ):
     #    return self.__m_NodeGraph.ValidateConnections( attrib_id )
 
@@ -250,12 +244,6 @@ class NESceneExt(NESceneBase):
     # Implemented in NESceneBase
     #def ValidateSymboliclinkUpdate( self, object_id, new_slot ):
     #    return self.__m_NodeGraph.ValidateSymboliclinkUpdate( object_id, new_slot )
-
-
-
-    # Implemented in NESceneBase
-    #def GetExposedAttribs( self, object_ids ):
-    #    return self.__m_NodeGraph.CollectExposedAttribs( object_ids )
 
 
 
@@ -324,7 +312,6 @@ class NESceneExt(NESceneBase):
 
     # GUI-dependent function.
     def __UpdateAttributeEditor( self, object_id=None ):
-        #super(NESceneExt, self).__UpdateAttributeEditor( object_id )  <- Do nothing
         try:
             # get object and desc from obj_id
             obj_id = object_id if object_id else self.__m_AttributeEditor.ActiveObjectID()
@@ -338,6 +325,8 @@ class NESceneExt(NESceneBase):
             desc = obj.GetDesc()
             if( desc==None ):
                 return False
+
+            #print( 'NESceneExt::__UpdateAttributeEditor()...', obj.FullKey() )
 
             self.__m_AttributeEditor.DeinitializeWidget()
 
@@ -400,18 +389,17 @@ class NESceneExt(NESceneBase):
 
 
     def Disconnect_Operation( self, conn_id ):
-        super(NESceneExt, self).Disconnect_Operation( conn_id )
+        dest_attrib_id = super(NESceneExt, self).Disconnect_Operation( conn_id )
         # Disconnect in NodeGraph
         #dest_attrib_id = self.__m_NodeGraph.RemoveConnectionByID( conn_id )
-
-        # Set Attribute's Lock/Unlock state in NodeGraph
-        #self.__m_NodeGraph.LockAttributeByID( dest_attrib_id, True )
-
+        
         # Disconnect in GraphicsScene
         self.__m_Scene.Disconnect_Exec( conn_id )
 
         # Update AttributeEditorWidget.
         #self.__m_AttributeEditor.SetEnabled_Exec( dest_attrib_id, True )
+        if( dest_attrib_id ):
+            self.__m_AttributeEditor.SetEnabled_Exec( dest_attrib_id, True )
 
 
 
@@ -459,44 +447,6 @@ class NESceneExt(NESceneBase):
         # Remove group in GraphicsScene
         self.__m_Scene.RemoveGroup_Exec( group_id )
         
-
-
-# Implemented in NESceneBase
-    #def Group_Operation( self, obj_id_list, pos, size, name, object_id, parent_id ):
-
-    #    #-------------------------------- グループノード本体を作るオペレーション ---------------------------#
-    #    group = self.CreateGroup_Operation( pos, size, name, object_id, parent_id )
-
-    #    #--------------------------- グループに子ノードを追加するオペレーション ---------------------------#
-    #    for obj_id in obj_id_list:
-    #        self.Parent_Operation( obj_id, group.ID() )
-
-    #    #--------------------- グループに内包されるコネクションも子供状態にするオペレーション ------------#
-    #    for conn_id in group.CollectInternalConnections():
-    #        self.Parent_Operation( conn_id, group.ID() )
-        
-    #    return group.ID()
-
-
-
-# Implemented in NESceneBase
-    #def Ungroup_Operation( self, group_id ):
-        
-    #    group = self.__m_NodeGraph.GetObjectByID( group_id, (NEGroupObject,) )
-    #    group_parent_id = group.ParentID()
-    #    connection_ids, object_ids = group.GetMemberIDs()
-        
-    #    # グループ内オブジェクトの親をもとに戻す
-    #    for obj_id in object_ids:
-    #        self.Parent_Operation( obj_id, group_parent_id )
-
-    #    # グループ内コネクションの親をもとに戻す
-    #    for conn_id in connection_ids:
-    #        self.Parent_Operation( conn_id, group_parent_id )
-
-    #    # グループを削除する
-    #    self.RemoveGroup_Operation( group_id )
-
 
 
     def Rename_Operation( self, node_id, newname ):
@@ -660,14 +610,14 @@ class NESceneExt(NESceneBase):
 
 
 
-    def Select_Operation_Multi( self, obj_id_list, option ):
+    def Select_Operation( self, obj_id_list, option ):
         try:
-            #print( 'NESceneExt::Select_Operation_Multi()...' )
+            #print( 'NESceneExt::Select_Operation()...' )
             #self.__m_SelectionList.Exec( *obj_id_list, **option )
 
             #if( self.__m_SelectionList.Changed()==False ):
             #    return False
-            result = super(NESceneExt, self).Select_Operation_Multi( obj_id_list, option )
+            result = super(NESceneExt, self).Select_Operation( obj_id_list, option )
             if( result==False ):
                 return False
 
