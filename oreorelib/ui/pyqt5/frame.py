@@ -133,7 +133,7 @@ class TitleBar(QFrame):
     def mousePressEvent(self,event):
         if( event.button() == Qt.LeftButton ):
             self.moving = True
-            self.offset = event.pos()
+            self.offset = self.mapToParent( event.pos() )
         return super(TitleBar, self).mousePressEvent(event)
 
 
