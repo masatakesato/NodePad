@@ -147,8 +147,8 @@ class GraphicsView(QGraphicsView):
 
         # Walkaround for 'Ctrl+MouseLeft' item selection across multiple QGraphicsViews.
         elif( event.modifiers() == Qt.ControlModifier and event.button() == Qt.LeftButton ):# Switch Selection
-            #print( 'GraphicsView::mousePressEvent()... Detected Switch Selection.' )
             if( self.itemAt(event.pos()) ):
+                print( 'GraphicsView::mousePressEvent()... Detected Switch Selection.' )
                 self.__m_MouseMode = MouseMode.SwitchSelection
                 return
             else:
@@ -200,7 +200,9 @@ class GraphicsView(QGraphicsView):
                 self.__ChangeSelection( self.items( self.__m_RubberBand.geometry(), Qt.IntersectsItemShape ), 'true' )
 
         elif( self.__m_MouseMode == MouseMode.SwitchSelection ):# Walkaround for 'Ctrl+MouseLeft' item selection through multiple QGraphicsViews.
-            self.__ChangeSelection( self.items(event.pos()), 'invert' )
+            topmost_item = ( self.itemAt( event.pos() ), )
+            if( any( topmost_item ) ):
+                self.__ChangeSelection( topmost_item, 'invert' )
 
         elif( self.__m_MouseMode == MouseMode.RubberBandSwitchSelection ):# Walkaround for 'Ctrl+MouseLeft' rubberband item selection through multiple QGraphicsViews.
             if( self.__m_RubberBand.isVisible() ):
