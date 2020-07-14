@@ -930,14 +930,13 @@ class NESceneManager:
                 self.ParentByID_Exec( obj_id_list, parent_id, terminate=False )
 
 
+TODO: Refactor postprocess below
+
         # Assign actual name to Node, Group and Symboliclink if possible
         includetypes = ( NENodeSnapshot, NEGroupSnapshot, NESymbolicLinkSnapshot )
-        duplicant_ids = []
         for snapshot in snapshotCommand.Snapshots():
             if( type(snapshot) in includetypes ):
                 self.RenameByID_Exec( refObjIDs[snapshot.ObjectID()], snapshot.Key(), terminate=False )
-                duplicant_ids.append( refObjIDs[snapshot.ObjectID()] )
-
 
         # Translate Duplicated Node/Groups to appropriate position.
         excludetypes = ( NEConnectionSnapshot, NESymbolicLinkSnapshot, NEParentSnapshot )
@@ -951,7 +950,11 @@ class NESceneManager:
             self.TranslateByID_Exec( refObjIDs[snapshot.ObjectID()], newPos, relative=False, terminate=False )
 
 
-        return duplicant_ids
+        # Return duplicated node/group ids in target space 
+        return [ v for k, v in refObjIDs.items() if v in dest_space_children ]
+
+
+
 ######################################################################################################################
 #
 # TODO: 形状パラメータをQtの外側で保持したい. コピペ時の形状サイズ再現性維持のため、下記スナップショット実装に機能拡張が必要
@@ -965,11 +968,6 @@ class NESceneManager:
 #  NEGroupIOSnapshot　　　位置指定
 # 
 ######################################################################################################################
-
-        # return child objects 
-        #return [ v for k, v in refObjIDs.items() ]# if v in dest_space_children ]
-
-        #return list( refObjIDs.values() )
 
 
 
