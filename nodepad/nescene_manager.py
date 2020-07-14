@@ -376,6 +376,9 @@ class NESceneManager:
 
 
     def SelectByID_Exec( self, obj_id_list, option ):
+
+        #print( 'NESceneManager::SelectByID_Exec()...' )
+
         obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject, NEGroupIOObject, NESymbolicLink), parent_id=None )
         
         if( not obj_id_list ):
@@ -418,8 +421,7 @@ class NESceneManager:
 
 # TODO: 既に階層関係を持ったノード/グループ同士の再グループ化ルールを決める
 # TODO: 選択ノード群が複数グループに跨る場合の処理方法を決める.
-# TODO: active_symboliclink_ids is not used. Deprecate?
-    def GroupByID_Exec( self, obj_id_list, parent_id, *, pos=None, size=None, name=None, object_id=None, active_symboliclink_ids=None, groupio_ids=(None, None), align_groupios=True, terminate=True ):
+    def GroupByID_Exec( self, obj_id_list, parent_id, *, pos=None, size=None, name=None, object_id=None, groupio_ids=(None, None), align_groupios=True, terminate=True ):
 
         print( 'NESceneManager::GroupByID_Exec()...' )
 
@@ -680,11 +682,10 @@ class NESceneManager:
 
         obj_id_list = self.__m_refNEScene.GetObjectIDs( obj_name_list )
         parent_id = self.__m_refNEScene.GetObjectID( parent_name, typefilter=(NERootObject, NEGroupObject) ) if parent_name else self.__m_refNEScene.CurrentEditSpaceID()
-# TODO: parent_idはコピー先の親空間.
         if( parent_id ):
             self.DuplicateByID_Exec( obj_id_list, parent_id )
         else:
-            print( 'Invalid space specified while object duplication. aborting...' )
+            print( 'NESceneManager::Duplicate_Exec()... Invalid destination space specified. Aborting Duplication.' )
 
 
     
@@ -693,7 +694,7 @@ class NESceneManager:
         
         print( 'NESceneManager::DuplicateByID_Exec()...' )
 
-# TODO: 複数親空間に跨るオブジェクト群を複製できるようにしたい
+        # 選択オブジェクトの親空間を制限したい場合はparent_id引数を指定する
         obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject), parent_id=None )#parent_id )
         if( not obj_id_list ):
             print( '\tAborting: No valid objects specified.' )
@@ -703,7 +704,7 @@ class NESceneManager:
         self.__m_DuplicationSnapshot.Init( self.__m_refNEScene, obj_id_list )
 
         selection_id_list = self.__ExecuteSnapshot( self.__m_DuplicationSnapshot, (75.0, 75.0), parent_id )
-        SelectCommand( self.__m_refNEScene, selection_id_list, {'clear':True} ).execute()#self.__m_CommandManager.executeCmd( SelectCommand( self.__m_refNEScene, selection_id_list, {'clear':True} ) )
+        SelectCommand( self.__m_refNEScene, selection_id_list, {'clear':True} ).execute()
         self.__m_refNEScene.UpdateSelection()
 
         # Terminate command sequence
@@ -886,7 +887,6 @@ class NESceneManager:
                 #parentID = dest_space_id
                 groupIOIDs = ( refObjIDs[ refSnapshots[i+1].ObjectID() ], refObjIDs[ refSnapshots[i+2].ObjectID() ] )# GroupIO2個分のuuidを取り出す.
                 #name=snapshot.Key(),
-                #self.GroupByID_Exec( obj_id_list, pos=(0,0), name=str(newObjectID), parent_id=dest_space_id, object_id=newObjectID, groupio_ids=groupIOIDs, align_groupios=False, terminate=False )
                 self.CreateGroup_Exec( dest_space_id, name=str(newObjectID), object_id=newObjectID, groupio_ids=groupIOIDs, terminate=False )
                 i+=2 # skip GroupIO snapshots
 

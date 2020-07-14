@@ -114,7 +114,7 @@ class GroupIO(GraphicsNodeItem):
 
     def RemoveItem( self, item ):
         try:
-            #print('GroupIO::RemoveItem...')
+            print( 'GroupIO::RemoveItem()...' )
             idx = self.__m_PortSlots.index(item)
             self.__m_PortSlots.remove(item)
             item.setParentItem( self.parentItem() )

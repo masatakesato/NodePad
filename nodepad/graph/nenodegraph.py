@@ -1030,26 +1030,6 @@ class NENodeGraph():
 
 
 
-    #def ValidateConnections( self, attrib_id ):
-
-    #    valid_connections = {}# key: conn_id, value: outer-connected attribute id
-    #    invalid_connections = []# Invalid connection id list. invalid inter-space connection.
-
-    #    attrib = self.__m_IDMap[attrib_id[0]].AttributeByID(attrib_id[1])
-    #    connectable_space_id = attrib.ParentSpace().ParentID()
-
-    #    for conn in attrib.Connections().values():
-    #        outerattrib = conn.Source() if attrib.IsInputFlow() else conn.Destination()
-
-    #        if( outerattrib.ParentSpace().ID() == connectable_space_id ):# gather connections only inside connectable_space
-    #            valid_connections[conn.ID()] = outerattrib.AttributeID()
-    #        else:
-    #            invalid_connections.append( conn.ID() )
-
-    #    return valid_connections, invalid_connections
-
-
-
     def __ResolveNameConflict( self, obj_id ):
         obj_key = self.__m_IDMap[ obj_id ].FullKey()
         if( self.__m_KeyMap.IsAlreadyUsed( obj_key, [obj_id] ) ):

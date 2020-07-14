@@ -41,34 +41,12 @@ class NEGroupObject(NEGraphObject):
         
         obj.SetParent(self)
         
-        #============= transforma pos from world space to obj's parent space. ====================#
-# TODO: DEPRECATE! Use Transfom matrices instead. 2020.08.30
-        #space = self
-        #pos_stack = []
-        #while( space != None ):
-        #    pos_stack.append( space.GetPosition() )
-        #    space = space.Parent()
-
-        #obj_pos = list(obj.GetPosition())
-        #print( 'obj_pos before:', obj_pos[0], obj_pos[1] )
-        #for pos in reversed(pos_stack):
-        #    obj_pos[0] -= pos[0]
-        #    obj_pos[1] -= pos[1]
-        #print( 'obj_pos after:', obj_pos[0], obj_pos[1] )
-
-        ####################### Transformation using derived matrix #############################
-        obj_pos2 = self._NEGraphObject__m_MatDerived * obj.GetPositionAsVec3()
+        # Transform obj's position to local space.
+        obj_pos = self._NEGraphObject__m_MatDerived * obj.GetPositionAsVec3()
         #print( 'obj_pos_asvec3:', obj.GetPositionAsVec3()[0:3] )
-        #print( 'obj_pos_transformed:', obj_pos2[0], obj_pos2[1] )
+        #print( 'obj_pos_transformed:', obj_pos[0], obj_pos[1] )
         #self._NEGraphObject__m_MatDerived.Print()
-        #########################################################################################
-
-        #obj.SetTranslation( ( obj_pos[0], obj_pos[1] ) )
-        obj.SetTranslation( ( obj_pos2[0], obj_pos2[1] ) )
-
-
-
-        
+        obj.SetTranslation( ( obj_pos[0], obj_pos[1] ) )
 
 
 
@@ -82,30 +60,12 @@ class NEGroupObject(NEGraphObject):
 
         obj.SetParent(None)
 
-        #============= transforma pos form obj's parent space to world space. ====================#
-# TODO: DEPRECATE! Use Transfom matrices instead. 2020.08.30
-        #space = self
-        #pos_stack = []
-        #while( space != None ):
-        #    pos_stack.append( space.GetPosition() )
-        #    space = space.Parent()
-
-        #obj_pos = list(obj.GetPosition())
-        #print( 'obj_pos before:', obj_pos[0], obj_pos[1] )
-        #for pos in pos_stack:
-        #    obj_pos[0] += pos[0]
-        #    obj_pos[1] += pos[1]
-        #print( 'obj_pos after:', obj_pos[0], obj_pos[1] )
-
-        ####################### Transformation using derived matrix #############################
-        obj_pos2 = self._NEGraphObject__m_MatWorld * obj.GetPositionAsVec3()
+        # Transform obj's position to world space.
+        obj_pos = self._NEGraphObject__m_MatWorld * obj.GetPositionAsVec3()
         #print( 'obj_pos_asvec3:', obj.GetPositionAsVec3()[0:3] )
         #print( 'obj_pos_transformed:', obj_pos2[0], obj_pos2[1] )
         #self._NEGraphObject__m_MatDerived.Print()
-        #########################################################################################
-
-        #obj.SetTranslation( ( obj_pos[0], obj_pos[1] ) )
-        obj.SetTranslation( ( obj_pos2[0], obj_pos2[1] ) )
+        obj.SetTranslation( ( obj_pos[0], obj_pos[1] ) )
 
 
 
@@ -417,17 +377,18 @@ class NEGroupSnapshot():
         return self.__m_NodeArgs[5]
 
 
-
+    # TODO: Deprecate
     #def MemberIDs( self ):
     #    return self.__m_MemberIDs
 
 
 
     def __CollectNodeArgs( self, refObj ):
-
-        #excludetypes = ( NEConnectionObject, NEGroupIOObject, NESymbolicLink )
-
+        
         self.__m_NodeArgs = (refObj.ObjectType(), refObj.GetPosition(), refObj.GetSize(), refObj.ID(), refObj.Key(), refObj.ParentID() )
+
+        # TODO: Deprecate
+        #excludetypes = ( NEConnectionObject, NEGroupIOObject, NESymbolicLink )
         #self.__m_MemberIDs = [ obj.ID() for obj in refObj.Children().values() if not type(obj) in excludetypes ]# ConnectionObject, GroupIOObjectはスナップショットから除外
 
 

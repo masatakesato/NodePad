@@ -189,6 +189,8 @@ class GraphicsView(QGraphicsView):
 
     def mouseReleaseEvent(self, event):
 
+        print( 'GraphicsView::mouseReleaseEvent()...' )
+
         if( self.__m_MouseMode == MouseMode.MoveViewport ):
             self.setCursor(Qt.ArrowCursor)
 

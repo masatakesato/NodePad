@@ -47,10 +47,11 @@ class SymbolicLink(GraphicsNodeItem):
         self.__m_Pen = QPen(g_ArrowFrameColor[0], g_ArrowFrameWidth)
         
         self.setFlag( QGraphicsItem.ItemSendsGeometryChanges )
-        self.setFlag( QGraphicsItem.ItemIsMovable )
+        #self.setFlag( QGraphicsItem.ItemIsMovable ) # usually static. set movable only when editing symboliclink order.
         self.setFlag( QGraphicsItem.ItemIsSelectable )
 
         self.__UpdateBoundingRect()
+
 
 
     def __UpdateBoundingRect( self ):
@@ -75,8 +76,10 @@ class SymbolicLink(GraphicsNodeItem):
         self.__m_Shape.addPolygon( self.__m_PolygonShape )
 
 
+
     def ObjectType( self ):
         return self.__m_ObjectType
+
 
 
     def InputPort( self, object_id ):
@@ -87,12 +90,14 @@ class SymbolicLink(GraphicsNodeItem):
             return None
 
 
+
     def OutputPort( self, object_id ):
         try:
             return  self.__m_Ports[ object_id ]
         except:
             traceback.print_exc()
             return None
+
 
 
     def Port( self, object_id ):
@@ -103,32 +108,40 @@ class SymbolicLink(GraphicsNodeItem):
             return None
 
 
+
     def ExposedPort( self ):
         return self.__m_Ports[ self.__m_ExposedID ]
+
 
 
     def ProtectedPort( self ):
         return self.__m_Ports[ self.__m_ProtectedID ]
 
 
+
     def ID( self ):
         return self.__m_ID
+
 
 
     def GroupID( self ):
         return self.__m_GroupID
 
 
+
     def DataFlow( self ):
         return self.__m_Flow
+
 
 
     def IsInputFlow( self ):
         return self.__m_Flow==DataFlow.Input
 
 
+
     def IsOutputFlow( self ):
         return self.__m_Flow==DataFlow.Output
+
 
 
     def SetName( self, name ):
@@ -137,12 +150,15 @@ class SymbolicLink(GraphicsNodeItem):
         self.__UpdateBoundingRect()
 
 
+
     def Name( self ):
         return self.__m_Name
 
 
+
     def SetSlotIndex( self, idx ):
         self.__m_SlotIndex = idx
+
 
 
     def SlotIndex( self ):
@@ -170,14 +186,17 @@ class SymbolicLink(GraphicsNodeItem):
         return super(SymbolicLink, self).itemChange( change, value )
 
 
+
     def boundingRect(self):
         return self.__m_BoundingRect
+
 
 
     def shape( self ):
         if( self.scene().FocusViewID() != self._GraphicsNodeItem__m_RenderLayerID ):# QGraphicsViewごとにアイテムの表示/非表示を視切り替えて正しく動かすのに必要
             return QPainterPath()
         return self.__m_Shape
+
 
 
     def paint(self, painter, option, widget):
@@ -193,4 +212,3 @@ class SymbolicLink(GraphicsNodeItem):
         painter.setFont( self.__m_Font )
         painter.setPen(g_LabelColor)
         painter.drawText( self.__m_LabelRect, self.__m_LabelAlignment, self.__m_Name )
-

@@ -614,7 +614,7 @@ class GraphicsScene(QGraphicsScene):
 
 
     def __SelectionChangedSlot( self ):
-        #print( 'GraphicScene::__SelectionChangedSlot()...' )
+        print( 'GraphicScene::__SelectionChangedSlot()...' )
         
         inclusiveTypes = [ Node, Group, GroupIO ]# SymbolicLinkは外してある.
 
@@ -636,15 +636,17 @@ class GraphicsScene(QGraphicsScene):
         if( item.DataFlow() != groupio.DataFlow() ):
             return False
 
-        # 既にgroupioがitemを保持している場合は、登録処理を中止
+        # 既にitemがgroupioに所属している場合は、itemの並び順だけ更新して終了. 
         if( item.parentItem()==groupio ):
             item.parentItem().SnapItem(item )
             self.__m_refCallbackFunc( 'SetSymbolicLinkSlotIndexByID', item.ID(), item.SlotIndex() )
             return True
 
+        # itemが別のGroupIO所属下にある場合は外す
         if( item.parentItem() ):
             item.parentItem().RemoveItem(item)
         
+        # groupioにitemを新規登録する
         groupio.AddItem( item )
 
         return True
@@ -698,6 +700,8 @@ class GraphicsScene(QGraphicsScene):
 
     def __mouseClickEvent( self, event ):
 
+        #print( 'GraphicsScene::__mouseClickEvent()...' )
+
         if( event.button() == Qt.RightButton ):
             event.accept()
             return False
@@ -717,8 +721,22 @@ class GraphicsScene(QGraphicsScene):
             self.__m_MouseDragMode = MouseMode.DragSymbolicLink
             self.__m_refGroupIO = item.parentItem()
 
+################ TODO: Refactor. Set only selected Symboliclink movable. Freeze all other items. ##################
+            item.setFlag( QGraphicsItem.ItemIsMovable, True )
+            for item_ in self.selectedItems():
+                if( item != item_ ):
+                    item_.setFlag( QGraphicsItem.ItemIsMovable, False )
+
         elif( item ):
             self.__m_MouseDragMode = MouseMode.DragItem
+
+########################### TODO: Refactor. Set items movable except SymbolicLinks. ###############################
+            if( not isinstance(item, Edge) ):
+                item.setFlag( QGraphicsItem.ItemIsMovable, True )
+            for item_ in self.selectedItems():
+                if( isinstance(item_, SymbolicLink) ):
+                    item_.setFlag( QGraphicsItem.ItemIsMovable, False )
+
 
         self.__m_MouseStartPos = event.screenPos()
 
@@ -740,6 +758,8 @@ class GraphicsScene(QGraphicsScene):
 
     def mouseMoveEvent( self, event ):
         
+        #print( 'GraphicsScene::mouseMoveEvent()...' )
+
         groupio = next( (item for item in self.items(event.scenePos()) if isinstance(item, GroupIO) ), None )
 
         if( self.__m_MouseDragMode==MouseMode.DrawEdge ):# drawing connection
@@ -807,8 +827,11 @@ class GraphicsScene(QGraphicsScene):
 
     def mouseReleaseEvent( self, event ):
 
-        item = self.itemAt(event.scenePos(),QTransform())
+        #print( 'GraphicsScene::mouseReleaseEvent()...' )
+
+        item_at = self.itemAt(event.scenePos(),QTransform())
         grabberitem = self.mouseGrabberItem()
+        symlinks_removal = []
         
         # アイテム選択状態でマウスドラッグ終了する場合
         mouseMovement = event.screenPos() - self.__m_MouseStartPos
@@ -816,11 +839,11 @@ class GraphicsScene(QGraphicsScene):
             self.Translate()
 
         if( self.__m_MouseDragMode == MouseMode.DrawEdge ):
-            if( isinstance(item, Port) ):# Portの上でマウスボタンリリースした -> Port間にコネクション作成
-                self.__m_refCallbackFunc( 'ConnectByID', self.__m_refStartPort.PortID(), item.PortID(), check=True )
-            elif( isinstance(item, GroupIO) ):# GroupIO上でリリース -> シンボリックリンク作成
-                if( self.CheckSymbolize(self.__m_refStartPort, item.DataFlow()) ):
-                    self.__m_refCallbackFunc( 'CreateSymbolicLink', self.__m_refStartPort.PortID(), slot_index=item.BlankIndex() )
+            if( isinstance(item_at, Port) ):# Portの上でマウスボタンリリースした -> Port間にコネクション作成
+                self.__m_refCallbackFunc( 'ConnectByID', self.__m_refStartPort.PortID(), item_at.PortID(), check=True )
+            elif( isinstance(item_at, GroupIO) ):# GroupIO上でリリース -> シンボリックリンク作成
+                if( self.CheckSymbolize(self.__m_refStartPort, item_at.DataFlow()) ):
+                    self.__m_refCallbackFunc( 'CreateSymbolicLink', self.__m_refStartPort.PortID(), slot_index=item_at.BlankIndex() )
 
             # __m_TempEdgeを削除する
             self.__m_GraphicsViewLayers[ self.__m_FocusViewID ].RemoveItem( self.__m_TempEdge.ID() )

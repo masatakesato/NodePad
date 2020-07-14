@@ -223,12 +223,6 @@ class NESceneExt(NESceneBase):
 
 
 
-# TODO: Depracate. Implemented in NESceneBase
-    #def ValidateConnections( self, attrib_id ):
-    #    return self.__m_NodeGraph.ValidateConnections( attrib_id )
-
-
-
     # Implemented in NESceneBase
     #def CanBeSymbolized( self, attrib_id ):
     #    return self.__m_NodeGraph.CanBeSymbolized( attrib_id )

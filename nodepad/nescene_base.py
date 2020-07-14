@@ -235,11 +235,6 @@ def Compute( self, dataBlock ):
         return self.__m_NodeGraph.ExtractSymbolicLinkConnections( object_id )
 
 
-# TODO: Deprecate
-    #def ValidateConnections( self, attrib_id ):
-    #    return self.__m_NodeGraph.ValidateConnections( attrib_id )
-
-
 
     def CanBeSymbolized( self, attrib_id ):
         return self.__m_NodeGraph.CanBeSymbolized( attrib_id )
