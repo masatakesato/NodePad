@@ -406,7 +406,7 @@ class NEParentSnapshot():
 
 
 
-    def ParentID( self ):
+    def ObjectID( self ):
         return self.__m_ParentID
 
 

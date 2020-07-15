@@ -30,7 +30,7 @@ class NESceneManager:
         self.__m_Filepath = 'Untitled'
         
         self.__m_CallbackFuncs = {
-            'CreateNode': self.CreateNode_Exec,
+            'CreateNode': self.CreateNodeByID_Exec,
             'CreateCustomNode': self.CreateCustomNode_Exec,
             #'RemoveNodeByID', self.RemoveNodeByID_Exec, # DeleteByID経由で呼び出す
             'ConnectByID': self.ConnectByID_Exec,
@@ -62,7 +62,7 @@ class NESceneManager:
             'CheckLockedByID': self.CheckLockedByID,
             'CheckSymbolizeByID': self.CheckSymbolizeByID,
 
-            'CreateGroup': self.CreateGroup_Exec,# TODO: 試験実装.
+            'CreateGroup': self.CreateGroupByID_Exec,# TODO: 試験実装.
 
             'EditGroupByID': self.EditGroupByID, # Open node edit window for group
         }
@@ -130,9 +130,20 @@ class NESceneManager:
 
     
 
-    def CreateNode_Exec( self, nodetype, *, pos=(0,0), size=None, name=None, parent_id=None, object_id=None, active_attrib_ids=None, terminate=True ):
+    def CreateNode_Exec( self, nodetype, *args, **kwargs ):
         
-        print( 'NESceneManager::CreateNode_Exec()...', nodetype, pos )
+        pos = kwargs['pos'] if 'pos' in kwargs else (0, 0)
+        size = None
+        name = kwargs['name'] if 'name' in kwargs else None
+        parent_id = self.__m_refNEScene.GetObjectID( kwargs['parent'], (NERootObject, NEGroupObject,) ) if 'parent' in kwargs else None
+
+        return self.CreateNodeByID_Exec( nodetype, pos=pos, size=size, name=name, parent_id=parent_id )
+
+
+
+    def CreateNodeByID_Exec( self, nodetype, *, pos=(0,0), size=None, name=None, parent_id=None, object_id=None, active_attrib_ids=None, terminate=True ):
+        
+        print( 'NESceneManager::CreateNodeByID_Exec()...', nodetype, pos )
         
         # Create Node
         self.__m_CommandManager.executeCmd( CreateNodeCommand( self.__m_refNEScene, nodetype, pos, size, name, parent_id, object_id, active_attrib_ids ) )
@@ -365,11 +376,11 @@ class NESceneManager:
 
         if( not obj_id_list ):
             SelectCommand( self.__m_refNEScene, [], {'clear':True} ).execute()
-            self.__m_refNEScene.UpdateSelection()
+            self.__m_refNEScene.UpdateSelection()# Manually propagate 'selection changed' to GUI.
             return False
 
         SelectCommand( self.__m_refNEScene, obj_id_list, option ).execute()
-        self.__m_refNEScene.UpdateSelection()# TODO: 選択処理の結果をGUI表示に反映させる関数( GUI表示更新をトリガーとしたコールバックを全てブロックしてある )
+        self.__m_refNEScene.UpdateSelection()# Manually propagate 'selection changed' to GUI.
 
         return True
 
@@ -412,8 +423,19 @@ class NESceneManager:
 
 
 # TODO: 選択ノード群が複数グループに跨る場合の処理方法を決める.
-    def Group_Exec( self, obj_name_list ):
+    #def Group_Exec( self, obj_name_list ):
+    #    obj_id_list = self.__m_refNEScene.GetObjectIDs( obj_name_list, (NENodeObject, NEGroupObject) )
+    #    return self.GroupByID_Exec( obj_id_list, parent_id=None )
+
+# TODO: 必要? ParentByIDでいいのでは？
+    def Group_Exec( self, *args, **kwargs ):
+
+        # Gather object ids
+        obj_name_list = [ arg for arg in args if isinstance(arg, str) ]
         obj_id_list = self.__m_refNEScene.GetObjectIDs( obj_name_list, (NENodeObject, NEGroupObject) )
+
+        # Check parent space argument
+        parent_id = self.__m_refNEScene.GetObjectID( kwargs['parent'], (NERootObject, NEGroupObject) ) if 'parent' in kwargs else None
 
         return self.GroupByID_Exec( obj_id_list, parent_id=None )
 
@@ -432,8 +454,7 @@ class NESceneManager:
 
         # CreateGroup
         group_pos = pos if pos else self.__m_refNEScene.CenterPosition( obj_id_list )
-        group_id, groupin_id, groupout_id = self.CreateGroup_Exec( parent_id,
-                                                                  pos=group_pos, size=size, name=name, object_id=object_id,
+        group_id, groupin_id, groupout_id = self.CreateGroupByID_Exec( pos=group_pos, size=size, name=name, parent_id=parent_id, object_id=object_id,
                                                                   groupio_ids=groupio_ids, terminate=False )
         
         # Parent NENodeObjects NEGroupObjects, and relevant NEConnectionObjects
@@ -515,7 +536,17 @@ class NESceneManager:
 
 
 
-    def CreateGroup_Exec( self, parent_id, *, pos=(0,0), size=None, name=None, object_id=None, groupio_ids=(None, None), terminate=True ):
+    def CreateGroup_Exec( self, *args, **kwargs ):
+        # Check arguments
+        pos = kwargs['pos'] if 'pos' in kwargs else (0, 0)
+        name = kwargs['name'] if 'name' in kwargs else None
+        parent_id = self.__m_refNEScene.GetObjectID( kwargs['parent'], (NERootObject, NEGroupObject) ) if 'parent' in kwargs else None
+
+        return self.CreateGroupByID_Exec( pos=pos, name=name, parent_id=parent_id )
+
+
+
+    def CreateGroupByID_Exec( self, *, pos=(0,0), size=None, name=None, parent_id=None, object_id=None, groupio_ids=(None, None), terminate=True ):
 
         # Group Createion Command
         group_id = self.__m_CommandManager.executeCmd( CreateGroupCommand( self.__m_refNEScene, pos, size, name, parent_id, object_id ) )._CreateGroupCommand__m_Snapshot.ObjectID()
@@ -643,9 +674,15 @@ class NESceneManager:
 
 
 
-    def Delete_Exec( self, obj_name_list ):
-        obj_id_list = self.__m_refNEScene.GetObjectIDs( obj_name_list )
-        self.DeleteByID_Exec( obj_id_list )
+    #def Delete_Exec( self, obj_name_list ):
+    #    obj_id_list = self.__m_refNEScene.GetObjectIDs( obj_name_list )
+    #    self.DeleteByID_Exec( obj_id_list )
+
+
+
+    def Delete_Exec( self, *args, **kwargs ):
+        obj_name_list = [ arg for arg in args if isinstance(arg, str) ]
+        self.DeleteByID_Exec( self.__m_refNEScene.GetObjectIDs( obj_name_list ) )
 
 
 
@@ -678,14 +715,15 @@ class NESceneManager:
 
 
 
-    def Duplicate_Exec( self, obj_name_list, *, parent_name=None ):
-
+    def Duplicate_Exec( self, *args, **kwargs ):
+        # Gather object ids
+        obj_name_list = [ arg for arg in args if isinstance(arg, str) ]
         obj_id_list = self.__m_refNEScene.GetObjectIDs( obj_name_list )
-        parent_id = self.__m_refNEScene.GetObjectID( parent_name, typefilter=(NERootObject, NEGroupObject) ) if parent_name else self.__m_refNEScene.CurrentEditSpaceID()
-        if( parent_id ):
-            self.DuplicateByID_Exec( obj_id_list, parent_id )
-        else:
-            print( 'NESceneManager::Duplicate_Exec()... Invalid destination space specified. Aborting Duplication.' )
+
+        # Check options
+        parent_id = self.__m_refNEScene.GetObjectID( kwargs['parent'], (NERootObject, NEGroupObject) ) if 'parent' in kwargs else None
+
+        return self.DuplicateByID_Exec( obj_id_list, parent_id )
 
 
     
@@ -796,7 +834,7 @@ class NESceneManager:
 
     def Parent_Exec( self, parent_name ):
 
-        parent_id = self.__m_refNEScene.GetObjectID( parent_name, (NERootObject, NEGroupObject,) )
+        parent_id = self.__m_refNEScene.GetObjectID( parent_name, (NERootObject, NEGroupObject) )
         if( parent_id==None ):
             print( 'Aborting Parent Operation: No parent space specified.' )
             return False
@@ -871,23 +909,22 @@ class NESceneManager:
 
 
 
-    def __ExecuteSnapshot( self, snapshotCommand, offset, dest_space_id ):
+    def __ExecuteSnapshot( self, snapshotCommand, offset, dest_space_id=None ):
 
         refObjIDs = snapshotCommand.PublishObjectIDs()
         refSnapshots = snapshotCommand.Snapshots()
+        parent_space_id = dest_space_id if dest_space_id else self.__m_refNEScene.CurrentEditSpaceID()
 
-        # Construct NodeGraph structure
+        # Construct NodeGraph structure from Snapshots
         for i in range( len(refSnapshots) ):
 
             snapshot = refSnapshots[i]
             
             if( isinstance(snapshot, NEGroupSnapshot) ):
-                #obj_id_list = [ refObjIDs[member_id] for member_id in snapshot.MemberIDs() ]
                 newObjectID = refObjIDs[snapshot.ObjectID()]
-                #parentID = dest_space_id
                 groupIOIDs = ( refObjIDs[ refSnapshots[i+1].ObjectID() ], refObjIDs[ refSnapshots[i+2].ObjectID() ] )# GroupIO2個分のuuidを取り出す.
                 #name=snapshot.Key(),
-                self.CreateGroup_Exec( dest_space_id, name=str(newObjectID), object_id=newObjectID, groupio_ids=groupIOIDs, terminate=False )
+                self.CreateGroupByID_Exec( name=str(newObjectID), parent_id=parent_space_id, object_id=newObjectID, groupio_ids=groupIOIDs, terminate=False )
                 i+=2 # skip GroupIO snapshots
 
             elif( isinstance(snapshot, NENodeSnapshot) ):
@@ -895,22 +932,21 @@ class NESceneManager:
                         [ refObjIDs[id_] for id_ in snapshot.ActiveAttribIDs()[0] ], # input attributes
                         [ refObjIDs[id_] for id_ in snapshot.ActiveAttribIDs()[1] ], ] # output attributes
                 newObjectID = refObjIDs[snapshot.ObjectID()]
-                #parentID = dest_space_id
                 #name=snapshot.Key(), 
-                self.CreateNode_Exec( snapshot.ObjectType(), name=str(newObjectID), parent_id=dest_space_id, object_id=newObjectID, active_attrib_ids=active_attrib_ids, terminate=False )
+                self.CreateNodeByID_Exec( snapshot.ObjectType(), name=str(newObjectID), parent_id=parent_space_id, object_id=newObjectID, active_attrib_ids=active_attrib_ids, terminate=False )
                 for attribName in snapshot.AttribNames():
                     self.RenameAttributeByID_Exec( (refObjIDs[attribName[0]], refObjIDs[attribName[1]]), attribName[2], terminate=False )
                 for attribArg in snapshot.AttribArgs():
                     self.SetAttributeByID_Exec( (refObjIDs[attribArg[0]], refObjIDs[attribArg[1]]), attribArg[2], terminate=False )
 
             elif( isinstance(snapshot, NEConnectionSnapshot) ):
-                object_id = refObjIDs[snapshot.ObjectID()]
+                newObjectID = refObjIDs[snapshot.ObjectID()]
                 src_id = snapshot.SourceAttribID()
-                attrib1_id = ( refObjIDs[src_id[0]], refObjIDs[src_id[1]] )
+                newAttrib1_ID = ( refObjIDs[src_id[0]], refObjIDs[src_id[1]] )
                 dst_id = snapshot.DestinationAttribID()
-                attrib2_id = ( refObjIDs[dst_id[0]], refObjIDs[dst_id[1]] )
-                self.ConnectByID_Exec( attrib1_id, attrib2_id, object_id=object_id, terminate=False )
-                self.SetVisibleByID_Exec( object_id, snapshot.Visibility(), terminate=False )
+                newAttrib2_ID = ( refObjIDs[dst_id[0]], refObjIDs[dst_id[1]] )
+                self.ConnectByID_Exec( newAttrib1_ID, newAttrib2_ID, object_id=newObjectID, terminate=False )
+                self.SetVisibleByID_Exec( newObjectID, snapshot.Visibility(), terminate=False )
 
             elif( isinstance(snapshot, NESymbolicLinkSnapshot) ):
                 obj_idset = snapshot.ObjectIDSet()
@@ -925,35 +961,35 @@ class NESceneManager:
 
             elif( isinstance(snapshot, NEParentSnapshot) ):
                 print( 'TODO: NEParentSnapshot detected...' )
-                parent_id = refObjIDs[ snapshot.ParentID() ]
+                parent_id = refObjIDs[ snapshot.ObjectID() ]
                 obj_id_list = [ refObjIDs[obj_id] for obj_id in snapshot.MemberIDs() ]
                 self.ParentByID_Exec( obj_id_list, parent_id, terminate=False )
 
+        # Apply name and translation to each node.
+        root_duplicate_ids = []
 
-TODO: Refactor postprocess below
+        dest_space_children = self.__m_refNEScene.GetObjectByID( parent_space_id, (NERootObject, NEGroupObject,) ).Children()
+        typefilter_rename = ( NENodeSnapshot, NEGroupSnapshot, NESymbolicLinkSnapshot, )
+        typefilter_translate = ( NENodeSnapshot, NEGroupSnapshot, NEGroupIOSnapshot, )
 
-        # Assign actual name to Node, Group and Symboliclink if possible
-        includetypes = ( NENodeSnapshot, NEGroupSnapshot, NESymbolicLinkSnapshot )
         for snapshot in snapshotCommand.Snapshots():
-            if( type(snapshot) in includetypes ):
-                self.RenameByID_Exec( refObjIDs[snapshot.ObjectID()], snapshot.Key(), terminate=False )
 
-        # Translate Duplicated Node/Groups to appropriate position.
-        excludetypes = ( NEConnectionSnapshot, NESymbolicLinkSnapshot, NEParentSnapshot )
-        dest_space_children = self.__m_refNEScene.GetObjectByID( dest_space_id, (NERootObject, NEGroupObject,) ).Children()
-        for snapshot in snapshotCommand.Snapshots():
-            if( type(snapshot) in excludetypes ):
-                continue
-            pos = snapshot.Translation()
-            offsetflag = float( snapshot.ObjectID() in dest_space_children ) #float( snapshot.ObjectID() in snapshotCommand.SellectedIDs())
-            newPos = ( pos[0] + offset[0] * offsetflag, pos[1] + offset[1] * offsetflag )# Slide Default position if object is selected 
-            self.TranslateByID_Exec( refObjIDs[snapshot.ObjectID()], newPos, relative=False, terminate=False )
+            object_id = refObjIDs[snapshot.ObjectID()]
+            
+            if( type(snapshot) in typefilter_rename ):# Set actual name to Node, Group and Symboliclink
+                self.RenameByID_Exec( object_id, snapshot.Key(), terminate=False )
+            
+            if( type(snapshot) in typefilter_translate ):# Translate Duplicated Node/Groups to appropriate position.
+                pos = snapshot.Translation()
+                offsetflag = float( snapshot.ObjectID() in dest_space_children )
+                newPos = ( pos[0] + offset[0] * offsetflag, pos[1] + offset[1] * offsetflag )
+                self.TranslateByID_Exec( object_id, newPos, relative=False, terminate=False )
 
+            if( object_id in dest_space_children ):# Add to root_duplicate_ids list if object is a direct child of target group
+                root_duplicate_ids.append( object_id )
 
         # Return duplicated node/group ids in target space 
-        return [ v for k, v in refObjIDs.items() if v in dest_space_children ]
-
-
+        return root_duplicate_ids
 
 ######################################################################################################################
 #

@@ -8,7 +8,7 @@ for i in range(50):
 
 
 //============== ノード削除コマンド ============//
-manager.Delete_Exec( ['TestNode2001'] )
+manager.Delete_Exec( 'TestNode2001' )
 
 
 //=============== グループ化コマンド ==================//
@@ -28,7 +28,7 @@ manager.CreateNode_Exec( 'Float', pos=(0, 0) )
 manager.CreateNode_Exec( 'TestNode2', pos=(200, 0) )
 manager.Connect_Exec( 'Float001.Output', 'TestNode2001.In' )
 manager.Disconnect_Exec( 'Float001.Output', 'TestNode2001.In' )
-manager.Delete_Exec( ['connector_e3a8582c-9d36-11e7-8ff2-1078d249cd7c'] )# Use Disconnect_Exec, not recommended. 
+manager.Delete_Exec( 'connector_e3a8582c-9d36-11e7-8ff2-1078d249cd7c' )# Use Disconnect_Exec, not recommended. 
 
 
 //=============== アトリビュート値セットコマンド ============//
@@ -51,30 +51,31 @@ manager = MainWidget.SceneManager()
 manager.CreateNode_Exec( 'Float', pos=(0, 0) )
 manager.CreateNode_Exec( 'TestNode2', pos=(200, 0) )
 manager.SetAttribute_Exec( 'Float001.Output', -0.6 )
-manager.Group_Exec( ['Float001'] )
 manager.Connect_Exec( 'Float001.Output', 'TestNode2001.In' )
+manager.Group_Exec( 'Float001' )
 
 manager.Rename_Exec( 'Group001|Output', 'Bo' )# manager.RenameAttribute_Exec( 'Group001.Output', 'Bo' )
 manager.RenameAttribute_Exec( 'Group001.Bo', 'Bo22' )
 manager.SetAttribute_Exec( 'Group001.Bo22', -0.6 )
 
-// アトリビュートと内側シンボリックリンクを接続する
+
+############## テストケース作ること.上のコマンドからだと連続で動かせない. ##############################
+// アトリビュートと内側シンボリックリンクを接続する <---- 
 manager.Connect_Exec( 'Float001.Output', 'Output.Internal' )
-
-
 manager.CreateSymbolicLink_Exec( 'Group001.Output' )
+
 
 
 //============= グループ作成してGroupIOを選択する ===================//
 manager = MainWidget.SceneManager()
 manager.CreateNode_Exec( 'Float', pos=(0, 0) )
-manager.Group_Exec( ['Float001'] )
-manager.Select_Exec( ['Float001'] )
-manager.Select_Exec( ['Group001|Group Input', 'Group001|Group Output'] )
-manager.Duplicate_Exec( ['Group001'] )
-manager.Duplicate_Exec( ['Group001|Group Input', 'Group001|Group Output'] )# invalid comand
-manager.Delete_Exec( ['Group001|Group Input'] )# invalid command
-manager.Delete_Exec( ['Group001'] )
+manager.Group_Exec( 'Float001' )
+manager.Select_Exec( 'Float001' )
+manager.Select_Exec( 'Group001|Group Input', 'Group001|Group Output' )
+manager.Duplicate_Exec( 'Group001' )
+manager.Duplicate_Exec( 'Group001|Group Input', 'Group001|Group Output' )# invalid comand
+manager.Delete_Exec( 'Group001|Group Input' )# invalid command
+manager.Delete_Exec( 'Group001' )
 
 
 //============= 複数選択 ===================//
