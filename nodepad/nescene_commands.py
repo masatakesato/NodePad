@@ -205,27 +205,28 @@ class DisconnectCommand(CommandBase):
 
 
 
-class ReconnectCommand(CommandBase):
+# Unused.
+#class ReconnectCommand(CommandBase):
 
-    def __init__( self, neScene, object_id, attrib_ids ):
-        super(ReconnectCommand, self).__init__()
+#    def __init__( self, neScene, object_id, attrib_ids ):
+#        super(ReconnectCommand, self).__init__()
 
-        self.__m_refNEScene = neScene
-        self.__m_Snapshot = neScene.GetSnapshot( object_id )# keep before-reconnection state for undo
+#        self.__m_refNEScene = neScene
+#        self.__m_Snapshot = neScene.GetSnapshot( object_id )# keep before-reconnection state for undo
 
-        self.__m_NewAttribIDs = attrib_ids
+#        self.__m_NewAttribIDs = attrib_ids
 
 
-    def execute( self ):
-        self.__m_refNEScene.Reconnect_Operation( self.__m_Snapshot.ObjectID(), self.__m_NewAttribIDs[0], self.__m_NewAttribIDs[1] )
+#    def execute( self ):
+#        self.__m_refNEScene.Reconnect_Operation( self.__m_Snapshot.ObjectID(), self.__m_NewAttribIDs[0], self.__m_NewAttribIDs[1] )
 
-    def undo( self ):
-        print( 'ReconnectCommand::undo()...' )
-        self.__m_refNEScene.Reconnect_Operation( self.__m_Snapshot.ObjectID(), self.__m_Snapshot.SourceAttribID(), self.__m_Snapshot.DestinationAttribID() )
+#    def undo( self ):
+#        print( 'ReconnectCommand::undo()...' )
+#        self.__m_refNEScene.Reconnect_Operation( self.__m_Snapshot.ObjectID(), self.__m_Snapshot.SourceAttribID(), self.__m_Snapshot.DestinationAttribID() )
 
-    def redo( self ):
-        print( 'ReconnectCommand::redo()...' )
-        self.__m_refNEScene.Reconnect_Operation( self.__m_Snapshot.ObjectID(), self.__m_NewAttribIDs[0], self.__m_NewAttribIDs[1] )
+#    def redo( self ):
+#        print( 'ReconnectCommand::redo()...' )
+#        self.__m_refNEScene.Reconnect_Operation( self.__m_Snapshot.ObjectID(), self.__m_NewAttribIDs[0], self.__m_NewAttribIDs[1] )
 
 
 

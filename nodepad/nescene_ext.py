@@ -23,38 +23,38 @@ class NESceneExt(NESceneBase):
     def __init__( self ):
         super(NESceneExt, self).__init__()
         
-        self.__m_Scene = GraphicsScene( self.GetRootID(), self.NodeTypeManager() )
-        self.__m_AttributeEditor = AttributeEditorWidget()
+        self.__m_GraphEditor = GraphicsScene( self.GetRootID(), self.NodeTypeManager() )
+        self.__m_AttribEditor = AttributeEditorWidget()
 
 
 
     def Release( self ):
         super(NESceneExt, self).Release()
-        self.__m_Scene.Release()
+        self.__m_GraphEditor.Release()
 
 
 
     def Clear( self ):
         super(NESceneExt, self).Clear()
 
-        self.__m_Scene.Init( self.GetRootID() )
-        self.__m_AttributeEditor.DeinitializeWidget()
+        self.__m_GraphEditor.Init( self.GetRootID() )
+        self.__m_AttribEditor.DeinitializeWidget()
 
 
 
     # GUI-dependent function. nescene_managerでのみ使用.
     def BindCommandCallbacks( self, func ):
         #super(NESceneExt, self).BindCommandCallbacks( func )  <- Do nothing
-        self.__m_Scene.BindCallbackFunc( func )
-        self.__m_AttributeEditor.BindCallbackFunc( func )
+        self.__m_GraphEditor.BindCallbackFunc( func )
+        self.__m_AttribEditor.BindCallbackFunc( func )
 
 
 
     # GUI-dependent function. nescene_managerでのみ使用.
     def UnbindCallbackFuncs( self ):
         #super(NESceneExt, self).BindCommandCallbacks( func )  <- Do nothing
-        self.__m_Scene.UnbindCallbackFunc()
-        self.__m_AttributeEditor.UnbindCallbackFunc()
+        self.__m_GraphEditor.UnbindCallbackFunc()
+        self.__m_AttribEditor.UnbindCallbackFunc()
 
         
 
@@ -71,16 +71,16 @@ class NESceneExt(NESceneBase):
 
 
     # GUI-dependent function. mainwidgetでのみ使用. 
-    def GraphicsScene( self ):
-        #super(NESceneExt, self).GraphicsScene()  <- Do nothing
-        return self.__m_Scene
+    def GraphEditor( self ):
+        #super(NESceneExt, self).GraphEditor()  <- Do nothing
+        return self.__m_GraphEditor
 
 
 
     # GUI-dependent function.
     def AttributeEditor( self ):
         #super(NESceneExt, self).AttributeEditor()  <- Do nothing
-        return self.__m_AttributeEditor
+        return self.__m_AttribEditor
 
 
 
@@ -250,7 +250,7 @@ class NESceneExt(NESceneBase):
     # GUI-dependent function.
     def GetGroupIOPosition( self, object_id ):
         #super(NESceneExt, self).GetGroupIOPosition( object_id )  <- Do nothing
-        return self.__m_Scene.CalcGroupIOOffsets( object_id )
+        return self.__m_GraphEditor.CalcGroupIOOffsets( object_id )
 
 
 
@@ -281,7 +281,7 @@ class NESceneExt(NESceneBase):
     # GUI-dependent function.
     def CurrentEditSpaceID( self ):
         #super(NESceneExt, self).CurrentEditSpaceID()  <- Do nothing
-        return self.__m_Scene.FocusViewID()# self.__m_FocusViewID
+        return self.__m_GraphEditor.FocusViewID()# self.__m_FocusViewID
 
 
 
@@ -300,15 +300,19 @@ class NESceneExt(NESceneBase):
     # GUI-dependent function.
     def UpdateSelection( self ):
         super(NESceneExt, self).UpdateSelection()#  <- Do nothing
-        self.__m_Scene.UpdateSelection( self._NESceneBase__m_SelectionList.Iter() )
+        self.__m_GraphEditor.UpdateSelection( self._NESceneBase__m_SelectionList.Iter() )
 
 
 
     # GUI-dependent function.
     def __UpdateAttributeEditor( self, object_id=None ):
         try:
+            if( self.__m_AttribEditor.IsLocked() ):
+                print( 'NESceneExt::__UpdateAttributeEditor()... AttributeEditor is Locked.' )
+                return False
+
             # get object and desc from obj_id
-            obj_id = object_id if object_id else self.__m_AttributeEditor.ActiveObjectID()
+            obj_id = object_id if object_id else self.__m_AttribEditor.ActiveObjectID()
             if( obj_id==None ):
                 return False
 
@@ -322,14 +326,14 @@ class NESceneExt(NESceneBase):
 
             #print( 'NESceneExt::__UpdateAttributeEditor()...', obj.FullKey() )
 
-            self.__m_AttributeEditor.DeinitializeWidget()
+            self.__m_AttribEditor.DeinitializeWidget()
 
             # initialize attribute editor widget
-            self.__m_AttributeEditor.InitializeWidget( obj_id, desc, obj.Key() )
+            self.__m_AttribEditor.InitializeWidget( obj_id, desc, obj.Key() )
         
             # set values to widget
             for attrib in obj.Attributes().values():
-                self.__m_AttributeEditor.SetValue_Exec( attrib.AttributeID(), attrib.Value() )
+                self.__m_AttribEditor.SetValue_Exec( attrib.AttributeID(), attrib.Value() )
 
             return True
 
@@ -347,8 +351,8 @@ class NESceneExt(NESceneBase):
         #newNode = self.__m_NodeGraph.AddNode( nodeDesc, computeFunc, pos, size, name, object_id, attrib_ids, parent_id )
         
         newsize = newNode.GetSize()
-        # Create Node in GraphicsScene
-        self.__m_Scene.CreateNode_Exec( newNode.Key(), newNode.ID(), newNode.GetDesc(), newNode.GetPosition(), newNode.ParentID() )                    
+        # Create Node in GraphEditor
+        self.__m_GraphEditor.CreateNode_Exec( newNode.Key(), newNode.ID(), newNode.GetDesc(), newNode.GetPosition(), newNode.ParentID() )                    
 
         return newNode
 
@@ -359,8 +363,8 @@ class NESceneExt(NESceneBase):
         # Remove node in NodeGraph
         #result = self.__m_NodeGraph.RemoveNodeByID( node_id )
 
-        # Remove node in GraphicsScene
-        self.__m_Scene.RemoveNode_Exec( node_id )
+        # Remove node in GraphEditor
+        self.__m_GraphEditor.RemoveNode_Exec( node_id )
 
 
 
@@ -372,11 +376,11 @@ class NESceneExt(NESceneBase):
         # Set Attribute's Lock/Unlock state in NodeGraph
         #self.__m_NodeGraph.LockAttributeByID( newConn.DestinationAttribID(), False )
         
-        # Create Connection in GraphicsScene
-        self.__m_Scene.Connect_Exec( newConn.Key(), newConn.ID(), newConn.SourceAttribID(), newConn.DestinationAttribID(), newConn.ParentID() )
+        # Create Connection in GraphEditor
+        self.__m_GraphEditor.Connect_Exec( newConn.Key(), newConn.ID(), newConn.SourceAttribID(), newConn.DestinationAttribID(), newConn.ParentID() )
 
         # Update AttributeEditorWidget
-        self.__m_AttributeEditor.SetEnabled_Exec( newConn.DestinationAttribID(), False )
+        self.__m_AttribEditor.SetEnabled_Exec( newConn.DestinationAttribID(), False )
 
         return newConn
 
@@ -387,34 +391,35 @@ class NESceneExt(NESceneBase):
         # Disconnect in NodeGraph
         #dest_attrib_id = self.__m_NodeGraph.RemoveConnectionByID( conn_id )
         
-        # Disconnect in GraphicsScene
-        self.__m_Scene.Disconnect_Exec( conn_id )
+        # Disconnect in GraphEditor
+        self.__m_GraphEditor.Disconnect_Exec( conn_id )
 
         # Update AttributeEditorWidget.
-        #self.__m_AttributeEditor.SetEnabled_Exec( dest_attrib_id, True )
+        #self.__m_AttribEditor.SetEnabled_Exec( dest_attrib_id, True )
         if( dest_attrib_id ):
-            self.__m_AttributeEditor.SetEnabled_Exec( dest_attrib_id, True )
+            self.__m_AttribEditor.SetEnabled_Exec( dest_attrib_id, True )
 
 
 
-    def Reconnect_Operation( self, conn_id, attrib1_id, attrib2_id ):
-        conn = super(NESceneExt, self).Reconnect_Operation( conn_id, attrib1_id, attrib2_id )
-        # Reconnect in NodeGraph
-        #conn, prev_src_attrib_id, prev_dest_attrib_id = self.__m_NodeGraph.ReconnectByID( conn_id, attrib1_id, attrib2_id )
+# Unused.
+    #def Reconnect_Operation( self, conn_id, attrib1_id, attrib2_id ):
+    #    conn = super(NESceneExt, self).Reconnect_Operation( conn_id, attrib1_id, attrib2_id )
+    #    # Reconnect in NodeGraph
+    #    #conn, prev_src_attrib_id, prev_dest_attrib_id = self.__m_NodeGraph.ReconnectByID( conn_id, attrib1_id, attrib2_id )
 
-        # Set Attribute's Lock/Unlock state in NodeGraph
-        #prev_state = self.__m_NodeGraph.LockAttributeByID( conn.DestinationAttribID(), False )
+    #    # Set Attribute's Lock/Unlock state in NodeGraph
+    #    #prev_state = self.__m_NodeGraph.LockAttributeByID( conn.DestinationAttribID(), False )
 
-        # Reconnect in GraphicsScene
-        self.__m_Scene.Reconnect_Exec( conn.ID(), ( conn.Source().ParentID(), conn.SourceID() ), ( conn.Destination().ParentID(), conn.DestinationID() ), conn.ParentID() )
+    #    # Reconnect in GraphEditor
+    #    self.__m_GraphEditor.Reconnect_Exec( conn.ID(), ( conn.Source().ParentID(), conn.SourceID() ), ( conn.Destination().ParentID(), conn.DestinationID() ), conn.ParentID() )
 
-        # TODO: NESceneBase::Reconnect_Operation()内でLockAttributeOperationを呼び出せばいいのでは？
-        # Update AttributeEditorWidget
-        #self.__m_AttributeEditor.SetEnabled_Exec( conn.DestinationAttribID(), False )
+    #    # TODO: NESceneBase::Reconnect_Operation()内でLockAttributeOperationを呼び出せばいいのでは？
+    #    # Update AttributeEditorWidget
+    #    #self.__m_AttribEditor.SetEnabled_Exec( conn.DestinationAttribID(), False )
 
-        # return previous connection
-        #return (prev_src_attrib_id, prev_dest_attrib_id)
-        return conn
+    #    # return previous connection
+    #    #return (prev_src_attrib_id, prev_dest_attrib_id)
+    #    return conn
 
 
 
@@ -425,8 +430,8 @@ class NESceneExt(NESceneBase):
         # Create Group in NodeGraph
         #newGroup = self.__m_NodeGraph.AddGroup( pos, size, name, object_id, parent_id )
 
-        # Create Group in GraphicsScene
-        self.__m_Scene.CreateGroup_Exec( newGroup.Key(), newGroup.ID(), newGroup.GetPosition(), newGroup.ParentID() )
+        # Create Group in GraphEditor
+        self.__m_GraphEditor.CreateGroup_Exec( newGroup.Key(), newGroup.ID(), newGroup.GetPosition(), newGroup.ParentID() )
         
         return newGroup
 
@@ -438,8 +443,8 @@ class NESceneExt(NESceneBase):
         # Remove group in NodeGraph
         #result = self.__m_NodeGraph.RemoveGroupByID( group_id )
 
-        # Remove group in GraphicsScene
-        self.__m_Scene.RemoveGroup_Exec( group_id )
+        # Remove group in GraphEditor
+        self.__m_GraphEditor.RemoveGroup_Exec( group_id )
         
 
 
@@ -448,11 +453,12 @@ class NESceneExt(NESceneBase):
         # Rename in NodeGraph
         #new_name, prev_name = self.__m_NodeGraph.RenameByID( node_id, newname )
 
-        # Rename in GraphicsScene
-        self.__m_Scene.Rename_Exec( node_id, new_name )
+        # Rename in GraphEditor
+        self.__m_GraphEditor.Rename_Exec( node_id, new_name )
 
         # Update AttributeEditorWidget
-        self.__m_AttributeEditor.Rename_Exec( node_id, new_name )
+        if( self.__m_AttribEditor.HasTrigerred()==False ):
+            self.__m_AttribEditor.Rename_Exec( node_id, new_name )
 
         return new_name, prev_name
 
@@ -463,11 +469,12 @@ class NESceneExt(NESceneBase):
         # Rename in NodeGraph
         #new_name, prev_name = self.__m_NodeGraph.RenameAttributeByID( attrib_id, newname ) 
 
-        # Rename in GraphicsScene
-        self.__m_Scene.RenameAttribute_Exec( attrib_id, new_name )
+        # Rename in GraphEditor
+        self.__m_GraphEditor.RenameAttribute_Exec( attrib_id, new_name )
         
         # Update AttributeEditorWidget
-        self.__m_AttributeEditor.RenameAttribute_Exec( attrib_id, new_name )
+        if( self.__m_AttribEditor.HasTrigerred()==False ):
+            self.__m_AttribEditor.RenameAttribute_Exec( attrib_id, new_name )
         
         return new_name, prev_name
 
@@ -479,7 +486,8 @@ class NESceneExt(NESceneBase):
         #prev_value = self.__m_NodeGraph.SetAttributeByID( attrib_id, new_value )
 
         # Update AttributeEditorWidget
-        self.__m_AttributeEditor.SetValue_Exec( attrib_id, new_value )
+        if( self.__m_AttribEditor.HasTrigerred()==False ):
+            self.__m_AttribEditor.SetValue_Exec( attrib_id, new_value )
 
         return prev_value
 
@@ -491,7 +499,8 @@ class NESceneExt(NESceneBase):
         #prev_state = self.__m_NodeGraph.LockAttributeByID( attrib_id, new_state )
 
         # Update AttributeEditorWidget
-        self.__m_AttributeEditor.SetEnabled_Exec( attrib_id, new_state )
+        if( self.__m_AttribEditor.HasTrigerred()==False ):
+            self.__m_AttribEditor.SetEnabled_Exec( attrib_id, new_state )
 
         return prev_state
 
@@ -502,10 +511,9 @@ class NESceneExt(NESceneBase):
         # Set Translation in NodeGraph
         #translation = self.__m_NodeGraph.TranslateByID( object_id, new_pos, realative )
 
-TODO: GraphicsScene上でのオブジェクト移動からコマンドをキックした場合に、エディタ上伝播が重複する問題が発生!!!
-TODO: GraphicsSceneの更新をブロックする仕組みが必要.
-        # Set Translation in GraphicsScene
-        self.__m_Scene.Translate_Exec( object_id, new_pos, realative )
+        # Set Translation in GraphEditor
+        if( self.__m_GraphEditor.HasTriggered()==False ):
+            self.__m_GraphEditor.Translate_Exec( object_id, new_pos, realative )
 
         return translation
 
@@ -516,8 +524,8 @@ TODO: GraphicsSceneの更新をブロックする仕組みが必要.
         # Set Visibility in NodeGraph
         #prev_flag = self.__m_NodeGraph.SetVisibleByID( object_id, flag )
 
-        # Set Visibility in GraphicsScene
-        self.__m_Scene.SetVisible_Exec( object_id, flag )
+        # Set Visibility in GraphEditor
+        self.__m_GraphEditor.SetVisible_Exec( object_id, flag )
 
         return prev_flag
 
@@ -528,11 +536,11 @@ TODO: GraphicsSceneの更新をブロックする仕組みが必要.
         # Set parent in NodeGraph
         #prev_parent_id, new_pos = self.__m_NodeGraph.ParentByID( object_id, parent_id )
 
-        # Set parent in GraphicsScene
-        self.__m_Scene.Parent_Exec( object_id, parent_id )
+        # Set parent in GraphEditor
+        self.__m_GraphEditor.Parent_Exec( object_id, parent_id )
 
         # Set new position on parent space
-        self.__m_Scene.Translate_Exec( object_id, obj.GetPosition(), False )# new_pos
+        self.__m_GraphEditor.Translate_Exec( object_id, obj.GetPosition(), False )# new_pos
 
         return obj#prev_parent_id
 
@@ -543,8 +551,8 @@ TODO: GraphicsSceneの更新をブロックする仕組みが必要.
         # Create Symboliclink in NodeGraph
         #symboliclink = self.__m_NodeGraph.ActivateSymbolicLinkByID( group_id, attribdesc, value, name, symboliclink_idset, slot_index )
         
-        # Create Symboliclink in GraphicsScene
-        self.__m_Scene.ActivateSymbolicLink_Exec( symboliclink.ParentID(), symboliclink.Key(), symboliclink.GetDesc(), symboliclink.SlotIndex() )# slot_index )
+        # Create Symboliclink in GraphEditor
+        self.__m_GraphEditor.ActivateSymbolicLink_Exec( symboliclink.ParentID(), symboliclink.Key(), symboliclink.GetDesc(), symboliclink.SlotIndex() )# slot_index )
         
         # Update AttributeEditorWidget
         self.__UpdateAttributeEditor()
@@ -558,8 +566,8 @@ TODO: GraphicsSceneの更新をブロックする仕組みが必要.
         # Remove symboliclink in NodeGraph
         #self.__m_NodeGraph.DeactivateSymbolicLinkByID( symboliclink_id )
 
-        # Remove symboliclink in GraphicsScene
-        self.__m_Scene.DeactivateSymbolicLink_Exec( symboliclink_id )
+        # Remove symboliclink in GraphEditor
+        self.__m_GraphEditor.DeactivateSymbolicLink_Exec( symboliclink_id )
 
         # Update AttributeEditorWidget
         self.__UpdateAttributeEditor()
@@ -572,8 +580,8 @@ TODO: GraphicsSceneの更新をブロックする仕組みが必要.
         # Set symbolicLink order in NodeGraph
         #prev_index = self.__m_NodeGraph.SetSymbolicLinkSlotIndexByID( object_id, index )
 
-        # Set symbolicLink order in GraphicsScene
-        self.__m_Scene.SetSymbolicLinkSlotIndex_Exec( object_id, index )
+        # Set symbolicLink order in GraphEditor
+        self.__m_GraphEditor.SetSymbolicLinkSlotIndex_Exec( object_id, index )
 
         # Update AttributeEditorWidget
         self.__UpdateAttributeEditor()
@@ -588,8 +596,8 @@ TODO: GraphicsSceneの更新をブロックする仕組みが必要.
         # Create GroupIO in NodeGraph
         #groupio = self.__m_NodeGraph.CreateGroupIO( dataflow, pos, group_id, object_id )
 
-        # Create GroupIO in GraphicsScene
-        self.__m_Scene.CreateGroupIO_Exec( groupio.Key(), dataflow, groupio.GetPosition(), group_id, groupio.ID() )
+        # Create GroupIO in GraphEditor
+        self.__m_GraphEditor.CreateGroupIO_Exec( groupio.Key(), dataflow, groupio.GetPosition(), group_id, groupio.ID() )
         
         return groupio
 
@@ -601,8 +609,8 @@ TODO: GraphicsSceneの更新をブロックする仕組みが必要.
         # Remove GroupIO in NodeGraph
         #self.__m_NodeGraph.RemoveGroupIOByID( object_id )
 
-        # Remove GroupIO in GraphicsScene
-        self.__m_Scene.RemoveGroupIO_Exec( object_id )
+        # Remove GroupIO in GraphEditor
+        self.__m_GraphEditor.RemoveGroupIO_Exec( object_id )
 
 
 
@@ -617,7 +625,7 @@ TODO: GraphicsSceneの更新をブロックする仕組みが必要.
             if( result==False ):
                 return False
 
-            self.__m_AttributeEditor.DeinitializeWidget()
+            self.__m_AttribEditor.DeinitializeWidget()
 
             obj_ids_editable = self.FilterObjectIDs( self.GetSelectedObjectIDs(), typefilter=c_EditableTypes, parent_id=None )
             # self.__m_NodeGraph.FilterObjects( self.GetSelectedObjectIDs(), typefilter=c_EditableTypes, parent_id=None )
@@ -632,11 +640,11 @@ TODO: GraphicsSceneの更新をブロックする仕組みが必要.
             if( desc==None ):    return False
 
             # initialize attribute editor widget
-            self.__m_AttributeEditor.InitializeWidget( obj_id, desc, obj.Key() )
+            self.__m_AttribEditor.InitializeWidget( obj_id, desc, obj.Key() )
         
             # set values to widget
             for attrib in obj.Attributes().values():
-                self.__m_AttributeEditor.SetValue_Exec( attrib.AttributeID(), attrib.Value() )
+                self.__m_AttribEditor.SetValue_Exec( attrib.AttributeID(), attrib.Value() )
 
             return True
 

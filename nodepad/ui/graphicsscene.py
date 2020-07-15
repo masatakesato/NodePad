@@ -42,8 +42,7 @@ class GraphicsScene(QGraphicsScene):
         self.__m_refCallbackFunc = None
         self.__m_refNodeTypeManager = nodetypemanager
 
-        self.__m_TranslateProhibitedTypes = [ Edge, SymbolicLink ]
-
+        self.__m_Triggered = False # True if this instance triggered NodeGraph update.
 
         self.__m_MouseDragMode = MouseMode.DoNothing
 
@@ -76,6 +75,11 @@ class GraphicsScene(QGraphicsScene):
 
         self.__m_refCallbackFunc = None
         self.__m_refNodeTypeManager = None
+
+
+
+    def HasTriggered( self ):
+        return self.__m_Triggered
 
 
 
@@ -535,8 +539,8 @@ class GraphicsScene(QGraphicsScene):
 
 
 
-    def CheckLocked( self, port_id ):
-        return self.__m_refCallbackFunc( 'CheckLockedByID', port_id )
+    def IsPortLocked( self, port_id ):
+        return self.__m_refCallbackFunc( 'IsAttributeLockedByID', port_id )
 
 
 
@@ -567,13 +571,22 @@ class GraphicsScene(QGraphicsScene):
 
 
     def Translate( self, offset ):
-        return self.__m_refCallbackFunc( 'TranslateByID', [item.ID() for item in self.selectedItems()], (offset.x(), offset.y()), relative=False )
-TODO: Refactor
+        self.__m_Triggered = True
+        result = self.__m_refCallbackFunc( 'TranslateByID', [item.ID() for item in self.selectedItems()], (offset.x(), offset.y()), relative=True )
+        self.__m_Triggered = False
+        return result
+
+# TODO: Deprecate
+        #self.__m_Triggered = True
+
+        #self.__m_TranslateProhibitedTypes = [ Edge, SymbolicLink ]
 
         #for item in self.selectedItems():
         #    if( type(item) in self.__m_TranslateProhibitedTypes ): continue
         #    itemPos = item.scenePos()
-        #    self.__m_refCallbackFunc( 'TranslateByID', item.ID(), (itemPos.x(), itemPos.y()) )
+        #    self.__m_refCallbackFunc( 'TranslateByID', [item.ID()], (itemPos.x(), itemPos.y()) )
+
+        #self.__m_Triggered = False
 
 
 
@@ -712,7 +725,7 @@ TODO: Refactor
         # check clicked graphicsitem
         item = self.itemAt( event.scenePos(), QTransform() )
         if( isinstance(item, Port) ):
-            if( self.CheckLocked( item.PortID() )==False ): # Draw connection guideline if port is unlocked.
+            if( self.IsPortLocked( item.PortID() )==False ): # Draw connection guideline if port is unlocked.
                 self.__m_refStartPort = item
                 self.__m_TempEdge = TemporaryEdge( item.scenePos() )
                 self.addItem(self.__m_TempEdge)
@@ -741,7 +754,7 @@ TODO: Refactor
                     item_.setFlag( QGraphicsItem.ItemIsMovable, False )
 
 
-        self.__m_MouseStartPos = event.screenPos()
+        self.__m_MouseStartPos = event.scenePos()#event.screenPos()
 
         return True
 
@@ -837,8 +850,9 @@ TODO: Refactor
         symlinks_removal = []
         
         # アイテム選択状態でマウスドラッグ終了する場合
-        mouseMovement = event.screenPos() - self.__m_MouseStartPos
+        mouseMovement = event.scenePos() - self.__m_MouseStartPos#event.screenPos() - self.__m_MouseStartPos
         if( self.__m_MouseDragMode==MouseMode.DragItem and ( mouseMovement.x() or mouseMovement.y() ) ):
+            print(mouseMovement )
             self.Translate( mouseMovement )
 
         if( self.__m_MouseDragMode == MouseMode.DrawEdge ):

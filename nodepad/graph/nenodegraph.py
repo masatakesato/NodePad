@@ -354,76 +354,79 @@ class NENodeGraph():
             return None
 
 
+# Unused.
+    #def ReconnectByID( self, conn_id, attrib1_id, attrib2_id ):
+    #    try:
+    #        conn = self.__m_IDMap[ conn_id ]
+    #        prev_src_attrib_id = conn.Source().AttributeID()
+    #        prev_dest_attrib_id = conn.Destination().AttributeID()
+    #        prev_parent_id = conn.ParentID()
 
-    def ReconnectByID( self, conn_id, attrib1_id, attrib2_id ):
-        try:
-            conn = self.__m_IDMap[ conn_id ]
-            prev_src_attrib_id = conn.Source().AttributeID()
-            prev_dest_attrib_id = conn.Destination().AttributeID()
-            prev_parent_id = conn.ParentID()
+    #        ###################### Disconnect ########################
+    #        # *---conn---*
+    #        curr_source_attrib = conn.Source()
+    #        curr_dest_attrib = conn.Destination()
 
-            ###################### Disconnect ########################
-            # *---conn---*
-            curr_source_attrib = conn.Source()
-            curr_dest_attrib = conn.Destination()
+    #        # Break source's attrib-connection link  x---conn---*
+    #        curr_source_attrib.UnbindConnection( conn )
+    #        conn.UnbindSource()
 
-            # Break source's attrib-connection link  x---conn---*
-            curr_source_attrib.UnbindConnection( conn )
-            conn.UnbindSource()
-
-            # Break destination's attrib-connection link x---conn---x
-            curr_dest_attrib.UnbindConnection( conn )
-            conn.UnbindDestination()
+    #        # Break destination's attrib-connection link x---conn---x
+    #        curr_dest_attrib.UnbindConnection( conn )
+    #        conn.UnbindDestination()
             
-            # Disconnect NEData Reference
-            curr_source_data = curr_source_attrib.Data()
-            curr_dest_data = curr_dest_attrib.Data()
-            curr_source_data.UnbindReference( curr_dest_data )
-            curr_dest_data.UnbindReference( curr_source_data )
+    #        # Disconnect NEData Reference
+    #        curr_source_data = curr_source_attrib.Data()
+    #        curr_dest_data = curr_dest_attrib.Data()
+    #        curr_source_data.UnbindReference( curr_dest_data )
+    #        curr_dest_data.UnbindReference( curr_source_data )
 
-            # Propagate Dirty Flag to Destination Attribute(s).
-            self.__m_Pipeline.PropagateDirty( curr_dest_attrib.ParentID() )
+    #        # Propagate Dirty Flag to Destination Attribute(s).
+    #        self.__m_Pipeline.PropagateDirty( curr_dest_attrib.ParentID() )
 
 
-            ##################### Reconnect ##########################
-            # Get New Attribute
-            attrib1 = self.GetAttributeByID( attrib1_id )
-            attrib2 = self.GetAttributeByID( attrib2_id )
-            new_source_attrib, new_dest_attrib = (attrib1, attrib2) if attrib1.IsOutputFlow() else (attrib2, attrib1)
+    #        ##################### Reconnect ##########################
+    #        # Get New Attribute
+    #        attrib1 = self.GetAttributeByID( attrib1_id )
+    #        attrib2 = self.GetAttributeByID( attrib2_id )
+    #        new_source_attrib, new_dest_attrib = (attrib1, attrib2) if attrib1.IsOutputFlow() else (attrib2, attrib1)
 
-            # Establish source's attrib-connection link
-            new_source_attrib.BindConnection( conn )
-            conn.BindSource( new_source_attrib )
+    #        # Establish source's attrib-connection link
+    #        new_source_attrib.BindConnection( conn )
+    #        conn.BindSource( new_source_attrib )
 
-            # Establish dest's attrib-connection link
-            new_dest_attrib.BindConnection( conn )
-            conn.BindDestination( new_dest_attrib )
+    #        # Establish dest's attrib-connection link
+    #        new_dest_attrib.BindConnection( conn )
+    #        conn.BindDestination( new_dest_attrib )
 
-            # Set parent space
-            new_source_attrib.ParentSpace().AddMember( conn )
+    #        # Set parent space
+    #        new_source_attrib.ParentSpace().AddMember( conn )
 
-            # Connect NEData
-            new_source_data = new_source_attrib.Data()
-            new_dest_data = new_dest_attrib.Data()
-            new_source_data.BindReference( new_dest_data )
-            new_dest_data.BindReference( new_source_data )
+    #        # Connect NEData
+    #        new_source_data = new_source_attrib.Data()
+    #        new_dest_data = new_dest_attrib.Data()
+    #        new_source_data.BindReference( new_dest_data )
+    #        new_dest_data.BindReference( new_source_data )
 
-            # Propagate Dirty Flag to Destination Attribute(s).
-            self.__m_Pipeline.PropagateDirty( new_dest_attrib.ParentID() )
+    #        # Propagate Dirty Flag to Destination Attribute(s).
+    #        self.__m_Pipeline.PropagateDirty( new_dest_attrib.ParentID() )
 
-            # Update connected ObjectTypes if needed.
-            if( new_source_attrib.Parent().ObjectType()=='InputSymbolicLink' ):
-                conn.SetObjectType( 'InputSymbolicLinkConnection' )
-            elif( new_dest_attrib.Parent().ObjectType()=='OutputSymbolicLink' ):
-                conn.SetObjectType( 'OutputSymbolicLinkConnection' )
-            else:
-                conn.SetObjectType( 'Connection' )
+    #        # Update connected ObjectTypes if needed.
+    #        if( new_source_attrib.Parent().ObjectType()=='InputSymbolicLink' ):
+    #            conn.SetObjectType( 'InputSymbolicLinkConnection' )
+    #        elif( new_dest_attrib.Parent().ObjectType()=='OutputSymbolicLink' ):
+    #            conn.SetObjectType( 'OutputSymbolicLinkConnection' )
+    #        else:
+    #            conn.SetObjectType( 'Connection' )
 
-            return conn
+    #        if( new_dest_attrib.HasConnections()==False ):
+    #            new_dest_attrib.SetEnable(True)
 
-        except:
-            traceback.print_exc()
-            return None
+    #        return conn
+
+    #    except:
+    #        traceback.print_exc()
+    #        return None
 
 
 

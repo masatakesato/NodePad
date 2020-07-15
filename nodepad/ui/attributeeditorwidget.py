@@ -86,8 +86,10 @@ class NodeInfo_Widget(QFrame):
         value = self.__m_LineEdit.text()
         if( value ):#and not value.isspace() ):
             self.__m_refCallbackFunc( self.__m_ID, self.__m_LineEdit.text() )
+            self.__m_CurrentValue = value
         else:
-            self.__m_LineEdit.setText( self.__m_CurrentValue )            
+            self.__m_LineEdit.setText( self.__m_CurrentValue )
+            
 
 
 
@@ -765,10 +767,7 @@ class AttributeEditorWidget(QFrame):
         self.setMinimumWidth(350)
         self.setStyleSheet( UIStyle.g_StaticFrameStyleSheet )
 
-        self.__m_CallbackFuncs = {
-            'SetValue_Exec': self.SetValue_Exec,
-            'SetEnabled_Exec': self.SetEnabled_Exec,
-        }
+        self.__m_Triggered = False # True if this instance triggered NodeGraph update.
 
         self.__m_refCallbackFunc = None
 
@@ -776,10 +775,6 @@ class AttributeEditorWidget(QFrame):
         self.__m_bWidgetExpanded = { 'Input': True, 'Output': True, 'GroupInput': True, 'GroupOutput': True }
 
 
-    def __SwitchExpand( self, key ):
-        #print( 'AttributeEditorWidget::Switching Attribute Editor Expand/Collapse:', key )
-        self.__m_bWidgetExpanded[key] = not self.__m_bWidgetExpanded[key]
-        
 
     def InitializeWidget( self, obj_id, nodeDesc, name ):
 
@@ -790,6 +785,7 @@ class AttributeEditorWidget(QFrame):
             self.__CreateWidget_GroupIO( nodeDesc, self.__m_refCallbackFunc )
         else:
             self.__CreateWidget( nodeDesc, name, self.__m_refCallbackFunc )
+
             
 
     def DeinitializeWidget( self ):
@@ -811,52 +807,72 @@ class AttributeEditorWidget(QFrame):
         self.__m_WidgetDict.clear()
 
 
+
     def BindCallbackFunc( self, callbackfunc ):
         self.__m_refCallbackFunc = callbackfunc
+
 
 
     def UnbindCallbackFunc( self ):
         self.__m_refCallbackFunc = None
 
 
+
     def ActiveObjectID( self ):
         return self.__m_refObjectID
 
 
-    def ExecCommandCallback( self, func_name, *args, **kwargs ):
-        try:
-            return self.__m_CallbackFuncs[ func_name ]( *args, **kwargs )
-        except:
-            traceback.print_exc()
-            return None
-
 
     def Rename_Exec( self, node_id, name ):
+        print( 'AttributeEditorWidget::Rename_Exec()...' )
         if( node_id in self.__m_WidgetDict ):
             self.__m_WidgetDict[ node_id ].SetValue( name )
 
 
 
     def RenameAttribute_Exec( self, attrib_id, name ):
+        print( 'AttributeEditorWidget::RenameAttribute_Exec()...' )
         if( attrib_id in self.__m_WidgetDict ):
             self.__m_WidgetDict[ attrib_id ].SetLabel( name )
 
 
+
     def SetValue_Exec( self, attrib_id, value ):
+        print( 'AttributeEditorWidget::SetValue_Exec()...' )
         if( attrib_id in self.__m_WidgetDict ):
             self.__m_WidgetDict[ attrib_id ].SetValue( value )
 
 
+
     def SetEnabled_Exec( self, attrib_id, state ):
+        print( 'AttributeEditorWidget::SetEnabled_Exec()...' )
         if( attrib_id in self.__m_WidgetDict ):
             self.__m_WidgetDict[ attrib_id ].setEnabled( state )
+
+
+
+    def HasTrigerred( self ):
+        return self.__m_Triggered
+
+
+
+    def __CallbackFunc( self, *args, **kwargs ):
+        self.__m_Triggered = True
+        self.__m_refCallbackFunc( *args, **kwargs )
+        self.__m_Triggered = False
+
+
+
+    def __SwitchExpand( self, key ):
+        #print( 'AttributeEditorWidget::Switching Attribute Editor Expand/Collapse:', key )
+        self.__m_bWidgetExpanded[key] = not self.__m_bWidgetExpanded[key]
 
 
 
     def __CreateWidget( self, nodeDesc, name, callbackfunc ):
 
         #====================== Initialize Node Title =======================#
-        nodeInfoWidget = NodeInfo_Widget( self.__m_refObjectID, nodeDesc.ObjectType(), self, functools.partial( callbackfunc, 'RenameByID' ) )
+        nodeInfoWidget = NodeInfo_Widget( self.__m_refObjectID, nodeDesc.ObjectType(), self, functools.partial( self.__CallbackFunc, 'RenameByID' ) )
         nodeInfoWidget.SetValue( name )
         self.__m_WidgetDict[ self.__m_refObjectID ] = nodeInfoWidget
         self.layout().addWidget( nodeInfoWidget )
@@ -881,7 +897,7 @@ class AttributeEditorWidget(QFrame):
                 continue
             
             # Create AttributeWidget and assign as collapsible widget's child
-            newWidget = self.__CreateAttributeWidget( desc, callbackfunc )
+            newWidget = self.__CreateAttributeWidget( desc, self.__CallbackFunc )
 
             # Assign Widget
             if( newWidget ):
@@ -908,7 +924,7 @@ class AttributeEditorWidget(QFrame):
                 continue
             
             # Create AttributeWidget and assign as collapsible widget's child
-            newWidget = self.__CreateAttributeWidget( desc, callbackfunc )
+            newWidget = self.__CreateAttributeWidget( desc, self.__CallbackFunc )
 
             # Assign Widget
             if( newWidget ):
@@ -923,38 +939,25 @@ class AttributeEditorWidget(QFrame):
             del collapsibleWidget_Out
 
 
+
     def __CreateAttributeWidget( self, desc, callbackfunc, *, name=None ):
 
         label = desc.Name() if name==None else name
 
         if( desc.DataType() is float ):
-            return AttributeEditor_ScalarDouble( desc.ObjectID(), label, -1000.0, 1000.0, 2, 0.01, self, functools.partial( callbackfunc, 'SetAttributeByID' ) )
+            return AttributeEditor_ScalarDouble( desc.ObjectID(), label, -1000.0, 1000.0, 2, 0.01, self, functools.partial( self.__CallbackFunc, 'SetAttributeByID' ) )
 
         elif( desc.DataType() is int ):
-            return AttributeEditor_ScalarInt( desc.ObjectID(), label, -100, 100, 1, 10, self, functools.partial( callbackfunc, 'SetAttributeByID' ) )
+            return AttributeEditor_ScalarInt( desc.ObjectID(), label, -100, 100, 1, 10, self, functools.partial( self.__CallbackFunc, 'SetAttributeByID' ) )
 
         elif( desc.DataType() is str ):
-            return AttributeEditor_String( desc.ObjectID(), label, self, functools.partial( callbackfunc, 'SetAttributeByID' ) )
+            return AttributeEditor_String( desc.ObjectID(), label, self, functools.partial( self.__CallbackFunc, 'SetAttributeByID' ) )
 
         elif( desc.DataType() is bool ):
-            return AttributeEditor_CheckBox( desc.ObjectID(), label, self, functools.partial( callbackfunc, 'SetAttributeByID' ) )
+            return AttributeEditor_CheckBox( desc.ObjectID(), label, self, functools.partial( self.__CallbackFunc, 'SetAttributeByID' ) )
 
         else:
             return None
-
-
-
-
-    def mousePressEvent( self, event ):
-        # なにもない場所でマウスクリックした際に、UIからフォーカスを外す
-        focuswidget = self.focusWidget()
-        if( focuswidget ):
-            if( isinstance(focuswidget, QLineEdit) ):
-                focuswidget.editingFinished.emit()# 編集途中の文字列をQLineEditに保持させる
-            focuswidget.clearFocus()
-
-        return super(AttributeEditorWidget, self).mousePressEvent(event)
-
 
 
 
@@ -974,14 +977,14 @@ class AttributeEditorWidget(QFrame):
 
             for desc in nodeDesc.InputAttribDescs():
                 # Create AttributeNameWidget and assign as collapsible widget's child 
-                nameWidget = NodeInfo_Widget( desc.ObjectID()[0], 'Attribute Name', self, functools.partial( callbackfunc, 'RenameByID' ) )
+                nameWidget = NodeInfo_Widget( desc.ObjectID()[0], 'Attribute Name', self, functools.partial( self.__CallbackFunc, 'RenameByID' ) )
                 nameWidget.SetValue( desc.Name() )
                 self.__m_WidgetDict[ nameWidget.ID() ] = nameWidget
                 collapsibleWidget_In.AddWidget( nameWidget)
 
                 # Create AttributeWidget and assign as collapsible widget's child
                 if( desc.IsEditable()==True ):
-                    attribWidget = self.__CreateAttributeWidget( desc, callbackfunc, name='Value' )
+                    attribWidget = self.__CreateAttributeWidget( desc, self.__CallbackFunc, name='Value' )
                     if( attribWidget ):
                         attribWidget.setEnabled( desc.Enabled() )
                         self.__m_WidgetDict[ attribWidget.ID() ] = attribWidget
@@ -1003,14 +1006,14 @@ class AttributeEditorWidget(QFrame):
 
             for desc in nodeDesc.OutputAttribDescs():
                 # Create AttributeNameWidget and assign as collapsible widget's child 
-                nameWidget = NodeInfo_Widget( desc.ObjectID()[0], 'Attribute Name', self, functools.partial( callbackfunc, 'RenameByID' ) )
+                nameWidget = NodeInfo_Widget( desc.ObjectID()[0], 'Attribute Name', self, functools.partial( self.__CallbackFunc, 'RenameByID' ) )
                 nameWidget.SetValue( desc.Name() )
                 self.__m_WidgetDict[ nameWidget.ID() ] = nameWidget
                 collapsibleWidget_Out.AddWidget( nameWidget)
 
                 # Create AttributeWidget and assign as collapsible widget's child
                 if( desc.IsEditable()==True ):
-                    attribWidget = self.__CreateAttributeWidget( desc, callbackfunc, name='Value' )
+                    attribWidget = self.__CreateAttributeWidget( desc, self.__CallbackFunc, name='Value' )
                     if( attribWidget ):
                         self.__m_WidgetDict[ attribWidget.ID() ] = attribWidget
                         collapsibleWidget_Out.AddWidget( attribWidget )
@@ -1020,3 +1023,15 @@ class AttributeEditorWidget(QFrame):
         
             self.__m_AttributeEditWidget.AddWidget( collapsibleWidget_Out )
             collapsibleWidget_Out.SetExpand( self.__m_bWidgetExpanded['GroupOutput'] )
+
+
+
+    def mousePressEvent( self, event ):
+        # なにもない場所でマウスクリックした際に、UIからフォーカスを外す
+        focuswidget = self.focusWidget()
+        if( focuswidget ):
+            if( isinstance(focuswidget, QLineEdit) ):
+                focuswidget.editingFinished.emit()# 編集途中の文字列をQLineEditに保持させる
+            focuswidget.clearFocus()
+
+        return super(AttributeEditorWidget, self).mousePressEvent(event)

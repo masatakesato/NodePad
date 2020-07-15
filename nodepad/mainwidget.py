@@ -30,9 +30,9 @@ class MainWidget(MainWindow):
 
         # Setup default view
         rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep ) 
-        rootView.setScene( self.__m_NEScene.GraphicsScene() )
-        rootView.FocusViewIdChanged.connect( self.__m_NEScene.GraphicsScene().SetFocusViewID )
-        rootView.RenderViewIdChanged.connect( self.__m_NEScene.GraphicsScene().SetRenderViewID )
+        rootView.setScene( self.__m_NEScene.GraphEditor() )
+        rootView.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
+        rootView.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
 
         self.__m_Views[ self.__m_NEScene.GetRootID() ] = rootView
 
@@ -547,11 +547,11 @@ class MainWidget(MainWindow):
         print( 'MainWidget::CreateNodeEditView()...' )
 
         view = GraphicsView( view_id, g_GridStep )
-        view.setScene( self.__m_NEScene.GraphicsScene() )
+        view.setScene( self.__m_NEScene.GraphEditor() )
 
         view.setWindowTitle( title )
-        view.FocusViewIdChanged.connect( self.__m_NEScene.GraphicsScene().SetFocusViewID )
-        view.RenderViewIdChanged.connect( self.__m_NEScene.GraphicsScene().SetRenderViewID )
+        view.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
+        view.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
         view.WidgetClosed.connect( functools.partial(self.__RemoveEditorViewCallback, view_id ) )# 削除時のコールバック関数
 
         self.__m_Views[ view_id ] = view

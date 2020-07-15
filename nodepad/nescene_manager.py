@@ -59,7 +59,7 @@ class NESceneManager:
             'Undo': self.Undo,
             'Redo': self.Redo,
             'CheckConnectivityByID': self.CheckConnectivityByID,
-            'CheckLockedByID': self.CheckLockedByID,
+            'IsAttributeLockedByID': self.IsAttributeLockedByID_Exec,
             'CheckSymbolizeByID': self.CheckSymbolizeByID,
 
             'CreateGroup': self.CreateGroupByID_Exec,# TODO: 試験実装.
@@ -412,7 +412,7 @@ class NESceneManager:
 
 
 
-    def CheckLockedByID( self, attrib_id ):
+    def IsAttributeLockedByID_Exec( self, attrib_id ):
         return self.__m_refNEScene.IsAttributeLocked( attrib_id )
 
 
@@ -463,8 +463,8 @@ class NESceneManager:
         # Align GroupIO positions
         if( align_groupios ):
             groupio_pos = self.__m_refNEScene.GetGroupIOPosition( group_id )# Generate GroupIOs' default position
-            self.TranslateByID_Exec( groupin_id, groupio_pos[0], relative=False, terminate=False )
-            self.TranslateByID_Exec( groupout_id, groupio_pos[1], relative=False, terminate=False )
+            self.TranslateByID_Exec( (groupin_id,), groupio_pos[0], relative=False, terminate=False )
+            self.TranslateByID_Exec( (groupout_id,), groupio_pos[1], relative=False, terminate=False )
 
         # Clear selection
         SelectCommand( self.__m_refNEScene, [], {'clear':True} ).execute()
@@ -1003,7 +1003,7 @@ class NESceneManager:
                 pos = snapshot.Translation()
                 offsetflag = float( snapshot.ObjectID() in dest_space_children )
                 newPos = ( pos[0] + offset[0] * offsetflag, pos[1] + offset[1] * offsetflag )
-                self.TranslateByID_Exec( object_id, newPos, relative=False, terminate=False )
+                self.TranslateByID_Exec( (object_id,), newPos, relative=False, terminate=False )
 
             if( object_id in dest_space_children ):# Add to root_duplicate_ids list if object is a direct child of target group
                 root_duplicate_ids.append( object_id )
