@@ -792,12 +792,32 @@ class NESceneManager:
 
 
 
-    def TranslateByID_Exec( self, object_id, translate, *, relative=False, terminate=True ):
+    #def TranslateByID_Exec( self, object_id, translate, *, relative=False, terminate=True ):
 
-        if( self.__m_refNEScene.PositionChanged(object_id, translate, False) == False ):
+    #    if( self.__m_refNEScene.PositionChanged(object_id, translate, relative) == False ):
+    #        return False
+
+    #    self.__m_CommandManager.executeCmd( TranslateCommand( self.__m_refNEScene, object_id, translate, relative ) )
+
+    #    # Terminate command sequence
+    #    if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
+
+    #    return True
+
+
+
+    def TranslateByID_Exec( self, obj_id_list, translate, *, relative=False, terminate=True ):
+
+        posChanged = False
+        obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=c_EditableTypes, parent_id=None )#parent_id )        
+
+        for object_id in obj_id_list:
+            if( self.__m_refNEScene.PositionChanged( object_id, translate, relative ) ):
+                self.__m_CommandManager.executeCmd( TranslateCommand( self.__m_refNEScene, object_id, translate, relative ) )
+                posChanged = True
+
+        if( posChanged==False ):
             return False
-
-        self.__m_CommandManager.executeCmd( TranslateCommand( self.__m_refNEScene, object_id, translate, relative ) )
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )

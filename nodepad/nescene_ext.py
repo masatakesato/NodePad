@@ -502,6 +502,8 @@ class NESceneExt(NESceneBase):
         # Set Translation in NodeGraph
         #translation = self.__m_NodeGraph.TranslateByID( object_id, new_pos, realative )
 
+TODO: GraphicsScene上でのオブジェクト移動からコマンドをキックした場合に、エディタ上伝播が重複する問題が発生!!!
+TODO: GraphicsSceneの更新をブロックする仕組みが必要.
         # Set Translation in GraphicsScene
         self.__m_Scene.Translate_Exec( object_id, new_pos, realative )
 

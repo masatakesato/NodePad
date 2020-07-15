@@ -566,11 +566,14 @@ class GraphicsScene(QGraphicsScene):
 
 
 
-    def Translate( self ):
-        for item in self.selectedItems():
-            if( type(item) in self.__m_TranslateProhibitedTypes ): continue
-            itemPos = item.scenePos()
-            self.__m_refCallbackFunc( 'TranslateByID', item.ID(), (itemPos.x(), itemPos.y()) )
+    def Translate( self, offset ):
+        return self.__m_refCallbackFunc( 'TranslateByID', [item.ID() for item in self.selectedItems()], (offset.x(), offset.y()), relative=False )
+TODO: Refactor
+
+        #for item in self.selectedItems():
+        #    if( type(item) in self.__m_TranslateProhibitedTypes ): continue
+        #    itemPos = item.scenePos()
+        #    self.__m_refCallbackFunc( 'TranslateByID', item.ID(), (itemPos.x(), itemPos.y()) )
 
 
 
@@ -614,7 +617,7 @@ class GraphicsScene(QGraphicsScene):
 
 
     def __SelectionChangedSlot( self ):
-        print( 'GraphicScene::__SelectionChangedSlot()...' )
+        #print( 'GraphicScene::__SelectionChangedSlot()...' )
         
         inclusiveTypes = [ Node, Group, GroupIO ]# SymbolicLinkは外してある.
 
@@ -836,7 +839,7 @@ class GraphicsScene(QGraphicsScene):
         # アイテム選択状態でマウスドラッグ終了する場合
         mouseMovement = event.screenPos() - self.__m_MouseStartPos
         if( self.__m_MouseDragMode==MouseMode.DragItem and ( mouseMovement.x() or mouseMovement.y() ) ):
-            self.Translate()
+            self.Translate( mouseMovement )
 
         if( self.__m_MouseDragMode == MouseMode.DrawEdge ):
             if( isinstance(item_at, Port) ):# Portの上でマウスボタンリリースした -> Port間にコネクション作成
