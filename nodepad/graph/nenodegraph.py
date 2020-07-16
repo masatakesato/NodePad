@@ -113,6 +113,15 @@ c_EditableTypes = (
 
 
 
+c_SelectableTypes = (
+    NENodeObject,
+    NEConnectionObject,
+    NEGroupObject,
+    NEGroupIOObject,
+    NESymbolicLink, )
+
+
+
 
 
 class NENodeGraph():

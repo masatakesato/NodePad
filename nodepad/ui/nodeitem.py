@@ -51,12 +51,12 @@ class Node(GraphicsNodeItem):
 
         # NodeEdit Pushbutton
         #if( node_edit_callback ):
-        #    self.__m_EditButton = PushButton( QPixmap( ':/resource/images/edit-group.png'), node_edit_callback )# TODO: attach code_edit_callback
+        #    self.__m_EditButton = PushButton( QPixmap( ':/resource/images/edit-group.png'), node_edit_callback )# TODO: attach code_edit_callback for custom scripting.
         #    self.__m_EditButton.setParentItem( self )
         #    self.__m_EditButton.setPos( self.__m_BoundingRect.width() - g_TitlebarHeight, 0.5 * (g_TitlebarHeight-g_ButtonSize) )
 
 
-        # DropShadow Effect......Heavy!!! causes access violation!!
+        # DropShadow Effect...... Disabled. Decreases performance. Causes access violation.
         #effect = QGraphicsDropShadowEffect()
         #effect.setBlurRadius(5)
         #effect.setOffset(5,5)

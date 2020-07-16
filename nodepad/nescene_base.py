@@ -313,45 +313,6 @@ def Compute( self, dataBlock ):
 
 
 
-    def UpdateSelection( self ):
-        print( 'NESceneBase::UpdateSelection()...' )
-        #self.__m_GraphEditor.UpdateSelection( self.__m_SelectionList.Iter() )
-
-
-
-
-
-# TODO: GUI-specific method. Should be removed from NESceneBase
-    #def __UpdateAttributeEditor( self, object_id=None ):
-    #    try:
-    #        # get object and desc from obj_id
-    #        obj_id = object_id if object_id else self.__m_AttribEditor.ActiveObjectID()
-    #        if( obj_id==None ):
-    #            return False
-
-    #        obj = self.__m_NodeGraph.GetObjectByID( obj_id, c_EditableTypes )
-    #        if( obj==None ):
-    #            return False
-
-    #        desc = obj.GetDesc()
-    #        if( desc==None ):
-    #            return False
-
-    #        self.__m_AttribEditor.DeinitializeWidget()
-
-    #        # initialize attribute editor widget
-    #        self.__m_AttribEditor.InitializeWidget( obj_id, desc, obj.Key() )
-        
-    #        # set values to widget
-    #        for attrib in obj.Attributes().values():
-    #            self.__m_AttribEditor.SetValue_Exec( attrib.AttributeID(), attrib.Value() )
-
-    #        return True
-
-    #    except:
-
-    #        return False
-
 
     ################################### Operations ###################################
 

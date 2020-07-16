@@ -127,10 +127,6 @@ class GraphicsScene(QGraphicsScene):
 
 
     #=============== Command functions ================#
-    def ExecCommand_( self, *args, **kwargs ):
-        self.__m_refCallbackFunc( *args, **kwargs )
-
-
 
     def CreateNode_Exec( self, node_name, node_id, nodeDesc, pos, parent_id ):
         try:
@@ -287,6 +283,25 @@ class GraphicsScene(QGraphicsScene):
         except:
             traceback.print_exc()
             return False
+
+
+
+    # 指定GraphicsItemだけを選択状態にする. シグナルemitはブロックする.
+    def Select_Exec( self, obj_id_list ):
+        try:
+            #print( 'GraphicsScene::Select_Exec()...' )
+
+            self.blockSignals( True )
+
+            self.clearSelection()
+
+            for obj_id in obj_id_list:
+                self.__m_GraphicsItems[ obj_id ].setSelected(True)
+
+            self.blockSignals( False )
+
+        except:
+            traceback.print_exc()
 
 
 
@@ -481,112 +496,87 @@ class GraphicsScene(QGraphicsScene):
 
 
     #================ Scene Edit Functions =================#
-    def __Group( self ):
+    def __GroupCallback( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.__m_refCallbackFunc( 'GroupByID', item_id_list, parent_id=self.__m_FocusViewID )
 
 
 
-    def __Ungroup( self ):
+    def __UngroupCallback( self ):
         for item in self.selectedItems():
             self.__m_refCallbackFunc( 'UngroupByID', item.ID() )
 
 
 
-    def __Undo( self ):
+    def __UndoCallback( self ):
         self.__m_refCallbackFunc( 'Undo' )
 
 
 
-    def __Redo( self ):
+    def __RedoCallback( self ):
         self.__m_refCallbackFunc( 'Redo' )
 
 
-    def __Cut( self ):
+
+    def __CutCallback( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.clearSelection()
         self.__m_refCallbackFunc( 'CutByID', item_id_list, parent_id=None )#self.__m_FocusViewID )
 
 
 
-    def __Copy( self ):
+    def __CopyCallback( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.__m_refCallbackFunc( 'CopyByID', item_id_list, parent_id=None )#, parent_id=self.__m_FocusViewID )
 # TODO: parent_idで、指定親空間内のノード群だけに制限して複製する.
 # TODO: 親空間を跨いで選択したノード群の複製に対応したい( parent_id=None で動作検証中 ).
 
 
-    def __Paste( self ):
+    def __PasteCallback( self ):
         self.__m_refCallbackFunc( 'PasteByID', parent_id=self.__m_FocusViewID )
 
 
 
-    def __Duplicate( self ):
+    def __DuplicateCallback( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.__m_refCallbackFunc( 'DuplicateByID', item_id_list, parent_id=self.__m_FocusViewID )
 
 
 
-    def __RemoveSelectedObjects( self ):
+    def __DeleteCallback( self ):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.clearSelection()
         self.__m_refCallbackFunc( 'DeleteByID', item_id_list )
 
 
 
-    def CheckConnectivity( self, port1_id, port2_id ):
+    def __CheckConnectivityCallback( self, port1_id, port2_id ):
         return self.__m_refCallbackFunc( 'CheckConnectivityByID', port1_id, port2_id )
 
 
 
-    def IsPortLocked( self, port_id ):
+    def __IsAttributeLockedCallback( self, port_id ):
         return self.__m_refCallbackFunc( 'IsAttributeLockedByID', port_id )
 
 
 
-    def IsSelected( self, object_id ):
-        try:
-            return self.__m_GraphicsItems[ object_id ] in self.selectedItems()
-        except:
-            traceback.print_exc()
-            return False
-
-
-
-    #def CheckSymbolize( self, port_id ):
-    #    return self.__m_refCallbackFunc( 'CheckSymbolizeByID', port_id )
-
-
-
-    def CheckSymbolize( self, port, dataflow ):
+    def __CheckSymbolizeCallback( self, port, dataflow ):
         if( port.DataFlow() == dataflow ):
             return self.__m_refCallbackFunc( 'CheckSymbolizeByID', port.PortID() )
         return False
 
 
 
-    def Import( self, filepath, pos ):
+    def __ImportCallback( self, filepath, pos ):
         return self.__m_refCallbackFunc( 'Import', filepath, (pos.x(), pos.y()) )
 
 
 
-    def Translate( self, offset ):
+    def __TranslateCallback( self, offset ):
         self.__m_Triggered = True
         result = self.__m_refCallbackFunc( 'TranslateByID', [item.ID() for item in self.selectedItems()], (offset.x(), offset.y()), relative=True )
         self.__m_Triggered = False
         return result
-
-# TODO: Deprecate
-        #self.__m_Triggered = True
-
-        #self.__m_TranslateProhibitedTypes = [ Edge, SymbolicLink ]
-
-        #for item in self.selectedItems():
-        #    if( type(item) in self.__m_TranslateProhibitedTypes ): continue
-        #    itemPos = item.scenePos()
-        #    self.__m_refCallbackFunc( 'TranslateByID', [item.ID()], (itemPos.x(), itemPos.y()) )
-
-        #self.__m_Triggered = False
 
 
 
@@ -610,38 +600,17 @@ class GraphicsScene(QGraphicsScene):
 
 
 
-    # 指定GraphicsItemだけを選択状態にする. シグナルemitはブロックする.
-    def UpdateSelection( self, obj_id_list ):
-        try:
-            #print( 'GraphicsScene::UpdateSelection()...' )
-
-            self.blockSignals( True )
-
-            self.clearSelection()
-
-            for obj_id in obj_id_list:
-                self.__m_GraphicsItems[ obj_id ].setSelected(True)
-
-            self.blockSignals( False )
-
-        except:
-            traceback.print_exc()
-
-
-
     def __SelectionChangedSlot( self ):
         #print( 'GraphicScene::__SelectionChangedSlot()...' )
         
-        inclusiveTypes = [ Node, Group, GroupIO ]# SymbolicLinkは外してある.
-
-        # 何も選択されていない場合はitem_idをNoneにしてコールバック
-        if( not self.selectedItems() ):
-            #print( '    Nothing selected.' )
-            self.__m_refCallbackFunc( 'SelectByID_Multi', [], {'clear':True} )
-            return
+        # Debug code
+        #inclusiveTypes = [ Node, Edge, Group, GroupIO, SymbolicLink ]
+        #for item in self.selectedItems():
+        #    if( not type(item) in inclusiveTypes ):
+        #        print( 'GraphicsScene::__SelectionChangedSlot()... UNSELECTABLE TYPE OBJECT PICKED: ', type(item) )
 
         # send select callbck with first item.
-        self.__m_refCallbackFunc( 'SelectByID_Multi', [ item.ID() for item in self.selectedItems() if type(item) in inclusiveTypes ], {'clear':True} )# [ item.ID() for item in self.selectedItems() ]
+        self.__m_refCallbackFunc( 'SelectByID', [ item.ID() for item in self.selectedItems() if type(item) in inclusiveTypes ], {'clear':True} )# [ item.ID() for item in self.selectedItems() ]
 
 
 
@@ -725,7 +694,7 @@ class GraphicsScene(QGraphicsScene):
         # check clicked graphicsitem
         item = self.itemAt( event.scenePos(), QTransform() )
         if( isinstance(item, Port) ):
-            if( self.IsPortLocked( item.PortID() )==False ): # Draw connection guideline if port is unlocked.
+            if( self.__IsAttributeLockedCallback( item.PortID() )==False ): # Draw connection guideline if port is unlocked.
                 self.__m_refStartPort = item
                 self.__m_TempEdge = TemporaryEdge( item.scenePos() )
                 self.addItem(self.__m_TempEdge)
@@ -784,7 +753,7 @@ class GraphicsScene(QGraphicsScene):
 
             # Snap TempEdge's endpoint to Port
             if( isinstance(currPort, Port) and currPort != self.__m_refStartPort ):
-                if( self.CheckConnectivity( self.__m_refStartPort.PortID(), currPort.PortID() ) == True ):
+                if( self.__CheckConnectivityCallback( self.__m_refStartPort.PortID(), currPort.PortID() ) == True ):
                     scenepos = currPort.scenePos()
 
             self.__m_TempEdge.SetDestPosition(scenepos)
@@ -802,12 +771,12 @@ class GraphicsScene(QGraphicsScene):
                 
             elif( groupio and self.__m_refGroupIO==None ):# アトリビュートからGroupIOへドラッグしている場合
                 #print( 'mouseDownEntered', groupio )
-                if( self.CheckSymbolize(self.__m_refStartPort, groupio.DataFlow()) ):
+                if( self.__CheckSymbolizeCallback( self.__m_refStartPort, groupio.DataFlow() ) ):
                     groupio.AddBlank( event.scenePos() )
 
             elif( groupio == self.__m_refGroupIO ):# マウスボタン押した位置と同じGroupIOの場合
                 #print( 'mouseDownHover', groupio )
-                if( self.CheckSymbolize(self.__m_refStartPort, groupio.DataFlow()) ):
+                if( self.__CheckSymbolizeCallback( self.__m_refStartPort, groupio.DataFlow() ) ):
                     groupio.MoveBlank( event.scenePos() )
 
         elif( self.__m_MouseDragMode==MouseMode.DragSymbolicLink ):# moving SymbolicLink
@@ -853,13 +822,13 @@ class GraphicsScene(QGraphicsScene):
         mouseMovement = event.scenePos() - self.__m_MouseStartPos#event.screenPos() - self.__m_MouseStartPos
         if( self.__m_MouseDragMode==MouseMode.DragItem and ( mouseMovement.x() or mouseMovement.y() ) ):
             print(mouseMovement )
-            self.Translate( mouseMovement )
+            self.__TranslateCallback( mouseMovement )
 
         if( self.__m_MouseDragMode == MouseMode.DrawEdge ):
             if( isinstance(item_at, Port) ):# Portの上でマウスボタンリリースした -> Port間にコネクション作成
                 self.__m_refCallbackFunc( 'ConnectByID', self.__m_refStartPort.PortID(), item_at.PortID(), check=True )
             elif( isinstance(item_at, GroupIO) ):# GroupIO上でリリース -> シンボリックリンク作成
-                if( self.CheckSymbolize(self.__m_refStartPort, item_at.DataFlow()) ):
+                if( self.__CheckSymbolizeCallback( self.__m_refStartPort, item_at.DataFlow() ) ):
                     self.__m_refCallbackFunc( 'CreateSymbolicLink', self.__m_refStartPort.PortID(), slot_index=item_at.BlankIndex() )
 
             # __m_TempEdgeを削除する
@@ -891,31 +860,31 @@ class GraphicsScene(QGraphicsScene):
     def keyPressEvent( self, event ):
         
         if( (event.key()==Qt.Key_Z) and (event.modifiers() & Qt.ControlModifier) ):# Undo(Ctrl+Z)
-            self.__Undo()
+            self.__UndoCallback()
 
         elif( (event.key()==Qt.Key_Y) and (event.modifiers() & Qt.ControlModifier) ):# Undo(Ctrl+Y)
-            self.__Redo()
+            self.__RedoCallback()
 
         elif( (event.key()==Qt.Key_X) and (event.modifiers() & Qt.ControlModifier) ):# Cut(Ctrl+X)
-            self.__Cut()
+            self.__CutCallback()
 
         elif( (event.key()==Qt.Key_C) and (event.modifiers() & Qt.ControlModifier) ):# Copy(Ctrl+C)
-            self.__Copy()
+            self.__CopyCallback()
 
         elif( (event.key()==Qt.Key_V) and (event.modifiers() & Qt.ControlModifier) ):# Paste(Ctrl+V)
-            self.__Paste()
+            self.__PasteCallback()
 
         elif( (event.key()==Qt.Key_D) and (event.modifiers() & Qt.ControlModifier) ):# Duplicate(Ctrl+D)
-            self.__Duplicate()
+            self.__DuplicateCallback()
 
         if( event.key()==Qt.Key_Delete ):
-            self.__RemoveSelectedObjects()
+            self.__DeleteCallback()
 
         elif( (event.key()==Qt.Key_G) and (event.modifiers() & Qt.ControlModifier) ):# Group(Ctrl+G)
-            self.__Group()
+            self.__GroupCallback()
 
         elif( (event.key()==Qt.Key_U) and (event.modifiers() & Qt.ControlModifier) ):# Ungroup(Ctrl+U)
-            self.__Ungroup()
+            self.__UngroupCallback()
 
         return super(GraphicsScene, self).keyPressEvent(event)
 
@@ -935,7 +904,7 @@ class GraphicsScene(QGraphicsScene):
             pos = event.scenePos()
             for url in event.mimeData().urls():
                 filepath = str(url.toLocalFile())
-                self.Import( filepath, pos )
+                self.__ImportCallback( filepath, pos )
         except:
             traceback.print_exc()
 

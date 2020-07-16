@@ -42,8 +42,7 @@ class NESceneManager:
             'UngroupByID': self.UngroupByID_Exec,
             #'RemoveGroupByID', self.RemoveGroupByID_Exec, # DeleteByID経由で呼び出す
             'DeleteByID': self.DeleteByID_Exec,
-            #'SelectByID': self.SelectByID_Exec,# オブジェクト選択操作.編集履歴に含めない
-            'SelectByID_Multi': self.SelectByID_Exec,# 複数オブジェクト一括選択操作.編集履歴に含めない
+            'SelectByID': self.SelectByID_Exec,# オブジェクト選択操作.編集履歴に含めない
             'DuplicateByID': self.DuplicateByID_Exec,
             'CutByID': self.CutByID_Exec,
             'CopyByID': self.CopyByID_Exec,
@@ -372,33 +371,27 @@ class NESceneManager:
     def Select_Exec( self, *args, **kwargs ):
         obj_name_list = [ arg for arg in args if isinstance(arg, str) ]
         option = kwargs
-        obj_id_list = self.__m_refNEScene.GetObjectIDs( obj_name_list, (NENodeObject, NEGroupObject, NEGroupIOObject, NESymbolicLink) )# c_KeyMapSupportTypes
+        obj_id_list = self.__m_refNEScene.GetObjectIDs( obj_name_list, typefilter=c_SelectableTypes )
 
         if( not obj_id_list ):
             SelectCommand( self.__m_refNEScene, [], {'clear':True} ).execute()
-            self.__m_refNEScene.UpdateSelection()# Manually propagate 'selection changed' to GUI.
             return False
 
         SelectCommand( self.__m_refNEScene, obj_id_list, option ).execute()
-        self.__m_refNEScene.UpdateSelection()# Manually propagate 'selection changed' to GUI.
 
         return True
 
 
 
     def SelectByID_Exec( self, obj_id_list, option ):
-
         #print( 'NESceneManager::SelectByID_Exec()...' )
-
-        obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject, NEGroupIOObject, NESymbolicLink), parent_id=None )
+        obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=c_SelectableTypes, parent_id=None )
         
         if( not obj_id_list ):
             SelectCommand( self.__m_refNEScene, [], {'clear':True} ).execute()
-            # SelectByID_Exec is kicked from GraphicsScene. No Need to run self.__m_refNEScene.UpdateSelection().
             return False
 
         SelectCommand( self.__m_refNEScene, obj_id_list, option ).execute()
-        # SelectByID_Exec is kicked from GraphicsScene. No Need to run self.__m_refNEScene.UpdateSelection().
 
         # Evaluate Selected Objects.
         self.__m_refNEScene.EvaluateSelected()
@@ -468,7 +461,6 @@ class NESceneManager:
 
         # Clear selection
         SelectCommand( self.__m_refNEScene, [], {'clear':True} ).execute()
-        self.__m_refNEScene.UpdateSelection()
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -743,7 +735,6 @@ class NESceneManager:
 
         selection_id_list = self.__ExecuteSnapshot( self.__m_DuplicationSnapshot, (75.0, 75.0), parent_id )
         SelectCommand( self.__m_refNEScene, selection_id_list, {'clear':True} ).execute()
-        self.__m_refNEScene.UpdateSelection()
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -785,24 +776,9 @@ class NESceneManager:
 
         selection_id_list = self.__ExecuteSnapshot( self.__m_CopySnapshot, (75.0, 75.0), parent_id )
         SelectCommand( self.__m_refNEScene, selection_id_list, {'clear':True} ).execute()
-        self.__m_refNEScene.UpdateSelection()
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
-
-
-
-    #def TranslateByID_Exec( self, object_id, translate, *, relative=False, terminate=True ):
-
-    #    if( self.__m_refNEScene.PositionChanged(object_id, translate, relative) == False ):
-    #        return False
-
-    #    self.__m_CommandManager.executeCmd( TranslateCommand( self.__m_refNEScene, object_id, translate, relative ) )
-
-    #    # Terminate command sequence
-    #    if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
-
-    #    return True
 
 
 

@@ -298,13 +298,6 @@ class NESceneExt(NESceneBase):
 
 
     # GUI-dependent function.
-    def UpdateSelection( self ):
-        super(NESceneExt, self).UpdateSelection()#  <- Do nothing
-        self.__m_GraphEditor.UpdateSelection( self._NESceneBase__m_SelectionList.Iter() )
-
-
-
-    # GUI-dependent function.
     def __UpdateAttributeEditor( self, object_id=None ):
         try:
             if( self.__m_AttribEditor.IsLocked() ):
@@ -616,14 +609,13 @@ class NESceneExt(NESceneBase):
 
     def Select_Operation( self, obj_id_list, option ):
         try:
-            #print( 'NESceneExt::Select_Operation()...' )
-            #self.__m_SelectionList.Exec( *obj_id_list, **option )
-
-            #if( self.__m_SelectionList.Changed()==False ):
-            #    return False
             result = super(NESceneExt, self).Select_Operation( obj_id_list, option )
             if( result==False ):
                 return False
+
+            if( self.__m_GraphEditor.HasTriggered()==False ):
+                self.__m_GraphEditor.Select_Exec( self._NESceneBase__m_SelectionList.Iter() )
+
 
             self.__m_AttribEditor.DeinitializeWidget()
 
@@ -645,6 +637,11 @@ class NESceneExt(NESceneBase):
             # set values to widget
             for attrib in obj.Attributes().values():
                 self.__m_AttribEditor.SetValue_Exec( attrib.AttributeID(), attrib.Value() )
+
+
+
+
+
 
             return True
 
