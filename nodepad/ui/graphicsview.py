@@ -138,6 +138,8 @@ class GraphicsView(QGraphicsView):
 
     def mousePressEvent(self, event):
 
+        print( 'GraphicsView::mousePressEvent()...' )
+
         self.__m_PrevPos = event.pos()
 
         if( event.modifiers() == Qt.AltModifier and event.button() == Qt.MiddleButton ):# View Translation
@@ -264,6 +266,7 @@ class GraphicsView(QGraphicsView):
 
 
     def focusInEvent( self, event ):
+        print( 'GraphicsView::focusInEvent()...' )
         self.FocusViewIdChanged.emit( self.__m_Key )
         return super(GraphicsView, self).focusInEvent(event)
 

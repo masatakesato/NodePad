@@ -555,9 +555,10 @@ class MainWidget(MainWindow):
         view.WidgetClosed.connect( functools.partial(self.__RemoveEditorViewCallback, view_id ) )# 削除時のコールバック関数
 
         self.__m_Views[ view_id ] = view
-        
-        view.show()
 
+        view.setFocus()
+        view.show()
+        
 
 
     # GroupEditWindow削除時のコールバック関数
