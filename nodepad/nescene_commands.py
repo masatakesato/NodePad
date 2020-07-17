@@ -22,7 +22,7 @@ from .nescene_ext import NESceneExt
 
 # TODO: Register CustomNode creation procedure at GraphicsScene::contextMenuEvent.
 # TODO: Implement NESceneManager::CreateCustomNode_Exec.
-# TODO: Implement NESceneManager::RemoveCustomNodeByID_Exec.
+# TODO: Implement NESceneManager::__RemoveCustomNodeByID_Exec.
 # TODO: Implement NEScene::CreateCustomNode_Operation.
 # TODO: Implement NEScene::RemoveCustomNode_Operation.
 # TODO: Implement NEScene::CompileCustomNodeCommand.
@@ -611,7 +611,7 @@ class SelectCommand():
 
 
 
-# TODO: 複数グループを跨いで選択したノード群をどうやってスナップショット化するか考える.
+
 class SnapshotCommand():
 
     def __init__( self ):
@@ -625,7 +625,6 @@ class SnapshotCommand():
         self.Clear()
         
         print('//===================== Initializing Snapshots ===================//' )
-# TODO: 同一オブジェクトの重複選択を消す必要あるかも.( 例えばコネクション: 直接選択 + ノード接続からの自動検出 )
         #refObj_list = [ neScene.GetObjectByID( obj_id ) for obj_id in obj_id_list ]
         #print( 'Duplicate', [ obj.FullKey() for obj in refObj_list ] )
 
@@ -643,7 +642,6 @@ class SnapshotCommand():
 
 
 ################################################################################################################
-# TODO: 複数親空間を跨ぐノード群選択時のスナップショット収集コード.
 
         print('//===================== Initializing Snapshots(new version) ===================//' )
         snapshot_gen_list, descendants = neScene.NodeGraph().PrepareSnapshot( obj_id_list )
@@ -654,18 +652,13 @@ class SnapshotCommand():
             #refObj = neScene.GetObjectByID( obj_id )
 
             if( isinstance(refObj, NENodeObject) ):
-                print( 'CreateNodeByID_Exec()...%s' % refObj.FullKey() )
                 self.__CollectCreateNodeArgs(refObj)
 
             elif( isinstance(refObj, NEGroupObject) ):
-                print( 'CreateGroupByID_Exec()...%s' % refObj.FullKey() )
                 if( not descendants[ refObj.ID() ] ): # Include all children if NEGroupObject is leaf
                     self.__CollectGroupArgsRecursive( refObj )
                 else:
                     self.__CollectCreateGroupArgs( refObj )
-                    for child_id in descendants[ refObj.ID() ]:
-                        refChild = neScene.GetObjectByID( child_id )
-                        print( 'Append Parent Snapshot...%s' % refChild.FullKey() )
                     self.__CollectParentingSnapshots( refObj, descendants[ refObj.ID() ] )
 
             self.__m_SelectedObjectIDs.add( refObj.ID() )
@@ -816,6 +809,8 @@ class SnapshotCommand():
 
     def __CollectParentingSnapshots( self, refObj, descendant_ids ):
         children = [ child for child in refObj.Children().values() if child.ID() in descendant_ids ]
+        print( 'Append Parent Snapshot...' )
+        for child in children: print( '    %s' % child.FullKey() )
         self.__m_Snapshots.append( NEParentSnapshot( refObj.ID(), children ) )# append GroupOut's snapshot
 
 

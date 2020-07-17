@@ -29,13 +29,7 @@ class NEGroupIOObject(NEGraphObject):
     def Release( self ):
         for linknode in self.__m_SymbolicLinkArray.values(): linknode.Release()
         self.__m_SymbolicLinkArray.clear()
-
         super(NEGroupIOObject, self).Release()
-
-
-
-    #def HasAttribute( self, attr_id ):
-    #    return len(self.__m_SymbolicLinkArray) > 0
 
 
 

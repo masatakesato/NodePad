@@ -537,7 +537,7 @@ class NENodeGraph():
 
 
 
-    def ExistsByID( self, object_id, object_types=( NENodeObject, NEGroupObject, NEGroupIOObject, NESymbolicLink, NEConnectionObject ) ):
+    def ObjectExistsByID( self, object_id, object_types=( NENodeObject, NEGroupObject, NEGroupIOObject, NESymbolicLink, NEConnectionObject ) ):
 
         if( not object_id in self.__m_IDMap ): # Object does not exist -> False
             return False
@@ -546,6 +546,19 @@ class NENodeGraph():
             return True
 
         return False # Object found. but type mismatch -> False
+
+
+
+    def AttributeExistsByID( self, attrib_id ):
+        try:
+            if( not attrib_id[0] in self.__m_IDMap ):
+                return False
+        
+            return self.__m_IDMap[ attrib_id[0] ].HasAttribute( attrib_id[1] )
+
+        except:
+            traceback.print_exc()
+            return False
 
 
 
@@ -1495,7 +1508,7 @@ class NENodeGraph():
 
 
 
-###### TODO: ツリー構造内ノード群を歯抜け選択した場合でも階層構造を維持してコピペしたい。そのためのスナップショット生成機能試験実装. #############
+########### ツリー構造内ノード群を歯抜け選択した場合でも階層構造を維持してコピペしたい。そのためのスナップショット生成機能試験実装. #############
 
 # https://www.geeksforgeeks.org/lca-n-ary-tree-constant-query-o1/
 

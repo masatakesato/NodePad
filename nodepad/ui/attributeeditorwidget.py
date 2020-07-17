@@ -928,6 +928,7 @@ class AttributeEditorWidget(QFrame):
 
             # Assign Widget
             if( newWidget ):
+                newWidget.setEnabled( desc.Enabled() )
                 self.__m_WidgetDict[ newWidget.ID() ] = newWidget
                 collapsibleWidget_Out.AddWidget( newWidget )
                 hasAttrib = True
@@ -1015,6 +1016,7 @@ class AttributeEditorWidget(QFrame):
                 if( desc.IsEditable()==True ):
                     attribWidget = self.__CreateAttributeWidget( desc, self.__CallbackFunc, name='Value' )
                     if( attribWidget ):
+                        attribWidget.setEnabled( desc.Enabled() )
                         self.__m_WidgetDict[ attribWidget.ID() ] = attribWidget
                         collapsibleWidget_Out.AddWidget( attribWidget )
 

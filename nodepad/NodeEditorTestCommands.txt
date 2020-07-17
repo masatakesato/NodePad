@@ -73,7 +73,7 @@ manager.Group_Exec( 'Float001' )
 manager.Select_Exec( 'Float001' )
 manager.Select_Exec( 'Group001|Group Input', 'Group001|Group Output' )
 manager.Duplicate_Exec( 'Group001' )
-manager.Duplicate_Exec( 'Group001|Group Input', 'Group001|Group Output' )# invalid comand
+manager.Duplicate_Exec( 'Group001|Group Input', 'Group001|Group Output' )# invalid command
 manager.Delete_Exec( 'Group001|Group Input' )# invalid command
 manager.Delete_Exec( 'Group001' )
 
@@ -94,3 +94,12 @@ manager.CreateNode_Exec( 'Float', pos=(0, 0) )
 manager.CreateGroup_Exec( pos=(100, 100) )
 manager.Select_Exec( 'Float001' )
 manager.Parent_Exec( 'Group001' )
+
+
+//=========== Lock/Unlock Attribute ==========//
+manager = MainWidget.SceneManager()
+manager.CreateNode_Exec( 'Float', pos=(0, 0) )
+manager.LockAttribute_Exec( 'Float001.Output', False )
+manager.Undo()
+
+

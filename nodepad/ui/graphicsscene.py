@@ -529,7 +529,7 @@ class GraphicsScene(QGraphicsScene):
         item_id_list = [ item.ID() for item in self.selectedItems() ]
         self.__m_refCallbackFunc( 'CopyByID', item_id_list, parent_id=None )#, parent_id=self.__m_FocusViewID )
 # TODO: parent_idで、指定親空間内のノード群だけに制限して複製する.
-# TODO: 親空間を跨いで選択したノード群の複製に対応したい( parent_id=None で動作検証中 ).
+
 
 
     def __PasteCallback( self ):
@@ -666,7 +666,7 @@ class GraphicsScene(QGraphicsScene):
             #menu.addAction( key, lambda nodetype=key : self.CreateNode( nodetype, event.scenePos() ) )# OK
             #menu.addAction( key, functools.partial(self.CreateNode, nodetype=key, pos=event.scenePos()) )
 
-            action.triggered.connect( functools.partial( callback, 'CreateNode', key, pos=(pos.x(), pos.y()), size=None, parent_id=self.__m_FocusViewID ) )
+            action.triggered.connect( functools.partial( callback, 'CreateNodeByID', key, pos=(pos.x(), pos.y()), size=None, parent_id=self.__m_FocusViewID ) )
 
             menu.addAction( action )
 
@@ -677,7 +677,7 @@ class GraphicsScene(QGraphicsScene):
 
         # test implementation for creating empty group
         action = QAction( 'Empty Group', self )
-        action.triggered.connect( functools.partial( callback, 'CreateGroup', pos=(pos.x(), pos.y()), size=None, parent_id=self.__m_FocusViewID ) )
+        action.triggered.connect( functools.partial( callback, 'CreateGroupByID', pos=(pos.x(), pos.y()), size=None, parent_id=self.__m_FocusViewID ) )
         
         menu.addAction( action )
 

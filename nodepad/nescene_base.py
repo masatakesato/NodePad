@@ -171,7 +171,7 @@ def Compute( self, dataBlock ):
 
 
     def ObjectExists( self, object_id, typefilter ):
-        return self.__m_NodeGraph.ExistsByID( object_id, typefilter )
+        return self.__m_NodeGraph.ObjectExistsByID( object_id, typefilter )
 
 
 
@@ -207,6 +207,11 @@ def Compute( self, dataBlock ):
 
     def GetAttributeID( self, name ):
         return self.__m_NodeGraph.GetAttributeID( name )
+
+
+
+    def AttributeExists( self, attrib_id ):
+        return self.__m_NodeGraph.AttributeExistsByID( attrib_id )
 
 
 
@@ -399,7 +404,6 @@ def Compute( self, dataBlock ):
 
 
 
-# TODO: グループを跨いで選択したノード群はどうやってグループ化する?
     def CreateGroup_Operation( self, pos, size, name, object_id, parent_id ):
 
         # Create Group in NodeGraph

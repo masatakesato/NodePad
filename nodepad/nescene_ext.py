@@ -159,7 +159,7 @@ class NESceneExt(NESceneBase):
 
     # Implemented in NESceneBase
     #def ObjectExists( self, object_id, typefilter ):
-    #    return self.__m_NodeGraph.ExistsByID( object_id, typefilter )
+    #    return self.__m_NodeGraph.ObjectExistsByID( object_id, typefilter )
 
 
 
@@ -190,6 +190,12 @@ class NESceneExt(NESceneBase):
     # Implemented in NESceneBase
     #def GetAttributeID( self, name ):
     #    return self.__m_NodeGraph.GetAttributeID( name )
+
+
+
+    # Implemented in NESceneBase
+    #def AttributeExists( self, attrib_id ):
+    #    return self.__m_NodeGraph.AttributeExistsByID( attrib_id )
 
 
 
@@ -406,17 +412,12 @@ class NESceneExt(NESceneBase):
     #    # Reconnect in GraphEditor
     #    self.__m_GraphEditor.Reconnect_Exec( conn.ID(), ( conn.Source().ParentID(), conn.SourceID() ), ( conn.Destination().ParentID(), conn.DestinationID() ), conn.ParentID() )
 
-    #    # TODO: NESceneBase::Reconnect_Operation()内でLockAttributeOperationを呼び出せばいいのでは？
-    #    # Update AttributeEditorWidget
-    #    #self.__m_AttribEditor.SetEnabled_Exec( conn.DestinationAttribID(), False )
-
     #    # return previous connection
     #    #return (prev_src_attrib_id, prev_dest_attrib_id)
     #    return conn
 
 
 
-# TODO: グループを跨いで選択したノード群はどうやってグループ化する?
     def CreateGroup_Operation( self, pos, size, name, object_id, parent_id ):
         newGroup = super(NESceneExt, self).CreateGroup_Operation( pos, size, name, object_id, parent_id )
 
