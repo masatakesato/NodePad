@@ -206,7 +206,7 @@ class NEGroupObject(NEGraphObject):
 
 
     # シンボリックリンク化できるかどうかチェック.
-    def CanSymbolize( self, attrib ):
+    def IsSymbolizable( self, attrib ):
         
         # アトリビュートの親ノードがグループ内に存在しない場合はFalse
         parent_id = attrib.ParentNode().ID()

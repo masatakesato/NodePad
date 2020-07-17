@@ -145,6 +145,11 @@ def Compute( self, dataBlock ):
 
 
 
+    def IsAncestorOf( self, ancestor_id, object_id ):
+        return self.__m_NodeGraph.IsAncestorOf( ancestor_id, object_id )
+
+
+
     def GetObjectByID( self, object_id, typefilter=c_IDMapSupportTypes ):
         return self.__m_NodeGraph.GetObjectByID( object_id, typefilter )
 
@@ -172,11 +177,6 @@ def Compute( self, dataBlock ):
 
     def GetParentID( self, object_id ):
         return self.__m_NodeGraph.GetParentID( object_id )
-
-
-
-    def ValidateVisibilityUpdate( self, object_id, visibility ):
-        return self.__m_NodeGraph.ValidateVisibilityUpdate( object_id, visibility )
 
 
 
@@ -216,8 +216,18 @@ def Compute( self, dataBlock ):
 
 
 
-    def ValidateAttributeUpdate( self, attrib_id, new_value ):
-        return self.__m_NodeGraph.ValidateAttributeUpdate( attrib_id, new_value )
+    def IsNewVisibility( self, object_id, visibility ):
+        return self.__m_NodeGraph.IsNewVisibility( object_id, visibility )
+
+
+
+    def IsNewAttributeValue( self, attrib_id, new_value ):
+        return self.__m_NodeGraph.IsNewAttributeValue( attrib_id, new_value )
+
+
+
+    def IsNewSymboliclinkSlot( self, object_id, new_slot ):
+        return self.__m_NodeGraph.IsNewSymboliclinkSlot( object_id, new_slot )
 
 
 
@@ -231,23 +241,23 @@ def Compute( self, dataBlock ):
 
 
 
+    def IsSymbolizable( self, attrib_id ):
+        return self.__m_NodeGraph.IsSymbolizable( attrib_id )
+
+
+
+    def IsGroupable( self, obj_id_list, parent_id ):
+        return self.__m_NodeGraph.IsGroupable( obj_id_list, parent_id )
+
+
+
     def ExtractSymbolicLinkConnections( self, object_id ):
         return self.__m_NodeGraph.ExtractSymbolicLinkConnections( object_id )
 
 
 
-    def CanBeSymbolized( self, attrib_id ):
-        return self.__m_NodeGraph.CanBeSymbolized( attrib_id )
-
-
-
     def GetSymboliclinkIDs( self, object_id ):
         return self.__m_NodeGraph.GetSymboliclinkIDs( object_id )
-
-
-
-    def ValidateSymboliclinkUpdate( self, object_id, new_slot ):
-        return self.__m_NodeGraph.ValidateSymboliclinkUpdate( object_id, new_slot )
 
 
 

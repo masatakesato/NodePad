@@ -78,7 +78,7 @@ class PushButton(GraphicsNodeItem):
 
     def mousePressEvent( self, event ):
         self.setFlag( QGraphicsItem.ItemIsSelectable, True )# マウスボタンが押されている間だけ一時的に選択可能状態にする. mouseReleaseEventは選択可能状態でしか起動しないため.
-        super(PushButton, self).mousePressEvent(event)
+        #super(PushButton, self).mousePressEvent(event)# mousePressedEventは実行しない. selectionChangedシグナルをEmitしたくない 
         self.__m_MouseState ^= MouseState.ButtonMask
 
 
@@ -86,7 +86,7 @@ class PushButton(GraphicsNodeItem):
         if( self.sceneBoundingRect().contains( event.scenePos() ) ):
             self.__m_refCallback()
         self.setFlag( QGraphicsItem.ItemIsSelectable, False )# マウスボタンがリリースされたらすぐ選択不可状態に戻す. QGraphicsScene::selectedItemsに登録されるのを防ぐため.
-        super(PushButton, self).mouseReleaseEvent(event)
+        #super(PushButton, self).mouseReleaseEvent(event)# mouseReleaseEventは実行しない. selectionChangedシグナルをEmitしたくない 
         self.__m_MouseState ^= MouseState.ButtonMask
 
 

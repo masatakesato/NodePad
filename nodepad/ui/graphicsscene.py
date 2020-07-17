@@ -562,7 +562,7 @@ class GraphicsScene(QGraphicsScene):
 
     def __CheckSymbolizeCallback( self, port, dataflow ):
         if( port.DataFlow() == dataflow ):
-            return self.__m_refCallbackFunc( 'CheckSymbolizeByID', port.PortID() )
+            return self.__m_refCallbackFunc( 'IsSymbolizableByID', port.PortID() )
         return False
 
 
@@ -601,16 +601,18 @@ class GraphicsScene(QGraphicsScene):
 
 
     def __SelectionChangedSlot( self ):
-        #print( 'GraphicScene::__SelectionChangedSlot()...' )
+        print( 'GraphicScene::__SelectionChangedSlot()...' )
         
         # Debug code
-        #inclusiveTypes = [ Node, Edge, Group, GroupIO, SymbolicLink ]
+        inclusiveTypes = [ Node, Edge, Group, GroupIO, SymbolicLink ]
         #for item in self.selectedItems():
         #    if( not type(item) in inclusiveTypes ):
         #        print( 'GraphicsScene::__SelectionChangedSlot()... UNSELECTABLE TYPE OBJECT PICKED: ', type(item) )
+        #
+        self.__m_refCallbackFunc( 'SelectByID', [ item.ID() for item in self.selectedItems() if type(item) in inclusiveTypes ], {'clear':True} )
 
         # send select callbck with first item.
-        self.__m_refCallbackFunc( 'SelectByID', [ item.ID() for item in self.selectedItems() if type(item) in inclusiveTypes ], {'clear':True} )# [ item.ID() for item in self.selectedItems() ]
+        #self.__m_refCallbackFunc( 'SelectByID', [ item.ID() for item in self.selectedItems() ], {'clear':True} )
 
 
 
@@ -715,8 +717,8 @@ class GraphicsScene(QGraphicsScene):
         elif( item ):
             self.__m_MouseDragMode = MouseMode.DragItem
 
-########################### TODO: Refactor. Set items movable except SymbolicLinks. ###############################
-            if( not isinstance(item, Edge) ):
+########################### TODO: Refactor. Set items movable except SymbolicLinks/PushBUtton. ###############################
+            if( not isinstance(item, (Edge, PushButton) ) ):
                 item.setFlag( QGraphicsItem.ItemIsMovable, True )
             for item_ in self.selectedItems():
                 if( isinstance(item_, SymbolicLink) ):

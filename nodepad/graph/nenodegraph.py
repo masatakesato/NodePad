@@ -858,8 +858,8 @@ class NENodeGraph():
 
 
 
-    def CanBeSymbolized( self, attrib_id ):
-        print( 'NENodeGraph::CanBeSymbolized()...' )
+    def IsSymbolizable( self, attrib_id ):
+        #print( 'NENodeGraph::IsSymbolizable()...' )
         attrib = self.GetAttributeByID( attrib_id )
         if( attrib==None ):
             return False
@@ -869,7 +869,23 @@ class NENodeGraph():
             print( '    Unable to symbolize. Parent space must be Group...' )
             return False
 
-        return parent.CanSymbolize( attrib )
+        return parent.IsSymbolizable( attrib )
+
+
+
+    # Checks if obj in obj_id_list can be groupt in parent_id space
+    def IsGroupable( self, obj_id_list, parent_id ):
+
+        # Return false if empty obj_id_list
+        if( not obj_id_list ):
+            return False
+
+        # Return if elemnt is ancestor of parent_id
+        for obj_id in obj_id_list:
+            if( self.IsAncestorOf( obj_id, parent_id ) ):
+                return False
+
+        return True
 
 
 
@@ -1006,7 +1022,7 @@ class NENodeGraph():
             return [ obj_id for obj_id in obj_id_list if
                     ( type(self.__m_IDMap[obj_id]) in (NENodeObject, NEGroupObject) ) and    # include nodegraph and group only
                     ( self.IsAncestorOf(obj_id, parent_id) == False ) and                   # exclude parent_id's ancestors
-                    ( obj_id != parent_id ) and                                              # exclude parent_id self
+                    #( obj_id != parent_id ) and                                              # exclude parent_id self
                     ( not obj_id in direct_children ) ]                                      # exclude parent_id's children
 
         except:
@@ -1117,7 +1133,7 @@ class NENodeGraph():
 
 
 
-    def ValidateVisibilityUpdate( self, object_id, visibility ):
+    def IsNewVisibility( self, object_id, visibility ):
         try:
             obj = self.__m_IDMap[ object_id ]
             if( isinstance(obj, NEGraphObject)==False ):
@@ -1133,7 +1149,7 @@ class NENodeGraph():
 
 
 
-    def ValidateAttributeUpdate( self, attrib_id, new_value ):
+    def IsNewAttributeValue( self, attrib_id, new_value ):
         try:
             attrib = self.GetAttributeByID( attrib_id )
 
@@ -1152,10 +1168,10 @@ class NENodeGraph():
 
 
 
-    def ValidateSymboliclinkUpdate( self, object_id, new_slot ):
+    def IsNewSymboliclinkSlot( self, object_id, new_slot ):
         try:
-            obj = self.GetObjectByID( object_id, (NESymbolicLink,) )            
-            return new_slot!=obj.SlotIndex() if obj else None
+            obj = self.GetObjectByID( object_id, (NESymbolicLink,) )
+            return new_slot!=obj.SlotIndex() if obj else False
 
         except:
             traceback.print_exc()
@@ -1189,7 +1205,7 @@ class NENodeGraph():
         try:
             #print( 'NENodeGraph::IsAncestorOf()...' )
             root_id = self.__m_Root.ID()
-            curr_id = self.__m_IDMap[ object_id ].ParentID()
+            curr_id = self.__m_IDMap[ object_id ].ID()#.ParentID()
 
             while( curr_id != root_id ):
                 if( curr_id == ancestor_id ):

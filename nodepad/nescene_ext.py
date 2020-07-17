@@ -164,12 +164,6 @@ class NESceneExt(NESceneBase):
 
 
     # Implemented in NESceneBase
-    #def ValidateVisibilityUpdate( self, object_id, visibility ):
-    #    return self.__m_NodeGraph.ValidateVisibilityUpdate( object_id, visibility )
-
-
-
-    # Implemented in NESceneBase
     #def GetConnectionID( self, attrib_name1, attrib_name2 ):
     #    return self.__m_NodeGraph.GetConnectionIDByAttribute( attrib_name1, attrib_name2 )
 
@@ -200,8 +194,20 @@ class NESceneExt(NESceneBase):
 
 
     # Implemented in NESceneBase
-    #def ValidateAttributeUpdate( self, attrib_id, new_value ):
-    #    return self.__m_NodeGraph.ValidateAttributeUpdate( attrib_id, new_value )
+    #def IsNewVisibility( self, object_id, visibility ):
+    #    return self.__m_NodeGraph.IsNewVisibility( object_id, visibility )
+
+
+
+    # Implemented in NESceneBase
+    #def IsNewAttributeValue( self, attrib_id, new_value ):
+    #    return self.__m_NodeGraph.IsNewAttributeValue( attrib_id, new_value )
+
+
+
+    # Implemented in NESceneBase
+    #def IsNewSymboliclinkSlot( self, object_id, new_slot ):
+    #    return self.__m_NodeGraph.IsNewSymboliclinkSlot( object_id, new_slot )
 
 
 
@@ -218,26 +224,20 @@ class NESceneExt(NESceneBase):
 
 
     # Implemented in NESceneBase
+    #def IsSymbolizable( self, attrib_id ):
+    #    return self.__m_NodeGraph.IsSymbolizable( attrib_id )
+
+
+
+    # Implemented in NESceneBase
     #def ExtractSymbolicLinkConnections( self, object_id ):
     #    return self.__m_NodeGraph.ExtractSymbolicLinkConnections( object_id )
 
 
 
     # Implemented in NESceneBase
-    #def CanBeSymbolized( self, attrib_id ):
-    #    return self.__m_NodeGraph.CanBeSymbolized( attrib_id )
-
-
-
-    # Implemented in NESceneBase
     #def GetSymboliclinkIDs( self, object_id ):
     #    return self.__m_NodeGraph.GetSymboliclinkIDs( object_id )
-
-
-
-    # Implemented in NESceneBase
-    #def ValidateSymboliclinkUpdate( self, object_id, new_slot ):
-    #    return self.__m_NodeGraph.ValidateSymboliclinkUpdate( object_id, new_slot )
 
 
 
@@ -620,7 +620,6 @@ class NESceneExt(NESceneBase):
             self.__m_AttribEditor.DeinitializeWidget()
 
             obj_ids_editable = self.FilterObjectIDs( self.GetSelectedObjectIDs(), typefilter=c_EditableTypes, parent_id=None )
-            # self.__m_NodeGraph.FilterObjects( self.GetSelectedObjectIDs(), typefilter=c_EditableTypes, parent_id=None )
 
             if( not obj_ids_editable ):
                 return False

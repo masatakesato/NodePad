@@ -59,7 +59,7 @@ class NESceneManager:
             'Redo': self.Redo,
             'CheckConnectivityByID': self.CheckConnectivityByID,
             'IsAttributeLockedByID': self.IsAttributeLockedByID_Exec,
-            'CheckSymbolizeByID': self.CheckSymbolizeByID,
+            'IsSymbolizableByID': self.__IsSymbolizableByID,
 
             'CreateGroup': self.CreateGroupByID_Exec,# TODO: 試験実装.
 
@@ -279,7 +279,7 @@ class NESceneManager:
 
     def SetAttributeByID_Exec( self, attrib_id, value, *, terminate=True ):
 
-        if( self.__m_refNEScene.ValidateAttributeUpdate( attrib_id, value )==False ):
+        if( self.__m_refNEScene.IsNewAttributeValue( attrib_id, value )==False ):
             return False
 
         #print( 'NESceneManager::SetAttributeByID_Exec()...', attrib.FullKey(), value )
@@ -410,8 +410,8 @@ class NESceneManager:
 
 
 
-    def CheckSymbolizeByID( self, attrib_id ):
-        return self.__m_refNEScene.CanBeSymbolized( attrib_id )
+    def __IsSymbolizableByID( self, attrib_id ):
+        return self.__m_refNEScene.IsSymbolizable( attrib_id )
 
 
 
@@ -434,8 +434,6 @@ class NESceneManager:
 
 
 
-# TODO: 既に階層関係を持ったノード/グループ同士の再グループ化ルールを決める
-# TODO: 選択ノード群が複数グループに跨る場合の処理方法を決める.
     def GroupByID_Exec( self, obj_id_list, parent_id, *, pos=None, size=None, name=None, object_id=None, groupio_ids=(None, None), align_groupios=True, terminate=True ):
 
         print( 'NESceneManager::GroupByID_Exec()...' )
@@ -443,6 +441,11 @@ class NESceneManager:
         obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject), parent_id=None )#parent_id )
         if( not obj_id_list ):
             print( '    Aborting: No valid objects specified.' )
+            return False
+
+        # Abort grouping if obj_id_list contains invalid objects.
+        if( self.__m_refNEScene.IsGroupable( obj_id_list, parent_id )==False ):
+            print( '    Aborting: Unable to group ancestor node/group.' )
             return False
 
         # CreateGroup
@@ -591,7 +594,7 @@ class NESceneManager:
 
     def CreateSymbolicLinkByID_Exec( self, attrib_id, *, symboliclink_idset=(None,None,None), conn_id=None, slot_index=-1, terminate=True ):
 
-        if( self.__m_refNEScene.CanBeSymbolized( attrib_id )==False ):
+        if( self.__m_refNEScene.IsSymbolizable( attrib_id )==False ):
             return False
 
         # Collect attribute's exsiting connections (for symboliclink bypassing)
@@ -652,7 +655,7 @@ class NESceneManager:
 
     def SetSymbolicLinkSlotIndexByID_Exec( self, symboliclink_id, index, terminate=True ):
         
-        if( self.__m_refNEScene.ValidateSymboliclinkUpdate(symboliclink_id, index)==False ):
+        if( self.__m_refNEScene.IsNewSymboliclinkSlot(symboliclink_id, index)==False ):
             return False
 
         print( 'NESceneManager::SetSymbolicLinkSlotIndexByID_Exec()...', index  )
@@ -679,16 +682,14 @@ class NESceneManager:
 
 
     def DeleteByID_Exec( self, obj_id_list, *, terminate=True ):
-        # dont need explicit filtering. obj_id_list loop identifies object types.
-        #obj_id_list = self.__m_refNEScene.FilterObjectIDs( obj_id_list, typefilter=(NENodeObject, NEGroupObject, NEConnectionObject, NESymbolicLink), parent_id=None )
-        
+
+        #print( 'NESceneManager::DeleteByID_Exec()...' )
+
         for obj_id in obj_id_list:#sorted( set(obj_id_list), key=obj_id_list.index ):
             obj_type = self.__m_refNEScene.GetType( obj_id )
 
             if( obj_type==None ):
                 continue
-
-            #print( 'DeleteByID_Exec...' )
 
             if( obj_type is NENodeObject ):
                 self.RemoveNodeByID_Exec( obj_id, terminate=False )
@@ -816,7 +817,7 @@ class NESceneManager:
     def SetVisibleByID_Exec( self, object_id, visibility=True, *, terminate=True ):
 
         # Check if visible change operation is necessary
-        if( self.__m_refNEScene.ValidateVisibilityUpdate( object_id, visibility )==False ):
+        if( self.__m_refNEScene.IsNewVisibility( object_id, visibility )==False ):
             return False
 
         print( 'SetVisibleByID_Exec...', visibility )
