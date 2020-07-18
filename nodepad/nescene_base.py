@@ -99,6 +99,11 @@ def Compute( self, dataBlock ):
 
 
 
+    def NodeTypeExists( self, nodetype ):
+        return self.__m_NodeTypeManager.Exists( nodetype )
+
+
+
     def EvaluateSelected( self ):
         for obj_id in self.__m_SelectionList.Iter():
             self.__m_NodeGraph.Evaluate( obj_id )

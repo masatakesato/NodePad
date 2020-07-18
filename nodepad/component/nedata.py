@@ -18,36 +18,45 @@ class NEData(NEObject):
         self.__m_options = { False: self, True: self.Reference }
 
 
+
     def __del__( self ):
         self.Release()
+
 
 
     def Release( self ):
         self.__m_References.clear()
 
 
+
     def Value( self ):
         return self.__m_Value
+
         
 
     def SetValue( self, value ):
         self.__m_Value = value
 
 
+
     def SetDirty( self ):
         self.__m_DirtyFlag = True
+
 
 
     def SetClean( self ):
         self.__m_DirtyFlag = False
 
 
+
     def IsDirty( self ):
         return self.__m_DirtyFlag
 
 
+
     def ParentID( self ):
         return self.__m_ParentID
+
 
 
     def BindReference( self, data ):
@@ -55,9 +64,11 @@ class NEData(NEObject):
         self.__m_References.append( data )
 
 
+
     def UnbindReference( self, data ):
         #print( 'NEData::UnbindReference()...', data )
         self.__m_References.remove( data )
+
 
 
     def ClearReference( self ):
@@ -65,20 +76,25 @@ class NEData(NEObject):
         self.__m_References.clear()
 
 
+
     def HasReference( self ):
         return bool( self.__m_References )
+
 
 
     def NumReferences( self ):
         return len( self.__m_References )
 
 
+
     def Reference( self, idx ):
         return self.__m_References[idx]
 
 
+
     def References( self ):
         return self.__m_References
+
 
 
     def FrontValue( self, idx ):

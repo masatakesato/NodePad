@@ -42,7 +42,7 @@ class GraphicsScene(QGraphicsScene):
         self.__m_refCallbackFunc = None
         self.__m_refNodeTypeManager = nodetypemanager
 
-        self.__m_Triggered = False # True if this instance triggered NodeGraph update.
+        self.__m_bTriggered = False # True if this instance triggered NodeGraph update.
 
         self.__m_MouseDragMode = MouseMode.DoNothing
 
@@ -79,7 +79,7 @@ class GraphicsScene(QGraphicsScene):
 
 
     def HasTriggered( self ):
-        return self.__m_Triggered
+        return self.__m_bTriggered
 
 
 
@@ -103,7 +103,7 @@ class GraphicsScene(QGraphicsScene):
 
 
     def SetFocusViewID( self, view_id ):
-        print( 'GraphicsScene::SetFocusViewID()...' )
+        #print( 'GraphicsScene::SetFocusViewID()...' )
         self.__m_FocusViewID = view_id
 
 
@@ -573,9 +573,9 @@ class GraphicsScene(QGraphicsScene):
 
 
     def __TranslateCallback( self, offset ):
-        self.__m_Triggered = True
+        self.__m_bTriggered = True
         result = self.__m_refCallbackFunc( 'TranslateByID', [item.ID() for item in self.selectedItems()], (offset.x(), offset.y()), relative=True )
-        self.__m_Triggered = False
+        self.__m_bTriggered = False
         return result
 
 

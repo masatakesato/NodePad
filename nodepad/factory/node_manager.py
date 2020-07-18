@@ -24,6 +24,7 @@ class NodeTypeManager:
         self.__m_ComputeFuncs.clear()
 
 
+
     def Register( self, objectType, layoutDesc, computeCallback ):
         if( objectType in self.__m_NodeDescs ):
             print( 'Warning: NodeType "' + objectType +'" already exists. Canceling registration.' )
@@ -39,6 +40,7 @@ class NodeTypeManager:
 
             return True
 
+
     
     def Unregister( self, objectType ):
         if( objectType in self.__m_NodeDescs ):
@@ -53,6 +55,12 @@ class NodeTypeManager:
             return False
 
 
+
+    def Exists( self, objectType ):
+        return objectType in self.__m_NodeDescs
+
+
+
     def GetNodeDesc( self, objectType ):
         try:
             return self.__m_NodeDescs[ objectType ]
@@ -61,12 +69,14 @@ class NodeTypeManager:
             return None
 
 
+
     def GetNodeDescByIndex( self, idx ):
         try:
             return self.__m_NodeDescs[ self.__m_Index[idx] ]
         except:
             traceback.print_exc()
             return None
+
 
 
     def NumNodeDescs( self ):
@@ -80,6 +90,7 @@ class NodeTypeManager:
         except:
             traceback.print_exc()
             return None
+
 
 
     def GetComputeFuncByIndex( self, idx ):

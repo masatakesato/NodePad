@@ -65,7 +65,7 @@ class NESceneManager:
 
             'EditGroupByID': self.__EditGroupByID, # Open node edit window for group
 
-            #'LockAttributeByID': __LockAttributeByID_Exec,
+            #'LockAttributeByID': __LockAttributeByID_Exec,# Disabled because of confliction with __ConnectByID_Exec/__DisconnectByID_Exec
         }
 
         self.__m_refDataChangedCallback = None
@@ -106,11 +106,6 @@ class NESceneManager:
 
 
 
-    def NodeTypeManager( self ):
-        return self.__m_refNEScene.NodeTypeManager()
-
-
-
     def GetFilePath( self ):
         return self.__m_Filepath
 
@@ -146,6 +141,10 @@ class NESceneManager:
         
         print( 'NESceneManager::__CreateNodeByID_Exec()...', nodetype, pos )
         
+        if( self.__m_refNEScene.NodeTypeExists( nodetype )==False ):
+            print( '    Aborting: nodetype does not exist.' )
+            return False
+
         # Create Node
         self.__m_CommandManager.executeCmd( CreateNodeCommand( self.__m_refNEScene, nodetype, pos, size, name, parent_id, object_id, active_attrib_ids ) )
         
@@ -279,7 +278,6 @@ class NESceneManager:
 
 
 
-TODO: アトリビュートロック時に値更新を中止する
     def __SetAttributeByID_Exec( self, attrib_id, value, *, terminate=True ):
 
         if( self.__m_refNEScene.IsNewAttributeValue( attrib_id, value )==False ):
@@ -296,30 +294,32 @@ TODO: アトリビュートロック時に値更新を中止する
 
 
 
-# TODO: TEST
-    def LockAttribute_Exec( self, attrib_name, state ):
+# TODO: Disabled because of confliction with __ConnectByID_Exec/__DisconnectByID_Exec.
+# Need to refactor NESceneBAse::Connect_Operation/Disconnect_Operation first. 
+    #def LockAttribute_Exec( self, attrib_name, state ):
 
-        attrib_id = self.__m_refNEScene.GetAttributeID( attrib_name )
+    #    attrib_id = self.__m_refNEScene.GetAttributeID( attrib_name )
 
-        if( attrib_id==None ):
-            return False
+    #    if( attrib_id==None ):
+    #        return False
 
-        return self.__LockAttributeByID_Exec( attrib_id, state )
+    #    return self.__LockAttributeByID_Exec( attrib_id, state )
 
 
 
-# TODO: TEST.
-    def __LockAttributeByID_Exec( self, attrib_id, state, *, terminate=True ):
+# TODO: Disabled because of confliction with __ConnectByID_Exec/__DisconnectByID_Exec.
+# Need to refactor NESceneBAse::Connect_Operation/Disconnect_Operation first. 
+    #def __LockAttributeByID_Exec( self, attrib_id, state, *, terminate=True ):
 
-        if( self.__m_refNEScene.AttributeExists( attrib_id )==False ):
-            return False
-        print( 'NESceneManager::__LockAttributeByID_Exec()...' )
-        self.__m_CommandManager.executeCmd( LockAttributeCommand( self.__m_refNEScene, attrib_id, state ) )
+    #    if( self.__m_refNEScene.AttributeExists( attrib_id )==False ):
+    #        return False
+    #    print( 'NESceneManager::__LockAttributeByID_Exec()...' )
+    #    self.__m_CommandManager.executeCmd( LockAttributeCommand( self.__m_refNEScene, attrib_id, state ) )
 
-        # Terminate command sequence
-        if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
+    #    # Terminate command sequence
+    #    if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
 
-        return True
+    #    return True
 
 
 

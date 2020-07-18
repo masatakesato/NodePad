@@ -31,7 +31,6 @@ class AttribDesc:
         self.__m_DataFlow = flow
         self.__m_DataType = datatype
         self.__m_bEditable = editable
-        self.__m_Enabled = True
         self.__m_AllowMultiConnect = allowmultconnect
         self.__m_Name = name
         self.__m_DefaultValue = val
@@ -54,16 +53,6 @@ class AttribDesc:
 
     def SetDataType( self, datatype ):
         self.__m_DataType = datatype
-
-
-
-    def SetEditable( self, flag ):
-        self.__m_bEditable = flag
-
-
-
-    def SetEnable( self, flag ):
-        self.__m_Enabled = flag
 
 
 
@@ -119,11 +108,6 @@ class AttribDesc:
 
     def IsEditable( self ):
         return self.__m_bEditable
-
-
-
-    def Enabled( self ):
-        return self.__m_Enabled
 
 
 
@@ -208,7 +192,6 @@ class NodeDesc:
         self.__m_ObjectType = objectType
         self.__m_AttribLayoutDesc = layoutdesc
         #self.__m_Updater = updater
-        self.__m_Enabled = True
         self.__m_ObjectID = None
 
 
@@ -235,16 +218,6 @@ class NodeDesc:
 
     def OutputAttribDescs( self ):
         return self.__m_AttribLayoutDesc.OutputAttribDescs()
-
-
-
-    def SetEnable( self, flag ):
-        self.__m_Enabled = flag
-
-
-
-    def Enabled( self ):
-        return self.__m_Enabled
 
 
 

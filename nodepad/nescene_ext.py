@@ -85,6 +85,12 @@ class NESceneExt(NESceneBase):
 
 
     # Implemented in NESceneBase
+    #def NodeTypeExists( self, nodetype ):
+    #    return self.__m_NodeTypeManager.Exists( nodetype )
+
+
+
+    # Implemented in NESceneBase
     #def EvaluateSelected( self ):
     #    for obj_id in self.__m_SelectionList.Iter():
     #        self.__m_NodeGraph.Evaluate( obj_id )
@@ -494,7 +500,7 @@ class NESceneExt(NESceneBase):
 
         # Update AttributeEditorWidget
         if( self.__m_AttribEditor.HasTrigerred()==False ):
-            self.__m_AttribEditor.SetEnabled_Exec( attrib_id, new_state )
+            self.__m_AttribEditor.SetEnabled_Exec( attrib_id, not new_state )
 
         return prev_state
 
@@ -631,17 +637,13 @@ class NESceneExt(NESceneBase):
             desc = obj.GetDesc()
             if( desc==None ):    return False
 
-            # initialize attribute editor widget
+            # Init attribute editor widget
             self.__m_AttribEditor.InitializeWidget( obj_id, desc, obj.Key() )
-        
-            # set values to widget
+            
+            # Init individual attributes
             for attrib in obj.Attributes().values():
                 self.__m_AttribEditor.SetValue_Exec( attrib.AttributeID(), attrib.Value() )
-
-
-
-
-
+                self.__m_AttribEditor.SetEnabled_Exec( attrib.AttributeID(), not attrib.IsLocked() )
 
             return True
 

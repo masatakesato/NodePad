@@ -291,7 +291,7 @@ class NENodeGraph():
             self.__m_Pipeline.PropagateDirty( dest_attrib.ParentID() )
 
             # Lock Destination Attribute
-            dest_attrib.SetEnable( False )
+            dest_attrib.SetLock( True )
 
             return newConn
 
@@ -323,8 +323,8 @@ class NENodeGraph():
         if( attrib==None ):
             return None
 
-        prev_state = attrib.Enabled()
-        attrib.SetEnable( state )
+        prev_state = attrib.IsLocked()
+        attrib.SetLock( state )
 
         return prev_state
 
@@ -355,8 +355,9 @@ class NENodeGraph():
         # Propagate Dirty Flag to Destination Attribute(s).
         self.__m_Pipeline.PropagateDirty( dest_attrib.ParentID() )
 
+        # Unlock Destination Attribute only if no connections exist
         if( dest_attrib.HasConnections()==False ):
-            dest_attrib.SetEnable(True)
+            dest_attrib.SetLock( False )
             return dest_attrib.AttributeID()
 
         else:
@@ -429,7 +430,7 @@ class NENodeGraph():
     #            conn.SetObjectType( 'Connection' )
 
     #        if( new_dest_attrib.HasConnections()==False ):
-    #            new_dest_attrib.SetEnable(True)
+    #            new_dest_attrib.SetLock( False )
 
     #        return conn
 
@@ -1169,8 +1170,10 @@ class NENodeGraph():
             if( attrib==None ):# check if attribute exisits
                 return False
 
-            old_value = attrib.Value()
-            if( old_value==new_value ):# check if value needs to be updated
+            if( attrib.IsLocked() ):# check if attribute is unlocked
+                return False
+
+            if( attrib.Value()==new_value ):# check if new value is different from current.
                 return False
 
             return True

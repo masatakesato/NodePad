@@ -767,7 +767,7 @@ class AttributeEditorWidget(QFrame):
         self.setMinimumWidth(350)
         self.setStyleSheet( UIStyle.g_StaticFrameStyleSheet )
 
-        self.__m_Triggered = False # True if this instance triggered NodeGraph update.
+        self.__m_bTriggered = False # True if this instance triggered NodeGraph update.
 
         self.__m_refCallbackFunc = None
 
@@ -852,14 +852,14 @@ class AttributeEditorWidget(QFrame):
 
 
     def HasTrigerred( self ):
-        return self.__m_Triggered
+        return self.__m_bTriggered
 
 
 
     def __CallbackFunc( self, *args, **kwargs ):
-        self.__m_Triggered = True
+        self.__m_bTriggered = True
         self.__m_refCallbackFunc( *args, **kwargs )
-        self.__m_Triggered = False
+        self.__m_bTriggered = False
 
 
 
@@ -901,7 +901,6 @@ class AttributeEditorWidget(QFrame):
 
             # Assign Widget
             if( newWidget ):
-                newWidget.setEnabled( desc.Enabled() )
                 self.__m_WidgetDict[ newWidget.ID() ] = newWidget
                 collapsibleWidget_In.AddWidget( newWidget )
                 hasAttrib = True
@@ -928,7 +927,6 @@ class AttributeEditorWidget(QFrame):
 
             # Assign Widget
             if( newWidget ):
-                newWidget.setEnabled( desc.Enabled() )
                 self.__m_WidgetDict[ newWidget.ID() ] = newWidget
                 collapsibleWidget_Out.AddWidget( newWidget )
                 hasAttrib = True
@@ -987,7 +985,6 @@ class AttributeEditorWidget(QFrame):
                 if( desc.IsEditable()==True ):
                     attribWidget = self.__CreateAttributeWidget( desc, self.__CallbackFunc, name='Value' )
                     if( attribWidget ):
-                        attribWidget.setEnabled( desc.Enabled() )
                         self.__m_WidgetDict[ attribWidget.ID() ] = attribWidget
                         collapsibleWidget_In.AddWidget( attribWidget )
 
@@ -1016,7 +1013,6 @@ class AttributeEditorWidget(QFrame):
                 if( desc.IsEditable()==True ):
                     attribWidget = self.__CreateAttributeWidget( desc, self.__CallbackFunc, name='Value' )
                     if( attribWidget ):
-                        attribWidget.setEnabled( desc.Enabled() )
                         self.__m_WidgetDict[ attribWidget.ID() ] = attribWidget
                         collapsibleWidget_Out.AddWidget( attribWidget )
 

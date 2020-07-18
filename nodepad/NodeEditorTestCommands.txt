@@ -97,9 +97,12 @@ manager.Parent_Exec( 'Group001' )
 
 
 //=========== Lock/Unlock Attribute ==========//
-manager = MainWidget.SceneManager()
-manager.CreateNode_Exec( 'Float', pos=(0, 0) )
-manager.LockAttribute_Exec( 'Float001.Output', False )
-manager.Undo()
+# TODO: Disabled because of confliction with __ConnectByID_Exec/__DisconnectByID_Exec.
+# TODO: Refactor NESceneBAse::Connect_Operation/Disconnect_Operation first.
+#manager = MainWidget.SceneManager()
+#manager.CreateNode_Exec( 'Float', pos=(0, 0) )
+#manager.LockAttribute_Exec( 'Float001.Output', True )
+#manager.Undo()
 
-
+#manager.CreateNode_Exec( 'Add', pos=(-200, 0) )
+#manager.LockAttribute_Exec( 'Add001.Value1', True )

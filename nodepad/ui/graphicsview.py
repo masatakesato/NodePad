@@ -138,7 +138,7 @@ class GraphicsView(QGraphicsView):
 
     def mousePressEvent(self, event):
 
-        print( 'GraphicsView::mousePressEvent()...' )
+        #print( 'GraphicsView::mousePressEvent()...' )
 
         self.__m_PrevPos = event.pos()
 
@@ -150,7 +150,7 @@ class GraphicsView(QGraphicsView):
         # Walkaround for 'Ctrl+MouseLeft' item selection across multiple QGraphicsViews.
         elif( event.modifiers() == Qt.ControlModifier and event.button() == Qt.LeftButton ):# Switch Selection
             if( self.itemAt(event.pos()) ):
-                print( 'GraphicsView::mousePressEvent()... Detected Switch Selection.' )
+                #print( 'GraphicsView::mousePressEvent()... Detected Switch Selection.' )
                 self.__m_MouseMode = MouseMode.SwitchSelection
                 return
             else:
@@ -191,7 +191,7 @@ class GraphicsView(QGraphicsView):
 
     def mouseReleaseEvent(self, event):
 
-        print( 'GraphicsView::mouseReleaseEvent()...' )
+        #print( 'GraphicsView::mouseReleaseEvent()...' )
 
         if( self.__m_MouseMode == MouseMode.MoveViewport ):
             self.setCursor(Qt.ArrowCursor)
@@ -266,7 +266,7 @@ class GraphicsView(QGraphicsView):
 
 
     def focusInEvent( self, event ):
-        print( 'GraphicsView::focusInEvent()...' )
+        #print( 'GraphicsView::focusInEvent()...' )
         self.FocusViewIdChanged.emit( self.__m_Key )
         return super(GraphicsView, self).focusInEvent(event)
 

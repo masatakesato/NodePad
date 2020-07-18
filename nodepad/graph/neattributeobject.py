@@ -17,7 +17,7 @@ class NEAttributeObject(NEGraphObject):
         self.__m_Desc = copy.deepcopy( attribDesc )
         self.__m_Desc._AttribDesc__m_ObjectID = ( parent_id, self.ID() )
         self.__m_refConnections = {}
-        self.__m_bLock = False
+        self.__m_bLocked = False
         self.__m_refData = None
 
         
@@ -121,7 +121,7 @@ class NEAttributeObject(NEGraphObject):
 
 
     def SetValue( self, value ):
-        self.__m_refData.SetValue( value )
+        if( not self.__m_bLocked ): self.__m_refData.SetValue( value )
 
 
 
@@ -145,23 +145,19 @@ class NEAttributeObject(NEGraphObject):
 
 
 
-    def SetEditable( self, state ):
-        self.__m_Desc.SetEditale( state )
-
-
-
     def IsEditable( self ):
         return self.__m_Desc.IsEditable()
 
 
 
-    def SetEnable( self, state ):
-        self.__m_Desc.SetEnable( state )
+    def SetLock( self, state ):
+        self.__m_bLocked = state
 
 
 
-    def Enabled( self ):
-        return self.__m_Desc.Enabled()
+    def IsLocked( self ):
+        m_bTriggered
+        return self.__m_refData.IsLocked()
 
 
 
@@ -277,16 +273,11 @@ class NEAttributeObject(NEGraphObject):
             print( 'Unable to connect: Different Node Hierarchy...' )
             return False
 
-        if( self.__m_bLock or attrib.__m_bLock ):
-            print( 'Unable to connect: Connection Operation is Frozen state...' )
-            return False
-
         if( self.__m_Desc.DataFlow()==attrib.__m_Desc.DataFlow() ):
             print( 'Unable to connect: Incorrect DataFlow Combination...' )
             return False
         
         if( not self.__m_Desc.ConnectableTypes().intersection(attrib.__m_Desc.ConnectableTypes()) ):
-        #if( not self.__m_Desc.DataType().intersection(attrib.__m_Desc.DataType()) ):
             print( 'Unable to connect: Different DataType...' )
             return False
 
@@ -295,7 +286,7 @@ class NEAttributeObject(NEGraphObject):
 
 
     def IsLocked( self ):
-        return self.__m_bLock
+        return self.__m_bLocked
 
 
 

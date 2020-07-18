@@ -18,7 +18,6 @@ class NEGroupIOObject(NEGraphObject):
         
         self.__m_LayoutDesc = AttribLayoutDesc()
         self.__m_Desc = NodeDesc( 'GroupIO', self.__m_LayoutDesc )
-        self.__m_Desc.SetEnable( False )
         self.__m_DataFlow = dataflow
         self.__m_refAttributes = {}
 
