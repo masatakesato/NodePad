@@ -826,17 +826,6 @@ class NENodeGraph():
             return []
 
 
-    def IsConnectedByID( self, attrib_id1, attrib_id2 ):
-
-        attrib1 = self.GetAttributeByID( attrib_id1 )
-        attrib2 = self.GetAttributeByID( attrib_id2 )
-
-        if( attrib1==None or attrib2==None ):
-            return False
-
-        return attrib2.IsConnected( attrib1 )
-
-
 
     def IsConnectableByID( self, attrib_id1, attrib_id2, checkloop=False ):
 
