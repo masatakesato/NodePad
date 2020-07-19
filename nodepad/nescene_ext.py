@@ -116,12 +116,6 @@ class NESceneExt(NESceneBase):
 
 
     # Implemented in NESceneBase
-    #def GetRoot( self ):
-    #    return self.__m_NodeGraph.GetRoot()
-
-
-
-    # Implemented in NESceneBase
     #def GetRootID( self ):
     #    return self.__m_NodeGraph.GetRootID()
 
@@ -229,12 +223,6 @@ class NESceneExt(NESceneBase):
 
 
     # Implemented in NESceneBase
-    #def AttribHasConnections( self, attrib_id ):
-    #    return self.__m_NodeGraph.AttribHasConnections( attrib_id )
-
-
-
-    # Implemented in NESceneBase
     #def IsConnectable( self, attrib_id1, attrib_id2, checkloop ):
     #    return self.__m_NodeGraph.IsConnectableByID( attrib_id1, attrib_id2, checkloop )
 
@@ -280,12 +268,6 @@ class NESceneExt(NESceneBase):
     # Implemented in NESceneBase
     #def GetType( self, object_id ):
     #    return self.__m_NodeGraph.GetObjectTypeByID( object_id )
-
-
-
-    # Implemented in NESceneBase
-    #def IsType( self, object_id, typefilter ):
-    #    return self.__m_NodeGraph.GetObjectTypeByID( object_id ) == typefilter
 
 
 

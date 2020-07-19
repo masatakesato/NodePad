@@ -360,16 +360,19 @@ class NESceneManager:
 
     def __RenameAttributeByID_Exec( self, attrib_id, newname, *, terminate=True ):
 
-        attrib = self.__m_refNEScene.GetAttribute( attrib_id )
-        if( attrib==None ):
+        print( 'NESceneManager::__RenameAttributeByID_Exec()...' )
+        if( self.__m_refNEScene.AttributeExists( attrib_id )==False ):
+            print( '    Aborting: Attribute does not exist.' )
             return False
 
+        #attrib = self.__m_refNEScene.GetAttribute( attrib_id )
+        #print( attrib.AttributeID()[0] == attrib.Parent().ID() )
+        #print( attrib.ParentID() == attrib.Parent().ID() )
+
         # SymbolicLinkの場合はself.__RenameByID_Execを使うように処理を切り替える
-        if( isinstance( attrib.Parent(), NESymbolicLink ) ):
-            return self.__RenameByID_Exec( attrib.ParentID(), newname, terminate=terminate )
-
-        print( 'NESceneManager::__RenameAttributeByID_Exec()...', attrib.Key(), newname )
-
+        if( self.__m_refNEScene.GetType(attrib_id[0])==NESymbolicLink ):
+            return self.__RenameByID_Exec( attrib_id[0], newname, terminate=terminate )
+        
         self.__m_CommandManager.executeCmd( RenameAttributeCommand( self.__m_refNEScene, attrib_id, newname ) )
         
         # Terminate command sequence
@@ -483,7 +486,7 @@ class NESceneManager:
 
         print( 'NESceneManager::__UngroupByID_Exec()...' )
 
-        if( not self.__m_refNEScene.IsType( group_id, NEGroupObject ) ):
+        if( self.__m_refNEScene.GetType(group_id)!=NEGroupObject ):
             print( '    Aborting: No valid objects specified.' )
             return False
 

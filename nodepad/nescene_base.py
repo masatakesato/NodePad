@@ -115,11 +115,6 @@ def Compute( self, dataBlock ):
 
 
 
-    def GetRoot( self ):
-        return self.__m_NodeGraph.GetRoot()
-
-
-
     def GetRootID( self ):
         return self.__m_NodeGraph.GetRootID()
 
@@ -137,11 +132,6 @@ def Compute( self, dataBlock ):
 
     def FilterDescendants( self, obj_id_list, parent_id ):
         return self.__m_NodeGraph.FilterDescendants( obj_id_list, parent_id )
-
-
-
-    def IsAncestorOf( self, ancestor_id, object_id ):
-        return self.__m_NodeGraph.IsAncestorOf( ancestor_id, object_id )
 
 
 
@@ -185,18 +175,13 @@ def Compute( self, dataBlock ):
 
 
 
-    def GetAttribConnectionIDs( self, attrib_id ):
-        return self.__m_NodeGraph.GetAttribConnectionIDs( attrib_id )
-
-
-
     def GetOverlappedConnections( self, attrib_ids ):
         return self.__m_NodeGraph.CollectOverlappedConnectionsByID( attrib_ids )
 
 
 
-    def GetAttribute( self, attrib_id ):
-        return self.__m_NodeGraph.GetAttributeByID( attrib_id )
+    #def GetAttribute( self, attrib_id ):
+    #    return self.__m_NodeGraph.GetAttributeByID( attrib_id )
 
 
 
@@ -221,6 +206,11 @@ def Compute( self, dataBlock ):
 
 
 
+    def IsValidNewName( self, object_id, newname ):
+        return self.__m_NodeGraph.IsValidNewName( object_id, newname )
+
+
+
     def IsNewVisibility( self, object_id, visibility ):
         return self.__m_NodeGraph.IsNewVisibility( object_id, visibility )
 
@@ -233,11 +223,6 @@ def Compute( self, dataBlock ):
 
     def IsNewSymboliclinkSlot( self, object_id, new_slot ):
         return self.__m_NodeGraph.IsNewSymboliclinkSlot( object_id, new_slot )
-
-
-
-    def AttribHasConnections( self, attrib_id ):
-        return self.__m_NodeGraph.AttribHasConnections( attrib_id )
 
 
 
@@ -297,11 +282,6 @@ def Compute( self, dataBlock ):
 
 
 
-    def IsType( self, object_id, typefilter ):
-        return self.__m_NodeGraph.GetObjectTypeByID( object_id ) == typefilter
-
-
-
     def PositionChanged( self, object_id, translate, relative ):
         return self.__m_NodeGraph.PositionChanged( object_id, translate, relative )
 
@@ -321,10 +301,6 @@ def Compute( self, dataBlock ):
     def CenterPosition( self, object_ids ):
         return self.__m_NodeGraph.GetCentroid( object_ids )
 
-
-
-    def IsValidNewName( self, object_id, newname ):
-        return self.__m_NodeGraph.IsValidNewName( object_id, newname )
 
 
 

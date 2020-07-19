@@ -164,15 +164,6 @@ class NENodeGraph():
 
 
 
-    def GetRoot( self ):
-        return self.__m_Root
-
-
-
-    def GetRootID( self ):
-        return self.__m_Root.ID()
-
-
 
     #########################################################################
     #               Object Create/Delete Operation(public func)             #
@@ -580,6 +571,11 @@ class NENodeGraph():
 
 
 
+    def GetRootID( self ):
+        return self.__m_Root.ID()
+
+
+
     def GetGroupIOIDs( self, group_id ):
         try:
             return self.__m_IDMap[ group_id ].GroupIOIDs()
@@ -810,17 +806,6 @@ class NENodeGraph():
 
 
 
-    def GetAttribConnectionIDs( self, attrib_id ):
-        try:
-            attrib = self.__m_IDMap[ attrib_id[0] ].AttributeByID( attrib_id[1] )
-            return attrib.ConnectionIDs()
-
-        except:
-            traceback.print_exc()
-            return []
-
-
-
     def IsConnectableByID( self, attrib_id1, attrib_id2, checkloop=False ):
 
         attrib1 = self.GetAttributeByID( attrib_id1 )
@@ -843,15 +828,6 @@ class NENodeGraph():
             return self.__m_Pipeline.CheckLoop( { attrib_source.ParentID():attrib_dest.ParentID() } )
 
         return True
-
-
-
-    def AttribHasConnections( self, attrib_id ):
-        try:
-            return self.__m_IDMap[ attrib_id[0] ].AttributeByID( attrib_id[1] ).HasConnections()
-        except:
-            traceback.print_exc()
-            return False
 
 
 
@@ -879,7 +855,7 @@ class NENodeGraph():
 
         # Return if elemnt is ancestor of parent_id
         for obj_id in obj_id_list:
-            if( self.IsAncestorOf( obj_id, parent_id ) ):
+            if( self.__IsAncestorOf( obj_id, parent_id ) ):
                 return False
 
         return True
@@ -1018,7 +994,7 @@ class NENodeGraph():
 
             return [ obj_id for obj_id in obj_id_list if
                     ( type(self.__m_IDMap[obj_id]) in (NENodeObject, NEGroupObject) ) and    # include nodegraph and group only
-                    ( self.IsAncestorOf(obj_id, parent_id) == False ) and                   # exclude parent_id's ancestors
+                    ( self.__IsAncestorOf(obj_id, parent_id) == False ) and                   # exclude parent_id's ancestors
                     #( obj_id != parent_id ) and                                              # exclude parent_id self
                     ( not obj_id in direct_children ) ]                                      # exclude parent_id's children
 
@@ -1209,9 +1185,9 @@ class NENodeGraph():
 
 
     # check if ancestor_id is ancestor of object_id
-    def IsAncestorOf( self, ancestor_id, object_id ):
+    def __IsAncestorOf( self, ancestor_id, object_id ):
         try:
-            #print( 'NENodeGraph::IsAncestorOf()...' )
+            #print( 'NENodeGraph::__IsAncestorOf()...' )
             root_id = self.__m_Root.ID()
             curr_id = self.__m_IDMap[ object_id ].ID()#.ParentID()
 
@@ -1229,8 +1205,8 @@ class NENodeGraph():
 
 
     # check if object_id is descendant of descendant_id
-    def IsDescendantOf( self, object_id, descendant_id ):
-        return self.IsAncestorOf( descendant_id, object_id )
+    #def __IsDescendantOf( self, object_id, descendant_id ):
+    #    return self.__IsAncestorOf( descendant_id, object_id )
 
 
 
