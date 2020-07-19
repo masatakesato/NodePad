@@ -1,8 +1,9 @@
 ﻿import pickle
 import uuid
 
-from .history.commandbase import CommandBase
+from .component.descriptors import AttribLock
 
+from .history.commandbase import CommandBase
 
 from .graph.neconnectionobject import NEConnectionSnapshot
 from .graph.nenodeobject import NENodeObject, NENodeSnapshot
@@ -10,7 +11,6 @@ from .graph.negroupobject import NEGroupObject, NEGroupSnapshot, NEParentSnapsho
 from .graph.nesymboliclink import NESymbolicLinkSnapshot
 from .graph.negroupioobject import NEGroupIOSnapshot
 
-#from .nescene import NEScene
 from .nescene_ext import NESceneExt
 
 
@@ -63,11 +63,15 @@ class RemoveCustomNodeCommand(CommandBase):
         
     def undo( self ):
         print( 'RemoveCustomNodeCommand::undo()...' )
+        # resotre node
         self.__m_refNEScene.CreateCustomNode_Operation( self.__m_Snapshot.ObjectType(), self.__m_Snapshot.Translation(), self.__m_Snapshot.Key(), self.__m_Snapshot.ObjectID(), self.__m_Snapshot.ParentID(), self.__m_Snapshot.ActiveAttribIDs() )
+        # restore attribute names
         for attribName in self.__m_Snapshot.AttribNames():
             self.__m_refNEScene.RenameAttribute_Operation( (attribName[0], attribName[1]), attribName[2] )
+        # restore attribute values and lock-states
         for attribArg in self.__m_Snapshot.AttribArgs():
             self.__m_refNEScene.SetAttribute_Operation( (attribArg[0], attribArg[1]), attribArg[2] )
+            self.__m_refNEScene.LockAttribute_Operation( (attribArg[0], attribArg[1]), attribArg[3] )
 
     def redo( self ):
         print( 'RemoveCustomNodeCommand::redo()...' )
@@ -142,11 +146,15 @@ class RemoveNodeCommand(CommandBase):
         
     def undo( self ):
         print( 'RemoveNodeCommand::undo()...' )
+        # restore node
         self.__m_refNEScene.CreateNode_Operation( self.__m_Snapshot.ObjectType(), self.__m_Snapshot.Translation(), self.__m_Snapshot.Size(), self.__m_Snapshot.Key(), self.__m_Snapshot.ObjectID(), self.__m_Snapshot.ParentID(), self.__m_Snapshot.ActiveAttribIDs() )
+        # restore attribute names
         for attribName in self.__m_Snapshot.AttribNames():
             self.__m_refNEScene.RenameAttribute_Operation( (attribName[0], attribName[1]), attribName[2] )
+        # restore attribute values and lock-states
         for attribArg in self.__m_Snapshot.AttribArgs():
             self.__m_refNEScene.SetAttribute_Operation( (attribArg[0], attribArg[1]), attribArg[2] )
+            self.__m_refNEScene.LockAttribute_Operation( (attribArg[0], attribArg[1]), attribArg[3] )
 
     def redo( self ):
         print( 'RemoveNodeCommand::redo()...' )
@@ -309,18 +317,18 @@ class SetAttributeCommand(CommandBase):
 
 class LockAttributeCommand(CommandBase):
 
-    def __init__( self, neScene, attrib_id, state ):
+    def __init__( self, neScene, attrib_id, flag ):
         super(LockAttributeCommand, self).__init__()
 
         self.__m_refNEScene = neScene
         self.__m_ObjectID = attrib_id
-        self.__m_NewState = state
+        self.__m_NewState = AttribLock.UserLock if flag else AttribLock.Unlock
         self.__m_PrevState = None
 
 
     def execute( self ):
         self.__m_PrevState = self.__m_refNEScene.LockAttribute_Operation( self.__m_ObjectID, self.__m_NewState )
-
+        
     def undo( self ):
         print( 'LockAttributeCommand::undo()...' )
         self.__m_refNEScene.LockAttribute_Operation( self.__m_ObjectID, self.__m_PrevState )
@@ -410,12 +418,12 @@ class TranslateCommand(CommandBase):
 
 class SetVisibleCommand(CommandBase):
 
-    def __init__( self, neScene, object_id, flag ):
+    def __init__( self, neScene, object_id, state ):
         super(SetVisibleCommand, self).__init__()
 
         self.__m_refNEScene = neScene
         self.__m_ObjectID = object_id
-        self.__m_NewState = flag
+        self.__m_NewState = state
         self.__m_PrevState = None
 
 
@@ -501,9 +509,12 @@ class RemoveSymbolicLinkCommand(CommandBase):
     
     def undo( self ):
         print( 'RemoveSymbolicLinkCommand::undo()...' )
+        # restore symboliclink
         self.__m_refNEScene.CreateSymbolicLink_Operation( self.__m_Snapshot.GroupID(), self.__m_Snapshot.AttribDesc(), self.__m_Snapshot.Value(), self.__m_Snapshot.Key(), self.__m_Snapshot.ObjectIDSet(), self.__m_Snapshot.SlotIntex() )
+        # restore attribute values and lock-states
         for attribArg in self.__m_Snapshot.AttribArgs():
             self.__m_refNEScene.SetAttribute_Operation( (attribArg[0], attribArg[1]), attribArg[2] )
+            self.__m_refNEScene.LockAttribute_Operation( (attribArg[0], attribArg[1]), attribArg[3] )
  
     def redo( self ):
         print( 'RemoveSymbolicLinkCommand::redo()...' )

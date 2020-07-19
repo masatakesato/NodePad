@@ -7,7 +7,7 @@ class DataFlow(IntEnum):
     Unknown         = -1
     Input           = 0
     Output          = 1
-    Internal        = 2 # internal.
+
 
 
 class ConnectionMode(IntEnum):
@@ -16,10 +16,14 @@ class ConnectionMode(IntEnum):
     Multiple = 2
 
 
-class SelectionMode(IntEnum):
-    Add = 0
-    Deselect = 1
-    Clear = 2
+
+class AttribLock:
+
+    Unlock = 0x00
+    SysLock = 0x01# system lock/unlock flag
+    UserLock = 0x02# user lock/unlock flag
+
+
 
 
 ############### Attribute Descriptor ###############

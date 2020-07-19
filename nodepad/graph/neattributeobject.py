@@ -17,8 +17,8 @@ class NEAttributeObject(NEGraphObject):
         self.__m_Desc = copy.deepcopy( attribDesc )
         self.__m_Desc._AttribDesc__m_ObjectID = ( parent_id, self.ID() )
         self.__m_refConnections = {}
-        self.__m_bLocked = False
         self.__m_refData = None
+        self.__m_Locked = AttribLock.Unlock
 
         
 
@@ -63,6 +63,13 @@ class NEAttributeObject(NEGraphObject):
 
     def BindConnection( self, pconn ):
         self.__m_refConnections[ pconn.ID() ] = pconn
+        # Clear current syslock settings, then reassign AttribLock.SysLock
+        self.__m_Locked = ( self.__m_Locked & AttribLock.UserLock ) | AttribLock.SysLock
+        #print( bin(self.__m_Locked) )
+
+TODO: 出力アトリビュートにシステムロックをかけたくない
+TODO: 出力アトリビュートだけは
+
 
 
 
@@ -70,6 +77,10 @@ class NEAttributeObject(NEGraphObject):
         try:
             self.__m_refConnections[ pconn.ID() ] = None
             del self.__m_refConnections[ pconn.ID() ]
+            # Clear current syslock settings, then reassign new syslock(0x01 if connection exists, else 0x00)
+            self.__m_Locked = ( self.__m_Locked & AttribLock.UserLock ) | bool(self.__m_refConnections)
+            #print( bin(self.__m_Locked) )
+
         except:
             pass
 
@@ -121,7 +132,7 @@ class NEAttributeObject(NEGraphObject):
 
 
     def SetValue( self, value ):
-        if( not self.__m_bLocked ): self.__m_refData.SetValue( value )
+        if( not self.__m_Locked ): self.__m_refData.SetValue( value )
 
 
 
@@ -150,14 +161,15 @@ class NEAttributeObject(NEGraphObject):
 
 
 
-    def SetLock( self, state ):
-        self.__m_bLocked = state
+    def SetUserLock( self, flag ):
+        # Clear current userlock settings, then reassign new userlock
+        self.__m_Locked = (self.__m_Locked & AttribLock.SysLock) | flag
+        #print( bin(self.__m_Locked) )
 
 
 
-    def IsLocked( self ):
-        m_bTriggered
-        return self.__m_refData.IsLocked()
+    def LockState( self ):
+        return self.__m_Locked
 
 
 
@@ -282,11 +294,6 @@ class NEAttributeObject(NEGraphObject):
             return False
 
         return True
-
-
-
-    def IsLocked( self ):
-        return self.__m_bLocked
 
 
 

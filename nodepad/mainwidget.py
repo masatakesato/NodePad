@@ -9,8 +9,6 @@ from .ui.graphicsview import GraphicsView
 from .ui.attributeeditorwidget import AttributeEditorWidget
 from .ui.pythoninterpreter import PyInterp
 
-
-#from .nescene import NEScene
 from .nescene_ext import NESceneExt
 from .nescene_manager import NESceneManager
 

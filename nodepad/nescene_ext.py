@@ -205,6 +205,11 @@ class NESceneExt(NESceneBase):
 
 
 
+    #def IsLocked( self, attrib_id ):
+    #    return self.__m_NodeGraph.IsLocked( attrib_id )
+
+
+
     # Implemented in NESceneBase
     #def IsNewVisibility( self, object_id, visibility ):
     #    return self.__m_NodeGraph.IsNewVisibility( object_id, visibility )
@@ -224,8 +229,8 @@ class NESceneExt(NESceneBase):
 
 
     # Implemented in NESceneBase
-    #def IsAttributeLocked( self, attrib_id ):
-    #    return self.__m_NodeGraph.IsLockedByID( attrib_id )
+    #def AttribHasConnections( self, attrib_id ):
+    #    return self.__m_NodeGraph.AttribHasConnections( attrib_id )
 
 
 
@@ -312,9 +317,7 @@ class NESceneExt(NESceneBase):
     # GUI-dependent function.
     def __UpdateAttributeEditor( self, object_id=None ):
         try:
-            if( self.__m_AttribEditor.IsLocked() ):
-                print( 'NESceneExt::__UpdateAttributeEditor()... AttributeEditor is Locked.' )
-                return False
+            print( 'NESceneExt::__UpdateAttributeEditor()...' )
 
             # get object and desc from obj_id
             obj_id = object_id if object_id else self.__m_AttribEditor.ActiveObjectID()
@@ -343,6 +346,7 @@ class NESceneExt(NESceneBase):
             return True
 
         except:
+            traceback.print_exc()
             return False
 
 
@@ -350,10 +354,6 @@ class NESceneExt(NESceneBase):
 
     def CreateNode_Operation( self, nodetype, pos, size, name, object_id, parent_id, attrib_ids ):
         newNode = super(NESceneExt, self).CreateNode_Operation( nodetype, pos, size, name, object_id, parent_id, attrib_ids )
-        # Create Node in NodeGraph
-        #nodeDesc = self.__m_NodeTypeManager.GetNodeDesc( nodetype )
-        #computeFunc = self.__m_NodeTypeManager.GetComputeFunc( nodetype )
-        #newNode = self.__m_NodeGraph.AddNode( nodeDesc, computeFunc, pos, size, name, object_id, attrib_ids, parent_id )
         
         newsize = newNode.GetSize()
         # Create Node in GraphEditor
@@ -365,9 +365,7 @@ class NESceneExt(NESceneBase):
 
     def RemoveNode_Operation( self, node_id ):
         super(NESceneExt, self).RemoveNode_Operation( node_id )
-        # Remove node in NodeGraph
-        #result = self.__m_NodeGraph.RemoveNodeByID( node_id )
-
+        
         # Remove node in GraphEditor
         self.__m_GraphEditor.RemoveNode_Exec( node_id )
 
@@ -375,17 +373,12 @@ class NESceneExt(NESceneBase):
 
     def Connect_Operation( self, attrib1_id, attrib2_id, object_id ):
         newConn = super(NESceneExt, self).Connect_Operation( attrib1_id, attrib2_id, object_id )
-        # Create Connection in NodeGraph
-        #newConn = self.__m_NodeGraph.AddConnectionByID( attrib1_id, attrib2_id, object_id )
-        
-        # Set Attribute's Lock/Unlock state in NodeGraph
-        #self.__m_NodeGraph.LockAttributeByID( newConn.DestinationAttribID(), False )
         
         # Create Connection in GraphEditor
         self.__m_GraphEditor.Connect_Exec( newConn.Key(), newConn.ID(), newConn.SourceAttribID(), newConn.DestinationAttribID(), newConn.ParentID() )
 
         # Update AttributeEditorWidget
-        self.__m_AttribEditor.SetEnabled_Exec( newConn.DestinationAttribID(), False )
+        self.__m_AttribEditor.Lock_Exec( newConn.DestinationAttribID(), self.IsLocked( newConn.DestinationAttribID() ) )
 
         return newConn
 
@@ -393,31 +386,21 @@ class NESceneExt(NESceneBase):
 
     def Disconnect_Operation( self, conn_id ):
         dest_attrib_id = super(NESceneExt, self).Disconnect_Operation( conn_id )
-        # Disconnect in NodeGraph
-        #dest_attrib_id = self.__m_NodeGraph.RemoveConnectionByID( conn_id )
         
         # Disconnect in GraphEditor
         self.__m_GraphEditor.Disconnect_Exec( conn_id )
 
         # Update AttributeEditorWidget.
-        #self.__m_AttribEditor.SetEnabled_Exec( dest_attrib_id, True )
         if( dest_attrib_id ):
-            self.__m_AttribEditor.SetEnabled_Exec( dest_attrib_id, True )
+            self.__m_AttribEditor.Lock_Exec( dest_attrib_id, self.IsLocked( dest_attrib_id ) )
 
 
 
 # Unused.
     #def Reconnect_Operation( self, conn_id, attrib1_id, attrib2_id ):
     #    conn = super(NESceneExt, self).Reconnect_Operation( conn_id, attrib1_id, attrib2_id )
-    #    # Reconnect in NodeGraph
-    #    #conn, prev_src_attrib_id, prev_dest_attrib_id = self.__m_NodeGraph.ReconnectByID( conn_id, attrib1_id, attrib2_id )
-
-    #    # Set Attribute's Lock/Unlock state in NodeGraph
-    #    #prev_state = self.__m_NodeGraph.LockAttributeByID( conn.DestinationAttribID(), False )
-
     #    # Reconnect in GraphEditor
     #    self.__m_GraphEditor.Reconnect_Exec( conn.ID(), ( conn.Source().ParentID(), conn.SourceID() ), ( conn.Destination().ParentID(), conn.DestinationID() ), conn.ParentID() )
-
     #    # return previous connection
     #    #return (prev_src_attrib_id, prev_dest_attrib_id)
     #    return conn
@@ -426,9 +409,6 @@ class NESceneExt(NESceneBase):
 
     def CreateGroup_Operation( self, pos, size, name, object_id, parent_id ):
         newGroup = super(NESceneExt, self).CreateGroup_Operation( pos, size, name, object_id, parent_id )
-
-        # Create Group in NodeGraph
-        #newGroup = self.__m_NodeGraph.AddGroup( pos, size, name, object_id, parent_id )
 
         # Create Group in GraphEditor
         self.__m_GraphEditor.CreateGroup_Exec( newGroup.Key(), newGroup.ID(), newGroup.GetPosition(), newGroup.ParentID() )
@@ -440,9 +420,6 @@ class NESceneExt(NESceneBase):
     def RemoveGroup_Operation( self, group_id ):
         result = super(NESceneExt, self).RemoveGroup_Operation( group_id )
         #print( 'NESceneExt::RemoveGroup_Operation()...' )
-        # Remove group in NodeGraph
-        #result = self.__m_NodeGraph.RemoveGroupByID( group_id )
-
         # Remove group in GraphEditor
         self.__m_GraphEditor.RemoveGroup_Exec( group_id )
         
@@ -450,9 +427,7 @@ class NESceneExt(NESceneBase):
 
     def Rename_Operation( self, node_id, newname ):
         new_name, prev_name = super(NESceneExt, self).Rename_Operation( node_id, newname )
-        # Rename in NodeGraph
-        #new_name, prev_name = self.__m_NodeGraph.RenameByID( node_id, newname )
-
+        
         # Rename in GraphEditor
         self.__m_GraphEditor.Rename_Exec( node_id, new_name )
 
@@ -466,8 +441,6 @@ class NESceneExt(NESceneBase):
 
     def RenameAttribute_Operation( self, attrib_id, newname ):
         new_name, prev_name = super(NESceneExt, self).RenameAttribute_Operation( attrib_id, newname )
-        # Rename in NodeGraph
-        #new_name, prev_name = self.__m_NodeGraph.RenameAttributeByID( attrib_id, newname ) 
 
         # Rename in GraphEditor
         self.__m_GraphEditor.RenameAttribute_Exec( attrib_id, new_name )
@@ -482,8 +455,6 @@ class NESceneExt(NESceneBase):
 
     def SetAttribute_Operation( self, attrib_id, new_value ):
         prev_value = super(NESceneExt, self).SetAttribute_Operation( attrib_id, new_value )
-        # Set Attribute in NodeGraph
-        #prev_value = self.__m_NodeGraph.SetAttributeByID( attrib_id, new_value )
 
         # Update AttributeEditorWidget
         if( self.__m_AttribEditor.HasTrigerred()==False ):
@@ -495,12 +466,10 @@ class NESceneExt(NESceneBase):
 
     def LockAttribute_Operation( self, attrib_id, new_state ):
         prev_state = super(NESceneExt, self).LockAttribute_Operation( attrib_id, new_state )
-        # Set Attribute's Lock/Unlock state in NodeGraph
-        #prev_state = self.__m_NodeGraph.LockAttributeByID( attrib_id, new_state )
-
+        
         # Update AttributeEditorWidget
         if( self.__m_AttribEditor.HasTrigerred()==False ):
-            self.__m_AttribEditor.SetEnabled_Exec( attrib_id, not new_state )
+            self.__m_AttribEditor.Lock_Exec( attrib_id, self.IsLocked( attrib_id ) )
 
         return prev_state
 
@@ -508,8 +477,6 @@ class NESceneExt(NESceneBase):
 
     def Translate_Operation( self, object_id, new_pos, realative ):
         translation = super(NESceneExt, self).Translate_Operation( object_id, new_pos, realative )
-        # Set Translation in NodeGraph
-        #translation = self.__m_NodeGraph.TranslateByID( object_id, new_pos, realative )
 
         # Set Translation in GraphEditor
         if( self.__m_GraphEditor.HasTriggered()==False ):
@@ -521,8 +488,6 @@ class NESceneExt(NESceneBase):
 
     def SetVisible_Operation( self, object_id, flag ):
         prev_flag = super(NESceneExt, self).SetVisible_Operation( object_id, flag )
-        # Set Visibility in NodeGraph
-        #prev_flag = self.__m_NodeGraph.SetVisibleByID( object_id, flag )
 
         # Set Visibility in GraphEditor
         self.__m_GraphEditor.SetVisible_Exec( object_id, flag )
@@ -533,8 +498,6 @@ class NESceneExt(NESceneBase):
 
     def Parent_Operation( self, object_id, parent_id ):
         obj = super(NESceneExt, self).Parent_Operation( object_id, parent_id )# prev_parent_id, new_pos
-        # Set parent in NodeGraph
-        #prev_parent_id, new_pos = self.__m_NodeGraph.ParentByID( object_id, parent_id )
 
         # Set parent in GraphEditor
         self.__m_GraphEditor.Parent_Exec( object_id, parent_id )
@@ -548,11 +511,9 @@ class NESceneExt(NESceneBase):
 
     def CreateSymbolicLink_Operation( self, group_id, attribdesc, value, name=None, symboliclink_idset=(None,None,None), slot_index=-1 ):
         symboliclink = super(NESceneExt, self).CreateSymbolicLink_Operation( group_id, attribdesc, value, name, symboliclink_idset, slot_index )
-        # Create Symboliclink in NodeGraph
-        #symboliclink = self.__m_NodeGraph.ActivateSymbolicLinkByID( group_id, attribdesc, value, name, symboliclink_idset, slot_index )
         
         # Create Symboliclink in GraphEditor
-        self.__m_GraphEditor.ActivateSymbolicLink_Exec( symboliclink.ParentID(), symboliclink.Key(), symboliclink.GetDesc(), symboliclink.SlotIndex() )# slot_index )
+        self.__m_GraphEditor.ActivateSymbolicLink_Exec( symboliclink.ParentID(), symboliclink.Key(), symboliclink.GetDesc(), symboliclink.SlotIndex() )
         
         # Update AttributeEditorWidget
         self.__UpdateAttributeEditor()
@@ -563,9 +524,7 @@ class NESceneExt(NESceneBase):
 
     def RemoveSymbolicLink_Operation( self, symboliclink_id ):
         super(NESceneExt, self).RemoveSymbolicLink_Operation( symboliclink_id )
-        # Remove symboliclink in NodeGraph
-        #self.__m_NodeGraph.DeactivateSymbolicLinkByID( symboliclink_id )
-
+        
         # Remove symboliclink in GraphEditor
         self.__m_GraphEditor.DeactivateSymbolicLink_Exec( symboliclink_id )
 
@@ -577,9 +536,6 @@ class NESceneExt(NESceneBase):
     def SetSymbolicLinkSlotIndex_Operation( self, object_id, index ):
         prev_index = super(NESceneExt, self).SetSymbolicLinkSlotIndex_Operation( object_id, index )
         #print( 'NESceneExt::SetSymbolicLinkSlotIndex_Operation()...' )
-        # Set symbolicLink order in NodeGraph
-        #prev_index = self.__m_NodeGraph.SetSymbolicLinkSlotIndexByID( object_id, index )
-
         # Set symbolicLink order in GraphEditor
         self.__m_GraphEditor.SetSymbolicLinkSlotIndex_Exec( object_id, index )
 
@@ -593,9 +549,6 @@ class NESceneExt(NESceneBase):
     def CreateGroupIO_Operation( self, dataflow, pos, object_id, group_id ):
         groupio = super(NESceneExt, self).CreateGroupIO_Operation( dataflow, pos, object_id, group_id )
         #print( 'NESceneExt::CreateGroupIO_Operation()...' )
-        # Create GroupIO in NodeGraph
-        #groupio = self.__m_NodeGraph.CreateGroupIO( dataflow, pos, group_id, object_id )
-
         # Create GroupIO in GraphEditor
         self.__m_GraphEditor.CreateGroupIO_Exec( groupio.Key(), dataflow, groupio.GetPosition(), group_id, groupio.ID() )
         
@@ -606,9 +559,6 @@ class NESceneExt(NESceneBase):
     def RemoveGroupIO_Operation( self, object_id ):
         super(NESceneExt, self).RemoveGroupIO_Operation( object_id )
         #print( 'NESceneExt::RemoveGroupIO_Operation()...' )
-        # Remove GroupIO in NodeGraph
-        #self.__m_NodeGraph.RemoveGroupIOByID( object_id )
-
         # Remove GroupIO in GraphEditor
         self.__m_GraphEditor.RemoveGroupIO_Exec( object_id )
 
@@ -643,7 +593,7 @@ class NESceneExt(NESceneBase):
             # Init individual attributes
             for attrib in obj.Attributes().values():
                 self.__m_AttribEditor.SetValue_Exec( attrib.AttributeID(), attrib.Value() )
-                self.__m_AttribEditor.SetEnabled_Exec( attrib.AttributeID(), not attrib.IsLocked() )
+                self.__m_AttribEditor.Lock_Exec( attrib.AttributeID(), bool(attrib.LockState()) )
 
             return True
 

@@ -18,8 +18,6 @@ class NESceneBase:
 
         # Nodegraph data
         self.__m_NodeGraph = NENodeGraph()
-        #self.__m_GraphEditor = GraphicsScene( self.__m_NodeGraph.GetRootID(), self.__m_NodeTypeManager )
-        #self.__m_AttribEditor = AttributeEditorWidget()
 
         # temporary cached data
         self.__m_SelectionList = SelectionList( uuid.UUID )
@@ -49,30 +47,23 @@ def Compute( self, dataBlock ):
     def Release( self ):
         self.__m_NodeTypeManager.Release()
         self.__m_NodeGraph.Release()
-        #self.__m_GraphEditor.Release()
 
 
 
     def Clear( self ):
         self.__m_NodeGraph.Init()
-        #self.__m_GraphEditor.Init( self.__m_NodeGraph.GetRootID() )
-        #self.__m_AttribEditor.DeinitializeWidget()
 
 
 
     # GUI-dependent function. nescene_managerでのみ使用.
     def BindCommandCallbacks( self, func ):
         pass
-        #self.__m_GraphEditor.BindCallbackFunc( func )
-        #self.__m_AttribEditor.BindCallbackFunc( func )
 
 
 
     # GUI-dependent function. nescene_managerでのみ使用.
     def UnbindCallbackFuncs( self ):
         pass
-        #self.__m_GraphEditor.UnbindCallbackFunc()
-        #self.__m_AttribEditor.UnbindCallbackFunc()
 
         
 
@@ -89,13 +80,12 @@ def Compute( self, dataBlock ):
     # GUI-dependent function. mainwidgetでのみ使用.
     def GraphEditor( self ):
         return None
-        #return self.__m_GraphEditor
 
 
 
+    # GUI-dependent function. mainwidgetでのみ使用.
     def AttributeEditor( self ):
         return None
-        #return self.__m_AttribEditor
 
 
 
@@ -220,6 +210,11 @@ def Compute( self, dataBlock ):
 
 
 
+    def IsLocked( self, attrib_id ):
+        return self.__m_NodeGraph.IsLocked( attrib_id )
+
+
+
     # Gather attribute parameters for symboliclink generation
     def GetSymbolocLinkInitialParams( self, attrib_id ):
         return self.__m_NodeGraph.GetSymbolocLinkInitialParams( attrib_id )
@@ -241,8 +236,8 @@ def Compute( self, dataBlock ):
 
 
 
-    def IsAttributeLocked( self, attrib_id ):
-        return self.__m_NodeGraph.IsLockedByID( attrib_id )
+    def AttribHasConnections( self, attrib_id ):
+        return self.__m_NodeGraph.AttribHasConnections( attrib_id )
 
 
 
@@ -341,11 +336,6 @@ def Compute( self, dataBlock ):
         nodeDesc = self.__m_NodeTypeManager.GetNodeDesc( nodetype )
         computeFunc = self.__m_NodeTypeManager.GetComputeFunc( nodetype )
         newNode = self.__m_NodeGraph.AddNode( nodeDesc, computeFunc, pos, size, name, object_id, attrib_ids, parent_id )
-        
-        # Create Node in GraphEditor
-        #newsize = newNode.GetSize()
-        #self.__m_GraphEditor.CreateNode_Exec( newNode.Key(), newNode.ID(), newNode.GetDesc(), newNode.GetPosition(), newNode.ParentID() )                    
-
         return newNode
 
 
@@ -354,37 +344,19 @@ def Compute( self, dataBlock ):
         # Remove node in NodeGraph
         result = self.__m_NodeGraph.RemoveNodeByID( node_id )
 
-        # Remove node in GraphEditor
-        #self.__m_GraphEditor.RemoveNode_Exec( node_id )
-
 
 
     def Connect_Operation( self, attrib1_id, attrib2_id, object_id ):
         # Create Connection in NodeGraph
         newConn = self.__m_NodeGraph.AddConnectionByID( attrib1_id, attrib2_id, object_id )
-        
-        # AddConnectionByID() deals with this process. Set Attribute's Lock/Unlock state in NodeGraph
-        #self.__m_NodeGraph.LockAttributeByID( newConn.DestinationAttribID(), False )
-        
-        # Create Connection in GraphEditor
-        #self.__m_GraphEditor.Connect_Exec( newConn.Key(), newConn.ID(), newConn.SourceAttribID(), newConn.DestinationAttribID(), newConn.ParentID() )
-
-        # Update AttributeEditorWidget
-        #self.__m_AttribEditor.SetEnabled_Exec( newConn.DestinationAttribID(), False )
-
         return newConn
 
 
 
     def Disconnect_Operation( self, conn_id ):
         # Disconnect in NodeGraph
-        return self.__m_NodeGraph.RemoveConnectionByID( conn_id )
-
-        # Disconnect in GraphEditor
-        #self.__m_GraphEditor.Disconnect_Exec( conn_id )
-
-        # Update AttributeEditorWidget
-        #self.__m_AttribEditor.SetEnabled_Exec( dest_attrib_id, True )
+        dest_attrib = self.__m_NodeGraph.RemoveConnectionByID( conn_id )
+        return dest_attrib
 
 
 
@@ -402,7 +374,7 @@ def Compute( self, dataBlock ):
     #    #self.__m_GraphEditor.Reconnect_Exec( conn_id, ( conn.Source().ParentID(), conn.SourceID() ), ( conn.Destination().ParentID(), conn.DestinationID() ), conn.ParentID() )
 
     #    # Update AttributeEditorWidget
-    #    #self.__m_AttribEditor.SetEnabled_Exec( conn.DestinationAttribID(), False )
+    #    #self.__m_AttribEditor.Lock_Exec( conn.DestinationAttribID(), True )
 
     #    # return previous connection
     #    return conn
@@ -410,119 +382,72 @@ def Compute( self, dataBlock ):
 
 
     def CreateGroup_Operation( self, pos, size, name, object_id, parent_id ):
-
         # Create Group in NodeGraph
-        newGroup = self.__m_NodeGraph.AddGroup( pos, size, name, object_id, parent_id )
-
-        # Create Group in GraphEditor
-        #self.__m_GraphEditor.CreateGroup_Exec( newGroup.Key(), newGroup.ID(), newGroup.GetPosition(), newGroup.ParentID() )
-        
+        newGroup = self.__m_NodeGraph.AddGroup( pos, size, name, object_id, parent_id )        
         return newGroup
 
         
 
     def RemoveGroup_Operation( self, group_id ):
-        print( 'NESceneBase::RemoveGroup_Operation()...' )
+        #print( 'NESceneBase::RemoveGroup_Operation()...' )
         # Remove group in NodeGraph
         result = self.__m_NodeGraph.RemoveGroupByID( group_id )
-
-        # Remove group in GraphEditor
-        #self.__m_GraphEditor.RemoveGroup_Exec( group_id )
 
 
 
     def Rename_Operation( self, node_id, newname ):
         # Rename in NodeGraph
         new_name, prev_name = self.__m_NodeGraph.RenameByID( node_id, newname )
-
-        # Rename in GraphEditor
-        #self.__m_GraphEditor.Rename_Exec( node_id, new_name )
-
-        # Update AttributeEditorWidget
-        #self.__m_AttribEditor.Rename_Exec( node_id, new_name )
-
         return new_name, prev_name
+
 
 
     def RenameAttribute_Operation( self, attrib_id, newname ):
         # Rename in NodeGraph
-        new_name, prev_name = self.__m_NodeGraph.RenameAttributeByID( attrib_id, newname ) 
-
-        # Rename in GraphEditor
-        #self.__m_GraphEditor.RenameAttribute_Exec( attrib_id, new_name )
-        
-        # Update AttributeEditorWidget
-        #self.__m_AttribEditor.RenameAttribute_Exec( attrib_id, new_name )
-        
+        new_name, prev_name = self.__m_NodeGraph.RenameAttributeByID( attrib_id, newname )         
         return new_name, prev_name
+
 
 
     def SetAttribute_Operation( self, attrib_id, new_value ):
         # Set Attribute in NodeGraph
         prev_value = self.__m_NodeGraph.SetAttributeByID( attrib_id, new_value )
-
-        # Update AttributeEditorWidget
-        #self.__m_AttribEditor.SetValue_Exec( attrib_id, new_value )
-
         return prev_value
+
 
 
     def LockAttribute_Operation( self, attrib_id, new_state ):
         # Set Attribute's Lock/Unlock state in NodeGraph
         prev_state = self.__m_NodeGraph.LockAttributeByID( attrib_id, new_state )
-
-        # Update AttributeEditorWidget
-        #self.__m_AttribEditor.SetEnabled_Exec( attrib_id, new_state )
-
         return prev_state
+
 
 
     def Translate_Operation( self, object_id, new_pos, realative ):
         # Set Translation in NodeGraph
         translation = self.__m_NodeGraph.TranslateByID( object_id, new_pos, realative )
+        return translation
 
-        # Set Translation in GraphEditor
-        #self.__m_GraphEditor.Translate_Exec( object_id, new_pos, realative )
-
-        return translation#prev_pos
 
 
     def SetVisible_Operation( self, object_id, flag ):
         # Set Visibility in NodeGraph
         prev_flag = self.__m_NodeGraph.SetVisibleByID( object_id, flag )
-
-        # Set Visibility in GraphEditor
-        #self.__m_GraphEditor.SetVisible_Exec( object_id, flag )
-
         return prev_flag
 
 
+
     def Parent_Operation( self, object_id, parent_id ):
-        print( 'NESceneBase::Parent_Operation()...' )
+        #print( 'NESceneBase::Parent_Operation()...' )
         # Set parent in NodeGraph
-        #prev_parent_id, new_pos = self.__m_NodeGraph.ParentByID( object_id, parent_id )
         obj = self.__m_NodeGraph.ParentByID( object_id, parent_id )
-
-        # Set parent in GraphEditor
-        #self.__m_GraphEditor.Parent_Exec( object_id, parent_id )
-
-        # Set new position on parent space
-        #self.__m_GraphEditor.Translate_Exec( object_id, new_pos, False )
-
-        return obj#prev_parent_id, new_pos
+        return obj
 
 
 
     def CreateSymbolicLink_Operation( self, group_id, attribdesc, value, name=None, symboliclink_idset=(None,None,None), slot_index=-1 ):
         # Create Symboliclink in NodeGraph
         symboliclink = self.__m_NodeGraph.ActivateSymbolicLinkByID( group_id, attribdesc, value, name, symboliclink_idset, slot_index )
-        
-        # Create Symboliclink in GraphEditor
-        #self.__m_GraphEditor.ActivateSymbolicLink_Exec( symboliclink.ParentID(), symboliclink.Key(), symboliclink.GetDesc(), symboliclink.SlotIndex() )# slot_index )
-        
-        # Update AttributeEditorWidget
-        #self.__UpdateAttributeEditor()
-
         return symboliclink
 
 
@@ -531,82 +456,37 @@ def Compute( self, dataBlock ):
         # Remove symboliclink in NodeGraph
         self.__m_NodeGraph.DeactivateSymbolicLinkByID( symboliclink_id )
 
-        # Remove symboliclink in GraphEditor
-        #self.__m_GraphEditor.DeactivateSymbolicLink_Exec( symboliclink_id )
-
-        # Update AttributeEditorWidget
-        #self.__UpdateAttributeEditor()
 
 
     def SetSymbolicLinkSlotIndex_Operation( self, object_id, index ):
-        print( 'NESceneBase::SetSymbolicLinkSlotIndex_Operation()...' )
+        #print( 'NESceneBase::SetSymbolicLinkSlotIndex_Operation()...' )
         # Set symbolicLink order in NodeGraph
         prev_index = self.__m_NodeGraph.SetSymbolicLinkSlotIndexByID( object_id, index )
+        return prev_index
 
-        # Set symbolicLink order in GraphEditor
-        #self.__m_GraphEditor.SetSymbolicLinkSlotIndex_Exec( object_id, index )
-
-        # Update AttributeEditorWidget
-        #self.__UpdateAttributeEditor()
-
-        return prev_index    
 
 
     def CreateGroupIO_Operation( self, dataflow, pos, object_id, group_id ):
-        print( 'NESceneBase::CreateGroupIO_Operation()...' )
+        #print( 'NESceneBase::CreateGroupIO_Operation()...' )
         # Create GroupIO in NodeGraph
         groupio = self.__m_NodeGraph.CreateGroupIO( dataflow, pos, group_id, object_id )
-
-        # Create GroupIO in GraphEditor
-        #self.__m_GraphEditor.CreateGroupIO_Exec( groupio.Key(), dataflow, groupio.GetPosition(), group_id, groupio.ID() )
-        
         return groupio
 
 
+
     def RemoveGroupIO_Operation( self, object_id ):
-        print( 'NESceneBase::RemoveGroupIO_Operation()...' )
+        #print( 'NESceneBase::RemoveGroupIO_Operation()...' )
         # Remove GroupIO in NodeGraph
         self.__m_NodeGraph.RemoveGroupIOByID( object_id )
-
-        # Remove GroupIO in GraphEditor
-        #self.__m_GraphEditor.RemoveGroupIO_Exec( object_id )
 
 
 
     # returns True if selection changed, else False.
     def Select_Operation( self, obj_id_list, option ):
         try:
-            print( 'NESceneBase::Select_Operation()...' )
-
+            #print( 'NESceneBase::Select_Operation()...' )
             self.__m_SelectionList.Exec( *obj_id_list, **option )
-
             return self.__m_SelectionList.Changed()
-
-            #if( self.__m_SelectionList.Changed()==False ):
-            #    return False
-
-            #self.__m_AttribEditor.DeinitializeWidget()
-
-            #obj_ids_editable = self.__m_NodeGraph.FilterObjects( self.__m_SelectionList.Iter(), typefilter=c_EditableTypes, parent_id=None )
-
-            #if( not obj_ids_editable ):
-            #    return False
-
-  
-            ## get object and desc from selected id
-            #obj_id = obj_ids_editable[0]
-            #obj = self.__m_NodeGraph.GetObjectByID( obj_id, c_EditableTypes )
-            #desc = obj.GetDesc()
-            #if( desc==None ):    return False
-
-            ## initialize attribute editor widget
-            #self.__m_AttribEditor.InitializeWidget( obj_id, desc, obj.Key() )
-        
-            ## set values to widget
-            #for attrib in obj.Attributes().values():
-            #    self.__m_AttribEditor.SetValue_Exec( attrib.AttributeID(), attrib.Value() )
-
-            #return True
 
         except:
             traceback.print_exc()

@@ -286,11 +286,11 @@ class NENodeSnapshot():
 
         # Attribute name snapshots
         for attrib in refObj.Attributes().values():
-            self.__m_AttribNames.append( (object_id, attrib.ID(), attrib.Key() ) )
+            self.__m_AttribNames.append( ( object_id, attrib.ID(), attrib.Key(), attrib.LockState() ) )
 
         # Attribute settings
         for attrib in refObj.Attributes().values():
-            self.__m_AttribArgs.append( (object_id, attrib.ID(), attrib.Value()) )
+            self.__m_AttribArgs.append( ( object_id, attrib.ID(), attrib.Value(), attrib.LockState() ) )
 
         # Get Attribute IDs
         desc = refObj.GetDesc()

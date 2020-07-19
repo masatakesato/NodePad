@@ -9,7 +9,7 @@ from .factory.node_manager import *
 from .graph.nenodegraph import *
 
 from .plugin_manager import *
-#from .nescene import *
+
 from .nescene_ext import *
 from .nescene_commands import *
 
@@ -58,7 +58,6 @@ class NESceneManager:
             'Undo': self.Undo,
             'Redo': self.Redo,
             'CheckConnectivityByID': self.__CheckConnectivityByID,
-            'IsAttributeLockedByID': self.__IsAttributeLockedByID_Exec,
             'IsSymbolizableByID': self.__IsSymbolizableByID,
 
             'CreateGroupByID': self.__CreateGroupByID_Exec,
@@ -258,7 +257,9 @@ class NESceneManager:
         if( self.__m_refNEScene.ObjectExists( conn_id, ( NEConnectionObject, ) )==False ):
             return False
         
-        self.__m_CommandManager.executeCmd( DisconnectCommand( self.__m_refNEScene, conn_id ) )# Remove Connection
+        snapshot = self.__m_CommandManager.executeCmd( DisconnectCommand( self.__m_refNEScene, conn_id ) )._DisconnectCommand__m_Snapshot# Remove Connection
+        src_attrib_id = snapshot.SourceAttribID()
+        dest_attrib_id = snapshot.DestinationAttribID()
 
         # Terminate command sequence
         if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
@@ -294,32 +295,28 @@ class NESceneManager:
 
 
 
-# TODO: Disabled because of confliction with __ConnectByID_Exec/__DisconnectByID_Exec.
-# Need to refactor NESceneBAse::Connect_Operation/Disconnect_Operation first. 
-    #def LockAttribute_Exec( self, attrib_name, state ):
+    def LockAttribute_Exec( self, attrib_name, state ):
 
-    #    attrib_id = self.__m_refNEScene.GetAttributeID( attrib_name )
+        attrib_id = self.__m_refNEScene.GetAttributeID( attrib_name )
 
-    #    if( attrib_id==None ):
-    #        return False
+        if( attrib_id==None ):
+            return False
 
-    #    return self.__LockAttributeByID_Exec( attrib_id, state )
+        return self.__LockAttributeByID_Exec( attrib_id, state )
 
 
 
-# TODO: Disabled because of confliction with __ConnectByID_Exec/__DisconnectByID_Exec.
-# Need to refactor NESceneBAse::Connect_Operation/Disconnect_Operation first. 
-    #def __LockAttributeByID_Exec( self, attrib_id, state, *, terminate=True ):
+    def __LockAttributeByID_Exec( self, attrib_id, state, *, terminate=True ):
 
-    #    if( self.__m_refNEScene.AttributeExists( attrib_id )==False ):
-    #        return False
-    #    print( 'NESceneManager::__LockAttributeByID_Exec()...' )
-    #    self.__m_CommandManager.executeCmd( LockAttributeCommand( self.__m_refNEScene, attrib_id, state ) )
+        if( self.__m_refNEScene.AttributeExists( attrib_id )==False ):
+            return False
+        print( 'NESceneManager::__LockAttributeByID_Exec()...' )
+        self.__m_CommandManager.executeCmd( LockAttributeCommand( self.__m_refNEScene, attrib_id, state ) )
 
-    #    # Terminate command sequence
-    #    if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
+        # Terminate command sequence
+        if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
 
-    #    return True
+        return True
 
 
 
@@ -416,11 +413,6 @@ class NESceneManager:
 
     def __CheckConnectivityByID( self, attrib1_id, attrib2_id ):
         return self.__m_refNEScene.IsConnectable( attrib1_id, attrib2_id, checkloop=False )
-
-
-
-    def __IsAttributeLockedByID_Exec( self, attrib_id ):
-        return self.__m_refNEScene.IsAttributeLocked( attrib_id )
 
 
 

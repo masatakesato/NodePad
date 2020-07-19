@@ -838,16 +838,16 @@ class AttributeEditorWidget(QFrame):
 
 
     def SetValue_Exec( self, attrib_id, value ):
-        print( 'AttributeEditorWidget::SetValue_Exec()...' )
+        print( 'AttributeEditorWidget::SetValue_Exec()...', value )
         if( attrib_id in self.__m_WidgetDict ):
             self.__m_WidgetDict[ attrib_id ].SetValue( value )
 
 
 
-    def SetEnabled_Exec( self, attrib_id, state ):
-        print( 'AttributeEditorWidget::SetEnabled_Exec()...' )
+    def Lock_Exec( self, attrib_id, state ):
+        print( 'AttributeEditorWidget::Lock_Exec()...' )
         if( attrib_id in self.__m_WidgetDict ):
-            self.__m_WidgetDict[ attrib_id ].setEnabled( state )
+            self.__m_WidgetDict[ attrib_id ].setEnabled( not state )
 
 
 

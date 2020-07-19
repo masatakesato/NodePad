@@ -290,9 +290,6 @@ class NENodeGraph():
             # Propagate Dirty Flag to Destination Attribute(s).
             self.__m_Pipeline.PropagateDirty( dest_attrib.ParentID() )
 
-            # Lock Destination Attribute
-            dest_attrib.SetLock( True )
-
             return newConn
 
         except:
@@ -323,8 +320,8 @@ class NENodeGraph():
         if( attrib==None ):
             return None
 
-        prev_state = attrib.IsLocked()
-        attrib.SetLock( state )
+        prev_state = attrib.LockState() & AttribLock.UserLock
+        attrib.SetUserLock( state )
 
         return prev_state
 
@@ -357,9 +354,7 @@ class NENodeGraph():
 
         # Unlock Destination Attribute only if no connections exist
         if( dest_attrib.HasConnections()==False ):
-            dest_attrib.SetLock( False )
             return dest_attrib.AttributeID()
-
         else:
             return None
 
@@ -640,7 +635,6 @@ class NENodeGraph():
 
 
 
-
     def AddGroup( self, pos, size, name, object_id, parent_id ):
         newGroup = self.__AddGroupToScene( pos, size, name, object_id, parent_id )
         return newGroup
@@ -672,13 +666,13 @@ class NENodeGraph():
 
 
 
-    def SetVisibleByID( self, object_id, flag ):
+    def SetVisibleByID( self, object_id, state ):
 
         if( not object_id in self.__m_IDMap ):
             return None
 
         prev_flag = self.__m_IDMap[ object_id ].Visibility()
-        self.__m_IDMap[ object_id ].SetVisible( flag )
+        self.__m_IDMap[ object_id ].SetVisible( state )
 
         return prev_flag
 
@@ -852,9 +846,9 @@ class NENodeGraph():
 
 
 
-    def IsLockedByID( self, attrib_id ):# Check if attribute connection is frozen(connection change forbidden)
+    def AttribHasConnections( self, attrib_id ):
         try:
-            return self.GetAttributeByID( attrib_id ).IsLocked()
+            return self.__m_IDMap[ attrib_id[0] ].AttributeByID( attrib_id[1] ).HasConnections()
         except:
             traceback.print_exc()
             return False
@@ -1159,7 +1153,7 @@ class NENodeGraph():
             if( attrib==None ):# check if attribute exisits
                 return False
 
-            if( attrib.IsLocked() ):# check if attribute is unlocked
+            if( attrib.LockState()!=AttribLock.Unlock ):# check if attribute is unlocked
                 return False
 
             if( attrib.Value()==new_value ):# check if new value is different from current.
@@ -1167,6 +1161,15 @@ class NENodeGraph():
 
             return True
 
+        except:
+            traceback.print_exc()
+            return False
+
+
+
+    def IsLocked( self, attrib_id ):
+        try:
+            return bool( self.__m_IDMap[ attrib_id[0] ].AttributeByID( attrib_id[1] ).LockState() )
         except:
             traceback.print_exc()
             return False

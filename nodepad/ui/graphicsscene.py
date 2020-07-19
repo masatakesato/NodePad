@@ -555,11 +555,6 @@ class GraphicsScene(QGraphicsScene):
 
 
 
-    def __IsAttributeLockedCallback( self, port_id ):
-        return self.__m_refCallbackFunc( 'IsAttributeLockedByID', port_id )
-
-
-
     def __CheckSymbolizeCallback( self, port, dataflow ):
         if( port.DataFlow() == dataflow ):
             return self.__m_refCallbackFunc( 'IsSymbolizableByID', port.PortID() )
@@ -696,13 +691,12 @@ class GraphicsScene(QGraphicsScene):
         # check clicked graphicsitem
         item = self.itemAt( event.scenePos(), QTransform() )
         if( isinstance(item, Port) ):
-            if( self.__IsAttributeLockedCallback( item.PortID() )==False ): # Draw connection guideline if port is unlocked.
-                self.__m_refStartPort = item
-                self.__m_TempEdge = TemporaryEdge( item.scenePos() )
-                self.addItem(self.__m_TempEdge)
-                self.__m_GraphicsViewLayers[ self.__m_FocusViewID ].AddItem( self.__m_TempEdge )
-                self.__m_MouseDragMode = MouseMode.DrawEdge
-                return False
+            self.__m_refStartPort = item
+            self.__m_TempEdge = TemporaryEdge( item.scenePos() )
+            self.addItem(self.__m_TempEdge)
+            self.__m_GraphicsViewLayers[ self.__m_FocusViewID ].AddItem( self.__m_TempEdge )
+            self.__m_MouseDragMode = MouseMode.DrawEdge
+            return False
 
         elif( isinstance(item, SymbolicLink) ):
             self.__m_MouseDragMode = MouseMode.DragSymbolicLink

@@ -315,15 +315,14 @@ class NESymbolicLinkSnapshot():
 
         object_id = refObj.ID()
         
-        # Node Creation params( source_attrib_id, position, object_id(self, and child attributes), name )
         self.__m_NodeArgs = ( refObj.GetPosition(), refObj.IDSet(), refObj.Key(), refObj.SlotIndex() )
 
         # Attribute settings
         attrib = refObj.ProtectedAttribute()
-        self.__m_AttribArgs.append( (object_id, attrib.ID(), attrib.Value()) )
+        self.__m_AttribArgs.append( ( object_id, attrib.ID(), attrib.Value(), attrib.LockState() ) )
 
         attrib = refObj.ExposedAttribute()
-        self.__m_AttribArgs.append( (object_id, attrib.ID(), attrib.Value()) )
+        self.__m_AttribArgs.append( ( object_id, attrib.ID(), attrib.Value(), attrib.LockState() ) )
 
 
 
