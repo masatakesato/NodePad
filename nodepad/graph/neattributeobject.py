@@ -18,7 +18,9 @@ class NEAttributeObject(NEGraphObject):
         self.__m_Desc._AttribDesc__m_ObjectID = ( parent_id, self.ID() )
         self.__m_refConnections = {}
         self.__m_refData = None
+
         self.__m_Locked = AttribLock.Unlock
+        self.__m_SysLock = AttribLock.SysLock if self.__m_Desc.IsInputFlow() else AttribLock.Unlock
 
         
 
@@ -64,12 +66,8 @@ class NEAttributeObject(NEGraphObject):
     def BindConnection( self, pconn ):
         self.__m_refConnections[ pconn.ID() ] = pconn
         # Clear current syslock settings, then reassign AttribLock.SysLock
-        self.__m_Locked = ( self.__m_Locked & AttribLock.UserLock ) | AttribLock.SysLock
+        self.__m_Locked = ( self.__m_Locked & AttribLock.UserLock ) | self.__m_SysLock
         #print( bin(self.__m_Locked) )
-
-TODO: 出力アトリビュートにシステムロックをかけたくない
-TODO: 出力アトリビュートだけは
-
 
 
 
@@ -163,7 +161,7 @@ TODO: 出力アトリビュートだけは
 
     def SetUserLock( self, flag ):
         # Clear current userlock settings, then reassign new userlock
-        self.__m_Locked = (self.__m_Locked & AttribLock.SysLock) | flag
+        self.__m_Locked = (self.__m_Locked & self.__m_SysLock) | flag
         #print( bin(self.__m_Locked) )
 
 
