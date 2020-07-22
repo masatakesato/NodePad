@@ -58,7 +58,6 @@ class TitleBar(QFrame):
         super(TitleBar, self).__init__(parent=parent)
 
         self.setStyleSheet( g_TitleBarStyleSheet )
-        self.setMouseTracking( True )
         self.setAutoFillBackground( True )
         self.setBackgroundRole( QPalette.Highlight )
         #self.setStyleSheet( css_titlebar )
@@ -175,7 +174,6 @@ class Frame(QFrame):
         self.setFrameShape( QFrame.StyledPanel )
         self.setStyleSheet( g_MainWindowStyleSheet )
         self.setWindowFlags( Qt.FramelessWindowHint | Qt.WindowMinMaxButtonsHint )
-        self.setMouseTracking( True )
         self.m_titleBar = TitleBar( self )
         self.m_content = QFrame( self )
         self.m_content.setStyleSheet( g_StaticFrameStyleSheet )
