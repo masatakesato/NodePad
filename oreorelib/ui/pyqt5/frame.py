@@ -112,6 +112,11 @@ class TitleBar(QFrame):
 
 
 
+    def label( self ) -> str:
+        return self.__m_Label.text()
+
+
+
     def showSmall(self):
         self.parent().showMinimized()
 
@@ -288,8 +293,13 @@ class Frame(QFrame):
 
 
 
-    def setWindowTitle( self, title ):
+    def setWindowTitle( self, title: str ) -> None:
         self.m_titleBar.setLabel(title)
+
+
+
+    def windowTitle( self ) -> str:
+        return self.m_titleBar.label()
 
 
 
