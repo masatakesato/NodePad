@@ -563,6 +563,7 @@ class MainWidget(MainWindow):
     def __RemoveEditorViewCallback( self, view_id ):
         try:
             self.__m_Views[ view_id ].Release()
+            self.__m_Views[ view_id ].deleteLater()
             del self.__m_Views[ view_id ]
         except:
             traceback.print_exc()
