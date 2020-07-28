@@ -198,10 +198,8 @@ class Frame(QFrame):
        
         self.__m_Margin = 5
 
-        self.__m_CurrentPos = QPoint()
-        
         self.handleSelected = None
-        self.__m_mousePressPos = None
+        self.__m_mousePressPos = QPoint()
         self.__m_mousePressRect = None
 
         self.handles = {}
@@ -267,8 +265,8 @@ class Frame(QFrame):
 
     def mouseReleaseEvent( self, event ):
         self.handleSelected = None
-        self.__m_mousePressPos = None
-        self.__m_mousePressRect = None
+        #self.__m_mousePressPos = None
+        #self.__m_mousePressRect = None
         return super(Frame, self).mouseReleaseEvent(event)
 
 
@@ -348,82 +346,3 @@ class Frame(QFrame):
         self.handles[self.BottomRight].setGeometry( self.width()-self.__m_Margin, self.height()-self.__m_Margin, self.__m_Margin, self.__m_Margin )
         self.handles[self.BottomLeft].setGeometry( 0, self.height()-self.__m_Margin, self.__m_Margin, self.__m_Margin )
         self.handles[self.TopLeft].setGeometry( 0, 0, self.__m_Margin, self.__m_Margin )
-
-
-
-
-
-    # Original __InteractiveResize method. Deprecated. 2019.06.05
-    #def __InteractiveResize( self, mousePos ):
-
-    #    if( self.handleSelected == self.TopLeft ):
-    #        #diff_x = ( mousePos.x() - self.__m_mousePressPos.x() ) * ( mousePos.x()<=self.__m_mousePressPos.x() or self.width()>self.minimumWidth() ) * ( self.width()<self.maximumWidth() )
-    #        diff_x = mousePos.x() - self.__m_mousePressPos.x()
-    #        diff_x = min( self.__m_mousePressRect.width() - self.minimumWidth(), diff_x )# "pressrect.width - diff_x" must be greater equal "min width"
-    #        diff_x = max( self.__m_mousePressRect.width() - self.maximumWidth(), diff_x )# "pressrect.width - diff_x" must be lesser equal "max width"
-    #        #diff_y = ( mousePos.y() - self.__m_mousePressPos.y() ) * ( mousePos.y()<=self.__m_mousePressPos.y() or self.height()>self.minimumHeight() ) * ( self.height()<self.maximumHeight() )
-    #        diff_y = mousePos.y() - self.__m_mousePressPos.y()
-    #        diff_y = min( self.__m_mousePressRect.height() - self.minimumHeight(), diff_y )# "pressrect.height - diff_y" must be greater equal "min height"
-    #        diff_y = max( self.__m_mousePressRect.height() - self.maximumHeight(), diff_y )# "pressrect.height - diff_y" must be lesser equal "max height"
-
-    #        self.setGeometry( self.__m_mousePressRect.adjusted( diff_x, diff_y, 0, 0 ) )
-
-
-    #    elif( self.handleSelected == self.Top ):
-    #        #diff_y = ( mousePos.y() - self.__m_mousePressPos.y() ) * ( mousePos.y()<=self.__m_mousePressPos.y() or self.height()>self.minimumHeight() ) * ( self.height()<self.maximumHeight() )
-    #        diff_y = mousePos.y() - self.__m_mousePressPos.y()
-    #        diff_y = min( self.__m_mousePressRect.height() - self.minimumHeight(), diff_y )# "pressrect.height - diff_y" must be greater equal "min height"
-    #        diff_y = max( self.__m_mousePressRect.height() - self.maximumHeight(), diff_y )# "pressrect.height - diff_y" must be lesser equal "max height"
-
-    #        self.setGeometry( self.__m_mousePressRect.adjusted( 0, diff_y, 0, 0 ) )
-
-
-    #    elif( self.handleSelected == self.TopRight ):
-    #        diff_x = mousePos.x() - self.__m_mousePressPos.x()
-    #        #diff_y = ( mousePos.y() - self.__m_mousePressPos.y() ) * ( mousePos.y()<=self.__m_mousePressPos.y() or self.height()>self.minimumHeight() ) * ( self.height()<self.maximumHeight() )
-    #        diff_y = mousePos.y() - self.__m_mousePressPos.y()
-    #        diff_y = min( self.__m_mousePressRect.height() - self.minimumHeight(), diff_y )# "pressrect.height - diff_y" must be greater equal "min height"
-    #        diff_y = max( self.__m_mousePressRect.height() - self.maximumHeight(), diff_y )# "pressrect.height - diff_y" must be lesser equal "max height"
-
-    #        self.setGeometry( self.__m_mousePressRect.adjusted( 0, diff_y, diff_x, 0 ) )
-
-
-    #    elif( self.handleSelected == self.Left ):
-    #        #diff = ( mousePos.x() - self.__m_mousePressPos.x() ) * ( mousePos.x()<=self.__m_mousePressPos.x() or self.width()>self.minimumWidth() ) * ( self.width()<self.maximumWidth() )
-    #        diff_x = mousePos.x() - self.__m_mousePressPos.x()
-    #        diff_x = min( self.__m_mousePressRect.width() - self.minimumWidth(), diff_x )# "pressrect.width - diff_x" must be greater equal "min width"
-    #        diff_x = max( self.__m_mousePressRect.width() - self.maximumWidth(), diff_x )# "pressrect.width - diff_x" must be lesser equal "max width"
-
-    #        self.setGeometry( self.__m_mousePressRect.adjusted( diff_x, 0, 0, 0 ) )
-
-
-    #    elif( self.handleSelected == self.Right ):
-    #        diff = mousePos.x() - self.__m_mousePressPos.x()
-
-    #        self.setGeometry( self.__m_mousePressRect.adjusted( 0, 0, diff, 0 ) )
-
-
-    #    elif( self.handleSelected == self.BottomLeft ):
-    #        #diff_x = ( mousePos.x() - self.__m_mousePressPos.x() ) * ( mousePos.x()<=self.__m_mousePressPos.x() or self.width()>self.minimumWidth() ) * ( self.width()<self.maximumWidth() )
-    #        diff_x = mousePos.x() - self.__m_mousePressPos.x()
-    #        diff_x = min( self.__m_mousePressRect.width() - self.minimumWidth(), diff_x )# "pressrect.width - diff_x" must be greater equal "min width"
-    #        diff_x = max( self.__m_mousePressRect.width() - self.maximumWidth(), diff_x )# "pressrect.width - diff_x" must be lesser equal "max width"
-    #        diff_y = mousePos.y() - self.__m_mousePressPos.y()
-
-    #        self.setGeometry( self.__m_mousePressRect.adjusted( diff_x, 0, 0, diff_y ) )
-
-
-    #    elif( self.handleSelected == self.Bottom ):
-    #        diff = mousePos.y() - self.__m_mousePressPos.y()
-
-    #        self.setGeometry( self.__m_mousePressRect.adjusted( 0, 0, 0, diff ) )
-
-
-    #    elif( self.handleSelected == self.BottomRight ):
-    #        diff_x = mousePos.x() - self.__m_mousePressPos.x()
-    #        diff_y = mousePos.y() - self.__m_mousePressPos.y()
-
-    #        self.setGeometry( self.__m_mousePressRect.adjusted( 0, 0, diff_x, diff_y ) )
-
-
-    #    #self.__UpdateHandlesPos()# resizeEventで呼び出すようにした. 2019.06.07
