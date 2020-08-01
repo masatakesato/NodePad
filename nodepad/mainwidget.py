@@ -43,8 +43,8 @@ class MainWidget(MainWindow):
         #qtab.addTab(QLabel('Label 2'), 'Tab2')
         
         attrEditFrame = QFrame()
-        attrEditFrame.setFocusPolicy( Qt.StrongFocus )
-        attrEditFrame.setStyleSheet( UIStyle.g_StaticFrameStyleSheet )
+        #attrEditFrame.setFocusPolicy( Qt.StrongFocus )# Selectorでフォーカス状態管理するなら必要ない.
+        attrEditFrame.setStyleSheet( UIStyle.g_DynamicFrameStyleSheet )#UIStyle.g_StaticFrameStyleSheet )
         attrEditFrame.setLayout( QVBoxLayout() )
         attrEditFrame.layout().setContentsMargins(0,0,0,0)
         attrEditFrame.layout().addWidget( qtab )
@@ -567,3 +567,20 @@ class MainWidget(MainWindow):
             del self.__m_Views[ view_id ]
         except:
             traceback.print_exc()
+
+
+
+
+    def mousePressEvent( self, event ):
+        print( 'MainWidget::mousePressEvent ()...' )
+
+        #widgets = QApplication.topLevelWidgets()# event.globalPos() )
+
+        #print( widgets )
+
+# TODO: フォーカス可能なウィジェット群を予め登録しておく
+# TODO: マウスクリックの際に、カーソル下にあるフォーカス対象ウィジェットを検出する。
+# TODO: setAttribute/setStyleを使って、フォーカス対象ウィジェットのスタイルを一時変更する
+# TODO: 大元スタイルシートのfocusは切っておく or ['focus'=true]に置き換える
+
+        super(MainWidget, self).mousePressEvent(event)

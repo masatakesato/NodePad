@@ -8,7 +8,7 @@ from .graph.nenodegraph import *
 
 
 #from .plugin_manager import *
-#from .selectionlist import SelectionList
+#from .selector import Selector
 
 from .ui.graphicsscene import GraphicsScene
 from .ui.attributeeditorwidget import AttributeEditorWidget

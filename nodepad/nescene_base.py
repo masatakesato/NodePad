@@ -7,7 +7,7 @@ from .graph.nenodegraph import *
 
 
 from .plugin_manager import *
-from .selectionlist import SelectionList
+from .selector import Selector
 
 
 class NESceneBase:
@@ -20,7 +20,7 @@ class NESceneBase:
         self.__m_NodeGraph = NENodeGraph()
 
         # temporary cached data
-        self.__m_SelectionList = SelectionList( uuid.UUID )
+        self.__m_SelectionList = Selector( uuid.UUID )
 
 
         # Register TestNode
@@ -462,6 +462,7 @@ def Compute( self, dataBlock ):
         try:
             #print( 'NESceneBase::Select_Operation()...' )
             self.__m_SelectionList.Exec( *obj_id_list, **option )
+            #self.__m_SelectionList.Info()
             return self.__m_SelectionList.Changed()
 
         except:

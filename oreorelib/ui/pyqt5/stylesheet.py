@@ -407,10 +407,10 @@ g_DynamicFrameStyleSheet = """
 QFrame
 {
     color: rgb(255,127,39);
-    background-color: rgb(24,24,24);
+    background-color: rgb(42,42,42);
 
     margin: 0px 0px 0px 0px;
-    border: 1px solid rgb(60,60,60);
+    border: 1px solid rgb(42,42,42);
     padding: 0px 0px 0px 0px;
 }
 
