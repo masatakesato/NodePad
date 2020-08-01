@@ -739,6 +739,160 @@ QFrame
 
 
 
+g_TabWidgetStyleSheet_ = """ 
+
+/*====================== TabWidget settings ==========================*/
+QTabWidget::pane
+{
+    /*background-color: transparent;*/ /* valid inside padding area */
+    margin: 0px 0px 0px 0px;
+    
+    border-top: 2px solid rgb(72,72,72);
+    border-right: 1px solid rgb(72,72,72);
+    border-bottom: 1px solid rgb(72,72,72);
+    border-left: 1px solid rgb(72,72,72);
+
+    padding: 0px 0px 0px 0px;
+}
+
+QTabWidget::pane:focus
+{
+    border-top: 2px solid rgb(191,77,0);
+}
+
+
+/*======================== TabBar settings ==========================*/
+QTabBar::tab
+{
+    color: rgb(235,235,235);
+    background-color: rgb(42,42,42);
+
+    height: 17px;
+
+    margin: 0px 0px 0px 0px;
+    border: 0px none;
+    padding: 2px 24px 2px 12px; /*top, right, bottom, left*/
+}
+
+QTabBar::tab:hover
+{
+    background-color: rgb(60,60,60);
+}
+
+QTabBar::tab:selected
+{
+    background-color: rgb(72,72,72);
+}
+
+QTabBar::tab:selected:focus
+{
+    background-color: rgb(191,77,0);
+}
+
+QTabBar::close-button
+{
+    image: url(:/resource/images/close.png);
+}
+
+
+/*============== TabBar close button Settings ======================*/
+QTabBar::close-button:hover
+{
+    background-color: rgb(96,96,96);
+}
+
+QTabBar::close-button:pressed
+{
+    background-color: rgb(32,32,32);
+}
+
+QTabBar::close-button:selected:hover
+{
+    background-color: rgb(128,128,128);
+}
+
+QTabBar::close-button:selected:pressed
+{
+    background-color: rgb(48,48,48);
+}
+
+QTabBar::close-button:selected:active:hover
+{
+    background-color: rgb(255,127,39);
+}
+
+QTabBar::close-button:selected:active:pressed
+{
+    background-color: rgb(125,50,0);
+}
+
+
+/*===================== Left/Right arrow icons Settings ======================*/
+QTabBar QToolButton
+{
+    background-color: rgb(42,42,42);
+
+    margin: 0px 0px 0px 0px;
+    border: 0px none;
+    padding: 0px 0px 0px 0px;
+}
+
+
+QTabBar QToolButton::left-arrow
+{
+    background-color: rgb(60,60,60);
+
+    width: 14px;
+    height: 14px;
+    image: url(:/resource/images/arrow-left.png);
+}
+
+QTabBar QToolButton::left-arrow:hover
+{
+    background-color: rgb(72,72,72);
+}
+
+QTabBar QToolButton::left-arrow:pressed
+{
+    background-color: rgb(32,32,32);
+}
+
+
+QTabBar QToolButton::right-arrow
+{
+    background-color: rgb(60,60,60);
+
+    width: 14px;
+    height: 14px;
+    image: url(:/resource/images/arrow-right.png);
+}
+
+QTabBar QToolButton::right-arrow:hover
+{
+    background-color: rgb(72,72,72);
+}
+
+QTabBar QToolButton::right-arrow:pressed
+{
+    background-color: rgb(32,32,32);
+}
+
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 g_SplitLineStyleSheet = """
 QFrame
 {

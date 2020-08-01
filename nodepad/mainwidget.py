@@ -37,13 +37,14 @@ class MainWidget(MainWindow):
 
         #============ Initialize Attribute Editor ============#
         qtab = QTabWidget()
+        qtab.setFocusPolicy( Qt.StrongFocus )
         qtab.setLayout( QVBoxLayout() )
-        qtab.setStyleSheet( UIStyle.g_TabWidgetStyleSheet )
+        qtab.setStyleSheet( UIStyle.g_TabWidgetStyleSheet_ )
         qtab.addTab( self.__m_NEScene.AttributeEditor(), 'Attribute Editor' )
         #qtab.addTab(QLabel('Label 2'), 'Tab2')
         
         attrEditFrame = QFrame()
-        #attrEditFrame.setFocusPolicy( Qt.StrongFocus )# Selectorでフォーカス状態管理するなら必要ない.
+        attrEditFrame.setFocusPolicy( Qt.StrongFocus )# Selectorでフォーカス状態管理するなら必要ない.
         attrEditFrame.setStyleSheet( UIStyle.g_DynamicFrameStyleSheet )#UIStyle.g_StaticFrameStyleSheet )
         attrEditFrame.setLayout( QVBoxLayout() )
         attrEditFrame.layout().setContentsMargins(0,0,0,0)

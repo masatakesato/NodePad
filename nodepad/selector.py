@@ -38,6 +38,11 @@
 
 
 
+    def Contains( self, query ):
+        return query in self.__m_Objects
+
+
+
     def Info( self ):
         print( '//============ Selector Information ============//')
         print( 'Selected Objects:' )#, self.__m_Objects )
