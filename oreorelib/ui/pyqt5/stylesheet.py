@@ -21,6 +21,7 @@ QFrame:active
 """
 
 
+
 g_TitleBarStyleSheet = """
 QFrame
 {
@@ -49,26 +50,57 @@ QLabel
     padding: 6px 6px 6px 6px;
 }
 
-QPushButton
+"""
+
+
+
+g_TitleButtonStyleSheet = """
+QFrame
 {
-    color: rgb(235,235,235);
     background-color: none;
 
-    height: 18px;
+    min-width: 16px;
+    max-width: 16px;
+    min-height: 16px;
+    max-height: 16px;
 
     margin: 0px 0px 0px 0px;
     border: 0px none;
-    padding: 6px 6px 6px 6px;
+    padding: 0px 0px 0px 0px;
 }
 
-QPushButton:hover
+QFrame:hover
 {
     background-color: rgb(60,60,60);
 }
 
-QPushButton:pressed
+QFrame[ pressed=true ]
 {
     background-color: rgb(24,24,24);
+}
+
+QFrame[ icon = close ]
+{
+    padding: 6px 8px 6px 8px;
+    image: url(:/resource/images/close.png);
+}
+
+QFrame[ icon = maximize ]
+{
+    padding: 6px 8px 6px 8px;
+    image: url(:/resource/images/maximize.png);
+}
+
+QFrame[ icon = minimize ]
+{
+    padding: 6px 8px 6px 8px;
+    image: url(:/resource/images/minimize.png);
+}
+
+QFrame[ icon = restore ]
+{
+    padding: 6px 8px 6px 8px;
+    image: url(:/resource/images/restore.png) 0;
 }
 
 """
@@ -228,6 +260,7 @@ QPushButton:pressed
     border-bottom: 1px solid rgb(72,72,72);
 }
 """
+
 
 
 g_ScrollBarStyleSheet = """
@@ -401,8 +434,6 @@ QScrollBar::right-arrow:horizontal
 
 
 
-
-
 g_DynamicFrameStyleSheet = """
 QFrame
 {
@@ -422,6 +453,7 @@ QFrame:focus
 """
 
 
+
 g_StaticFrameStyleSheet = """
 QFrame
 {
@@ -433,6 +465,7 @@ QFrame
 }
 
 """
+
 
 
 g_TextFieldStyleSheet = """
@@ -454,6 +487,8 @@ QTextEdit:focus, QPlainTextEdit:focus
 
 """
 
+
+
 # refactored. 2019.05.19
 g_LabelStyleSheet = """
 QLabel
@@ -472,6 +507,7 @@ QLabel:disabled
     background-color: transparent;
 }
 """
+
 
 
 g_LineEditStyleSheet = """
@@ -509,6 +545,7 @@ QLineEdit:read-only
 }
 
 """
+
 
 
 g_SliderStyleSheet = """
@@ -553,6 +590,7 @@ QSlider::handle:horizontal:disabled
 }
 
 """
+
 
 
 g_SpinBoxStyleSheet = """
@@ -634,6 +672,7 @@ QSpinBox:focus, QDoubleSpinBox:focus
 """
 
 
+
 g_CheckBoxStyleSheet = """
 
 QCheckBox
@@ -679,67 +718,8 @@ QCheckBox::indicator:disabled
 """
 
 
+
 g_TabWidgetStyleSheet = """ 
-
-QTabBar::tab
-{
-    color: rgb(235,235,235);
-    background-color: rgb(160,160,60);
-
-    height: 17px;
-
-    margin: 0px 0px 0px 0px;
-    border: 0px none;
-    padding: 3px 12px 0px 12px;
-}
-
-QTabBar::tab:selected
-{
-    background-color: rgb(60,60,60);
-}
-
-QTabBar::tab:!selected
-{
-    color: rgb(128,128,0);
-    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:0.8, stop:0 rgb(64,64,64), stop:1 rgb(32,32,32) );
-
-    margin: 1.5px 0px 2.0px 0px;
-
-    border-top: 1px solid rgb(96,96,96);
-    border-right: 2px solid rgb(16,16,16);
-    border-bottom: 2px solid rgb(32,32,32);
-
-    padding: 0px 0px 0px 0px;
-}
-
-QTabWidget::pane
-{
-    background-color: rgb(60,60,128);
-
-    margin: 0px 0px 0px 0px;
-    
-    border-top: 3px solid rgb(60,60,60);
-    border-right: 1px solid rgb(60,60,60);
-    border-bottom: 1px solid rgb(60,60,60);
-    border-left: 1px solid rgb(60,60,60);
-
-    padding: 0px 0px 0px 0px;
-}
-
-QFrame
-{
-    background-color: transparent;/*rgb(0,128,0);*/
-
-    margin: 0px 0px 0px 0px;
-    border: 0px solid rgb(0,0,0);
-    padding: 0px 0px 0px 0px;
-}
-
-"""
-
-
-
-g_TabWidgetStyleSheet_ = """ 
 
 /*====================== TabWidget settings ==========================*/
 QTabWidget::pane
@@ -760,6 +740,11 @@ QTabWidget::pane:focus
     border-top: 2px solid rgb(191,77,0);
 }
 
+QTabWidget::pane[ TabWidgetFocus = true ]
+{
+    border-top: 2px solid rgb(0,77,191);
+}
+
 
 /*======================== TabBar settings ==========================*/
 QTabBar::tab
@@ -767,7 +752,8 @@ QTabBar::tab
     color: rgb(235,235,235);
     background-color: rgb(42,42,42);
 
-    height: 17px;
+    min-height: 17px;
+    max-height: 17px;
 
     margin: 0px 0px 0px 0px;
     border: 0px none;
@@ -789,8 +775,21 @@ QTabBar::tab:selected:focus
     background-color: rgb(191,77,0);
 }
 
+QTabBar::tab:selected[ TabWidgetFocus = true ]
+{
+    background-color: rgb(0,77,191);
+}
+
+
 QTabBar::close-button
 {
+    min-width: 16px;
+    max-width: 16px;
+    min-height: 16px;
+    max-height: 16px;
+    
+    padding: 2px 2px 2px 2px;
+
     image: url(:/resource/images/close.png);
 }
 
@@ -811,25 +810,39 @@ QTabBar::close-button:selected:hover
     background-color: rgb(128,128,128);
 }
 
+
 QTabBar::close-button:selected:pressed
 {
     background-color: rgb(48,48,48);
 }
 
-QTabBar::close-button:selected:active:hover
+QTabBar::close-button:selected:hover:focus
 {
     background-color: rgb(255,127,39);
 }
 
-QTabBar::close-button:selected:active:pressed
+QTabBar::close-button:selected:hover[ TabWidgetFocus = true ]
+{
+    background-color: rgb(39,127,255);
+}
+
+QTabBar::close-button:selected:pressed:focus
 {
     background-color: rgb(125,50,0);
+}
+
+QTabBar::close-button:selected:pressed[ TabWidgetFocus = true ]
+{
+    background-color: rgb(0,50,125);
 }
 
 
 /*===================== Left/Right arrow icons Settings ======================*/
 QTabBar QToolButton
 {
+    min-width: 16px;
+    max-width: 16px;
+
     background-color: rgb(42,42,42);
 
     margin: 0px 0px 0px 0px;
@@ -842,8 +855,8 @@ QTabBar QToolButton::left-arrow
 {
     background-color: rgb(60,60,60);
 
-    width: 14px;
-    height: 14px;
+    padding: 1px 1px 1px 1px;
+
     image: url(:/resource/images/arrow-left.png);
 }
 
@@ -862,8 +875,8 @@ QTabBar QToolButton::right-arrow
 {
     background-color: rgb(60,60,60);
 
-    width: 14px;
-    height: 14px;
+    padding: 1px 1px 1px 1px;
+
     image: url(:/resource/images/arrow-right.png);
 }
 
@@ -878,18 +891,6 @@ QTabBar QToolButton::right-arrow:pressed
 }
 
 """
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -927,6 +928,7 @@ QLabel
 """
 
 
+
 g_ExpandWidgetBodyStyleSheet = """
 QFrame
 {
@@ -937,6 +939,7 @@ QFrame
     padding: 0px 0px 0px 0px;
 }
 """
+
 
 
 g_ExpandWidgetStyleSheet = """
@@ -952,6 +955,7 @@ QFrame
 """
 
 
+
 g_ScrollAreaWidgetStyleSheet = """
 QWidget
 {
@@ -962,6 +966,7 @@ QWidget
     padding: 0px 0px 0px 0px;
 }
 """
+
 
 
 g_NodeEditorStyleSheet = """
@@ -982,12 +987,6 @@ QGraphicsView:focus
     padding: 0px 0px 0px 0px;
 }
 """
-
-
-
-
-
-
 
 
 
@@ -1017,7 +1016,9 @@ QSplitter::handle:vertical
 
 """
 
-# TODO: ファイルオープンダイアログで使用. 修正. 2019.05.19
+
+
+# TODO: File open dialogue uses this stylesheet. 
 g_ListViewStyleSheet = """
 QListView
 {
@@ -1057,7 +1058,8 @@ QListView::item:selected:!active
 """
 
 
-# TODO: ファイルオープンダイアログで使用. 修正. 2019.05.19
+
+# TODO: File open dialogue uses this stylesheet. 
 g_TreeViewStyleSheet = """
 
 /* http://stackoverflow.com/questions/26162387/qtableview-qtablewidget-grid-stylesheet-grid-line-width */
@@ -1104,7 +1106,9 @@ QTreeView::item:selected:!active
 }
 """
 
-# TODO: ファイルオープンダイアログで使用. 修正. 2019.05.19
+
+
+# TODO: File open dialogue uses this stylesheet. 
 g_ComboBoxStyleSheet = """
 QComboBox
 {
@@ -1168,7 +1172,7 @@ QComboBox QAbstractItemView
 
 
 
-# TODO: ファイルオープンダイアログで使用. 修正. 2019.05.19
+# TODO: File open dialogue uses this stylesheet. 
 g_DialogStyleSheet = """
 QWidget
 {
@@ -1189,6 +1193,7 @@ QDialog, QFileDialog
 
 # file open dialogue stylesheets
 # g_DialogStyleSheet + g_ComboBoxStyleSheet + g_ListViewStyleSheet + g_TreeViewStyleSheet + g_LineEditStyleSheet + g_ButtonStyleSheet + g_ScrollBarStyleSheet
+
 
 
 g_MessageBoxStyleSheet = """

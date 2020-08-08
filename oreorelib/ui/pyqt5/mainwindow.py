@@ -45,7 +45,7 @@ class MainWindow(Frame):
             self.m_content.deleteLater()
         self.m_content = widget
         self.m_content.setSizePolicy( QSizePolicy.Preferred, QSizePolicy.Preferred )
-        self.contentlayout.addWidget( self.m_content )
+        self.framelayout.addWidget( self.m_content )#self.contentlayout.addWidget( self.m_content )
 
 
 

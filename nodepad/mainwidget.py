@@ -3,6 +3,7 @@ import functools
 # TODO: Redirect stdout to QTextEdit.
 
 from oreorelib.ui.pyqt5.mainwindow import MainWindow
+from oreorelib.ui.pyqt5.tabbedmdi import TabbedMDIManager, DockableFrame, Duration
 
 from .ui.graphicssettings import *
 from .ui.graphicsview import GraphicsView
@@ -20,6 +21,8 @@ class MainWidget(MainWindow):
     def __init__( self ):
         super(MainWidget, self).__init__()        
  
+        qApp.focusChanged.connect( lambda old, new: self.__onTabFocusChanged( old, new, 'TabWidgetFocus' ) )
+
         #========== Initialize NEScene ===========#
         self.__m_NEScene = NESceneExt()#NEScene()
 
@@ -35,16 +38,28 @@ class MainWidget(MainWindow):
         self.__m_Views[ self.__m_NEScene.GetRootID() ] = rootView
 
 
+
+        rootView2 = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep ) 
+        rootView2.setScene( self.__m_NEScene.GraphEditor() )
+        rootView2.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
+        rootView2.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
+
+        self.__m_TabbedMDIManager = TabbedMDIManager()
+
+        rootTabID = self.__m_TabbedMDIManager.AddDockable( DockableFrame, Duration.Persistent )
+        self.__m_TabbedMDIManager.AddTab( rootTabID, rootView2, 'Root', self.__m_NEScene.GetRootID() )
+
+
+
         #============ Initialize Attribute Editor ============#
         qtab = QTabWidget()
         qtab.setFocusPolicy( Qt.StrongFocus )
         qtab.setLayout( QVBoxLayout() )
-        qtab.setStyleSheet( UIStyle.g_TabWidgetStyleSheet_ )
+        qtab.setStyleSheet( UIStyle.g_TabWidgetStyleSheet )
         qtab.addTab( self.__m_NEScene.AttributeEditor(), 'Attribute Editor' )
         #qtab.addTab(QLabel('Label 2'), 'Tab2')
         
         attrEditFrame = QFrame()
-        attrEditFrame.setFocusPolicy( Qt.StrongFocus )# Selectorでフォーカス状態管理するなら必要ない.
         attrEditFrame.setStyleSheet( UIStyle.g_DynamicFrameStyleSheet )#UIStyle.g_StaticFrameStyleSheet )
         attrEditFrame.setLayout( QVBoxLayout() )
         attrEditFrame.layout().setContentsMargins(0,0,0,0)
@@ -242,6 +257,7 @@ class MainWidget(MainWindow):
         self.UpdateWindowTitle()
 
 
+
     def Release( self ):
         self.__m_SceneManager.Release()
         self.__m_NEScene.Release()
@@ -249,6 +265,8 @@ class MainWidget(MainWindow):
         for view in self.__m_Views.values():
             view.Release()
         self.__m_Views.clear()
+
+        self.__m_TabbedMDIManager.Release()
 
 
 
@@ -572,3 +590,34 @@ class MainWidget(MainWindow):
             del self.__m_Views[ view_id ]
         except:
             traceback.print_exc()
+
+
+
+    @staticmethod
+    def __onTabFocusChanged( old: QWidget, new: QWidget, propertyName: str ) -> None:
+        #print( '{} -> {}'.format( old, new ) )
+
+        #print( '/---------------- old -----------------------/')
+        while( old ):# isinstance(old, QWidget)
+            #print( old )
+            if( isinstance( old, QTabWidget ) ):
+                old.setProperty( propertyName, False )
+                old.setStyle( old.style() )
+                tabBar = old.tabBar()
+                tabBar.setProperty( propertyName, False )
+                tabBar.setStyle( tabBar.style() )
+                break
+            old = old.parentWidget()
+
+        #print( '/---------------- new -----------------------/')
+        while( new ):# isinstance(new, QWidget)
+            #print( new )
+            if( isinstance( new, QTabWidget ) ):
+                new.setProperty( propertyName, True )
+                new.setStyle( new.style() )
+                tabBar = new.tabBar()
+                tabBar.setProperty( propertyName, True )
+                tabBar.setStyle( tabBar.style() )
+                break
+            new = new.parentWidget()       
+        #print( '\n')

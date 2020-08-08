@@ -4,6 +4,7 @@
 from .resource import *
 from .stylesheet import *
 
+import typing
 from enum import IntEnum
 
 from PyQt5.QtCore import *
@@ -16,6 +17,7 @@ class Region(IntEnum):
     Below   = -1
     Inside  = 0
     Above   = 1
+
 
 
 class ResizeHandle(QFrame):
@@ -50,53 +52,98 @@ class ResizeHandle(QFrame):
 
 
 
+class TitleButton(QFrame):
+
+    clicked = pyqtSignal()
+
+    def __init__( self, *args, **kwargs ):
+        super(TitleButton, self).__init__(*args, **kwargs)
+
+        self.setAttribute( Qt.WA_NoMousePropagation )
+        self.setFocusPolicy( Qt.NoFocus )
+        
+        self.setStyleSheet( g_TitleButtonStyleSheet )
+
+        self.__m_Inside = False
+
+
+
+    def SetStyleProperty( self, name: str, value: typing.Any ):
+        self.setProperty( name, value )
+        self.setStyle( self.style() )
+
+
+
+    def __UpdateInsideProperty( self, on: bool ):
+        self.__m_Inside = on
+        self.setProperty('pressed', on )
+        self.setStyle( self.style() )
+
+
+
+    def mousePressEvent( self, event ):
+        #print( 'TitleButton::mousePressEvent()...' )
+        self.__UpdateInsideProperty( True )
+        return super(TitleButton, self).mousePressEvent(event)
+
+
+
+    def mouseMoveEvent( self, event ):
+        #print( 'TitleButton::mouseMoveEvent()...' )
+        isInside = self.rect().contains( event.pos() ) 
+        if( self.__m_Inside != isInside ):
+            #print( 'In/Out Changed {}'.format( self.rect().contains( event.pos() ) ) )
+            self.__UpdateInsideProperty( isInside )
+        return super(TitleButton, self).mouseMoveEvent(event)
+
+
+
+    def mouseReleaseEvent( self, event ):
+        #print( 'TitleButton::mouseMoveEvent()...' )
+        if( self.rect().contains( event.pos() ) ):
+            self.clicked.emit()
+        self.__UpdateInsideProperty( False )
+        return super(TitleButton, self).mouseReleaseEvent(event)
+
+
 
 
 class TitleBar(QFrame):
 
-    def __init__(self, parent=None):
+    def __init__( self, parent ):
         super(TitleBar, self).__init__(parent=parent)
 
         self.setStyleSheet( g_TitleBarStyleSheet )
         self.setAutoFillBackground( True )
         self.setBackgroundRole( QPalette.Highlight )
-        #self.setStyleSheet( css_titlebar )
 
-        self.__m_IconMinimize = QIcon( ':/resource/images/minimize.png' )
-        self.__m_IconMaximize = QIcon( ':/resource/images/maximize.png' )
-        self.__m_IconRestore = QIcon( ':/resource/images/restore.png' )
-        self.__m_IconClose = QIcon( ':/resource/images/close.png' )
+        self.__m_MinButton = TitleButton()
+        self.__m_MinButton.setProperty( 'icon', 'minimize' )
+        self.__m_MinButton.setStyle( self.__m_MinButton.style() )
 
+        self.__m_MaxButton = TitleButton()
+        self.__m_MaxButton.setProperty( 'icon', 'maximize' )
+        self.__m_MaxButton.setStyle( self.__m_MaxButton.style() )
 
-        self.__m_MinButton = QPushButton( self )
-        #self.__m_MinButton.setStyleSheet( css_button )
-        self.__m_MinButton.setIcon( self.__m_IconMinimize )
+        self.__m_CloseButton = TitleButton()
+        self.__m_CloseButton.setProperty( 'icon', 'close' )
+        self.__m_CloseButton.setStyle( self.__m_CloseButton.style() )
 
-        self.__m_MaxButton = QPushButton( self )
-        #self.__m_MaxButton.setStyleSheet( css_button )
-        self.__m_MaxButton.setIcon( self.__m_IconMaximize )
-
-        self.__m_CloseButton = QPushButton( self )
-        #self.__m_CloseButton.setStyleSheet( css_button )
-        self.__m_CloseButton.setIcon( self.__m_IconClose )
-
-        self.__m_MinButton.setMinimumHeight( 10 )
-        self.__m_CloseButton.setMinimumHeight( 10 )
-        self.__m_MaxButton.setMinimumHeight( 10 )
-
-        self.__m_Label = QLabel( self )
-        #self.__m_Label.setStyleSheet( css_label )
+        self.__m_Label = QLabel()
         self.__m_Label.setText( 'Window Title' )
-        hbox = QHBoxLayout( self )
-        hbox.setContentsMargins(0,0,0,0)
-        hbox.addWidget( self.__m_Label )
-        hbox.addWidget( self.__m_MinButton )
-        hbox.addWidget( self.__m_MaxButton )
-        hbox.addWidget( self.__m_CloseButton )
-        hbox.insertStretch( 1, 500 )
-        hbox.setSpacing( 4 )
+        
+        self.hbox = QHBoxLayout()
+        self.hbox.setContentsMargins(0,0,0,0)
+        self.hbox.addWidget( self.__m_Label )
+        self.hbox.addWidget( self.__m_MinButton )
+        self.hbox.addWidget( self.__m_MaxButton )
+        self.hbox.addWidget( self.__m_CloseButton )
+        self.hbox.insertStretch( 1, 500 )
+        self.hbox.setSpacing( 4 )
         self.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Fixed )
         
+        self.setLayout( self.hbox )
+
         self.__m_CloseButton.clicked.connect( self.parent().close )
         self.__m_MinButton.clicked.connect( self.showSmall )
         self.__m_MaxButton.clicked.connect( self.showMaxRestore )
@@ -126,11 +173,11 @@ class TitleBar(QFrame):
         if(self.maxNormal):
             self.parent().showNormal()
             self.maxNormal = False
-            self.__m_MaxButton.setIcon( self.__m_IconMaximize )
+            self.__m_MaxButton.SetStyleProperty( 'icon', 'maximize' )
         else:
             self.parent().showMaximized()
             self.maxNormal = True
-            self.__m_MaxButton.setIcon( self.__m_IconRestore )
+            self.__m_MaxButton.SetStyleProperty( 'icon', 'restore' )
 
 
 
@@ -180,20 +227,21 @@ class Frame(QFrame):
         self.setStyleSheet( g_MainWindowStyleSheet )
         self.setWindowFlags( Qt.FramelessWindowHint | Qt.WindowMinMaxButtonsHint )
         self.m_titleBar = TitleBar( self )
-        self.m_content = QFrame( self )
+        self.m_content = QFrame()
         self.m_content.setStyleSheet( g_StaticFrameStyleSheet )
 
         self.framelayout = QVBoxLayout()
         self.framelayout.setSpacing( 0 )
         self.framelayout.addWidget( self.m_titleBar )
+        self.framelayout.addWidget( self.m_content )
         self.framelayout.setContentsMargins( 0, 0, 0, 0 )
      
-        self.contentlayout = QVBoxLayout()
-        self.contentlayout.setSpacing( 0 )
-        self.contentlayout.addWidget( self.m_content )
-        self.contentlayout.setContentsMargins( 0, 0, 0, 0 )
+        #self.contentlayout = QVBoxLayout()
+        #self.contentlayout.setSpacing( 0 )
+        #self.contentlayout.addWidget( self.m_content )
+        #self.contentlayout.setContentsMargins( 0, 0, 0, 0 )
         
-        self.framelayout.addLayout( self.contentlayout )
+        #self.framelayout.addLayout( self.contentlayout )
         super(Frame, self).setLayout( self.framelayout )#self.setLayout(framelayout)
        
         self.__m_Margin = 5
