@@ -276,7 +276,7 @@ class TabWidget(QTabWidget):
         self.setTabBar( self.__m_TabBar )
 
         self.setWindowTitle( '        ' )
-        self.setStyleSheet( g_TabWidgetStyleSheet )
+        self.setStyleSheet(  g_TabWidgetStyleSheet )# g_StaticFrameStyleSheet
         self.setAttribute( Qt.WA_NoMousePropagation )# Avoid mouse event propagation to parent widget(OwnerFrame...)
         self.setFocusPolicy( Qt.StrongFocus )
 

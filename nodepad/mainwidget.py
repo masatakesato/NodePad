@@ -3,7 +3,7 @@ import functools
 # TODO: Redirect stdout to QTextEdit.
 
 from oreorelib.ui.pyqt5.mainwindow import MainWindow
-from oreorelib.ui.pyqt5.tabbedmdi import TabbedMDIManager, DockableFrame, Duration
+from oreorelib.ui.pyqt5.tabbedmdi import TabbedMDIManager, TabWidget, DockableFrame, Duration
 
 from .ui.graphicssettings import *
 from .ui.graphicsview import GraphicsView
@@ -30,12 +30,12 @@ class MainWidget(MainWindow):
         self.__m_Views = {}
 
         # Setup default view
-        rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep ) 
-        rootView.setScene( self.__m_NEScene.GraphEditor() )
-        rootView.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
-        rootView.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
+        #rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep ) 
+        #rootView.setScene( self.__m_NEScene.GraphEditor() )
+        #rootView.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
+        #rootView.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
 
-        self.__m_Views[ self.__m_NEScene.GetRootID() ] = rootView
+        #self.__m_Views[ self.__m_NEScene.GetRootID() ] = rootView
 
 
 
@@ -46,8 +46,12 @@ class MainWidget(MainWindow):
 
         self.__m_TabbedMDIManager = TabbedMDIManager()
 
-        rootTabID = self.__m_TabbedMDIManager.AddDockable( DockableFrame, Duration.Persistent )
+        rootTabID = self.__m_TabbedMDIManager.AddDockable( TabWidget, Duration.Persistent )
         self.__m_TabbedMDIManager.AddTab( rootTabID, rootView2, 'Root', self.__m_NEScene.GetRootID() )
+
+
+        rootTabFrame = self.__m_TabbedMDIManager.GetDockable( rootTabID )
+
 
 
 
@@ -62,7 +66,7 @@ class MainWidget(MainWindow):
         attrEditFrame = QFrame()
         attrEditFrame.setStyleSheet( UIStyle.g_DynamicFrameStyleSheet )#UIStyle.g_StaticFrameStyleSheet )
         attrEditFrame.setLayout( QVBoxLayout() )
-        attrEditFrame.layout().setContentsMargins(0,0,0,0)
+        attrEditFrame.layout().setContentsMargins( 0, 0, 0, 0 )
         attrEditFrame.layout().addWidget( qtab )
 
         #=============== Initialize Python Interpreter =============#
@@ -75,12 +79,12 @@ class MainWidget(MainWindow):
         self.__m_SceneManager.BindNEScene( self.__m_NEScene, self.UpdateWindowTitle, self.CreateNodeEditView )
 
         vsplitter = QSplitter(Qt.Vertical)
-        vsplitter.setContentsMargins(0, 0, 0, 0)
-        vsplitter.addWidget( rootView )
+        vsplitter.setContentsMargins( 0, 0, 0, 0 )
+        vsplitter.addWidget( rootTabFrame )#rootView )
         vsplitter.addWidget(self.__m_PythonConsole)
 
         hsplitter = QSplitter(Qt.Horizontal)
-        hsplitter.setContentsMargins(0, 0, 0, 0)
+        hsplitter.setContentsMargins( 0, 0, 0, 0 )
         hsplitter.addWidget(vsplitter)
         hsplitter.addWidget( attrEditFrame )
         hsplitter.setStyleSheet(UIStyle.g_SplitterStyleSheet)
@@ -95,7 +99,7 @@ class MainWidget(MainWindow):
         #
         self.setCentralWidget(hsplitter)
         self.setGeometry( 300, 50, 1280, 768 )
-        self.centralWidget().setContentsMargins(6,0,6,6)
+        self.centralWidget().setContentsMargins( 4, 6, 4, 4 )
 
 
         #=============== Initialize Actions ==============#

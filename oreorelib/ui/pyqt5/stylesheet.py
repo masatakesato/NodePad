@@ -721,6 +721,15 @@ QCheckBox::indicator:disabled
 
 g_TabWidgetStyleSheet = """ 
 
+QFrame
+{
+    background-color: transparent;
+
+    margin: 0px 0px 0px 0px;
+    border: 0px none;
+    padding: 0px 0px 0px 0px;
+}
+
 /*====================== TabWidget settings ==========================*/
 QTabWidget::pane
 {
@@ -976,16 +985,18 @@ QGraphicsView
     selection-background-color: rgb(125,75,50);
 
     margin: 0px 0px 0px 0px;
-    border: 1px solid rgb(60,60,60);/*rgb(80,80,80);*/
+    border: 0px none;/*border: 1px solid rgb(60,60,60);/*rgb(80,80,80);*/
     padding: 0px 0px 0px 0px;
 }
 
+/*
 QGraphicsView:focus
 {
     margin: 0px 0px 0px 0px;
     border: 1px solid rgb(96,96,96);
     padding: 0px 0px 0px 0px;
 }
+*/
 """
 
 
