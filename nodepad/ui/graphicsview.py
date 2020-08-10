@@ -40,7 +40,14 @@ class GraphicsView(QGraphicsView):
 
 
 
+    def __del__( self ):
+        print( 'GraphicsView::__del__()...' )
+        #self.Release()
+
+
+
     def Release( self ):
+        print( 'GraphicsView::Release()...' )
         self.setViewport(None)
         self.FocusViewIdChanged.disconnect()
         self.RenderViewIdChanged.disconnect()

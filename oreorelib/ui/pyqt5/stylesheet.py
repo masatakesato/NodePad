@@ -751,7 +751,7 @@ QTabWidget::pane:focus
 
 QTabWidget::pane[ TabWidgetFocus = true ]
 {
-    border-top: 2px solid rgb(0,77,191);
+    border-top: 2px solid rgb(191,77,0);
 }
 
 
@@ -786,7 +786,7 @@ QTabBar::tab:selected:focus
 
 QTabBar::tab:selected[ TabWidgetFocus = true ]
 {
-    background-color: rgb(0,77,191);
+    background-color: rgb(191,77,0);
 }
 
 
@@ -832,7 +832,7 @@ QTabBar::close-button:selected:hover:focus
 
 QTabBar::close-button:selected:hover[ TabWidgetFocus = true ]
 {
-    background-color: rgb(39,127,255);
+    background-color: rgb(255,127,39);
 }
 
 QTabBar::close-button:selected:pressed:focus
@@ -842,7 +842,7 @@ QTabBar::close-button:selected:pressed:focus
 
 QTabBar::close-button:selected:pressed[ TabWidgetFocus = true ]
 {
-    background-color: rgb(0,50,125);
+    background-color: rgb(125,50,0);
 }
 
 

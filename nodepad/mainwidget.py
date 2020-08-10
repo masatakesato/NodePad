@@ -39,7 +39,8 @@ class MainWidget(MainWindow):
 
 
 
-        rootView2 = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep ) 
+        rootView2 = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep )
+        rootView2.setWindowTitle( 'Root' )
         rootView2.setScene( self.__m_NEScene.GraphEditor() )
         rootView2.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
         rootView2.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
@@ -563,27 +564,52 @@ class MainWidget(MainWindow):
 
 
 
-    def CreateNodeEditView( self, view_id, title ):
+    #def CreateNodeEditView( self, view_id, parent_id, title ):
+
+    #    print( 'MainWidget::CreateNodeEditView()...' )
+
+    #    if( view_id in self.__m_Views ):
+    #        self.__m_Views[ view_id ].activateWindow()
+            
+    #    else:
+    #        view = GraphicsView( view_id, g_GridStep )
+    #        view.setScene( self.__m_NEScene.GraphEditor() )
+
+    #        view.setWindowTitle( title )
+    #        view.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
+    #        view.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
+    #        view.WidgetClosed.connect( functools.partial(self.__RemoveEditorViewCallback, view_id ) )# 削除時のコールバック関数
+
+    #        self.__m_Views[ view_id ] = view
+
+    #        view.setFocus()
+    #        view.show()
+        
+
+
+    def CreateNodeEditView( self, view_id, parent_id, title ):
 
         print( 'MainWidget::CreateNodeEditView()...' )
 
-        if( view_id in self.__m_Views ):
-            self.__m_Views[ view_id ].activateWindow()
+        if( self.__m_TabbedMDIManager.ContentWidgetExists( view_id ) ):
+           return
+
+        dockable_id, index = self.__m_TabbedMDIManager.FindParentDockable( parent_id )
             
-        else:
-            view = GraphicsView( view_id, g_GridStep )
-            view.setScene( self.__m_NEScene.GraphEditor() )
+        #print( dockable_id, index )
 
-            view.setWindowTitle( title )
-            view.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
-            view.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
-            view.WidgetClosed.connect( functools.partial(self.__RemoveEditorViewCallback, view_id ) )# 削除時のコールバック関数
+        view = GraphicsView( view_id, g_GridStep )
+        view.setScene( self.__m_NEScene.GraphEditor() )
+        view.setWindowTitle( title )
 
-            self.__m_Views[ view_id ] = view
+        view.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
+        view.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
+        #view.WidgetClosed.connect( functools.partial(self.__RemoveEditorViewCallback, view_id ) )# 削除時のコールバック関数
 
-            view.setFocus()
-            view.show()
-        
+        self.__m_TabbedMDIManager.AddTab( dockable_id, view, view.windowTitle(), view_id )
+
+# TODO: DockaerFrame閉じるとTabと紐づいたcontentWidgetがメモリ上に残留
+
 
 
     # GroupEditWindow削除時のコールバック関数
