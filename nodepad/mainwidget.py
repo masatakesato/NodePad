@@ -27,7 +27,7 @@ class MainWidget(MainWindow):
         self.__m_NEScene = NESceneExt()#NEScene()
 
         #========== Initialize GraphicsViews ===========#
-        self.__m_Views = {}
+        #self.__m_Views = {}
 
         # Setup default view
         #rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep ) 
@@ -267,9 +267,9 @@ class MainWidget(MainWindow):
         self.__m_SceneManager.Release()
         self.__m_NEScene.Release()
 
-        for view in self.__m_Views.values():
-            view.Release()
-        self.__m_Views.clear()
+        #for view in self.__m_Views.values():
+        #    view.Release()
+        #self.__m_Views.clear()
 
         self.__m_TabbedMDIManager.Release()
 
@@ -591,8 +591,11 @@ class MainWidget(MainWindow):
 
         print( 'MainWidget::CreateNodeEditView()...' )
 
-        if( self.__m_TabbedMDIManager.ContentWidgetExists( view_id ) ):
-           return
+        ownerDockable = self.__m_TabbedMDIManager.FindParentDockable( view_id )
+        if( ownerDockable != (None, -1) ):
+            #dockable_id, index = self.__m_TabbedMDIManager.FindParentDockable( view_id )
+            self.__m_TabbedMDIManager.Activate( ownerDockable[0], ownerDockable[1] )
+            return
 
         dockable_id, index = self.__m_TabbedMDIManager.FindParentDockable( parent_id )
             
@@ -608,18 +611,16 @@ class MainWidget(MainWindow):
 
         self.__m_TabbedMDIManager.AddTab( dockable_id, view, view.windowTitle(), view_id )
 
-# TODO: DockaerFrame閉じるとTabと紐づいたcontentWidgetがメモリ上に残留
-
 
 
     # GroupEditWindow削除時のコールバック関数
-    def __RemoveEditorViewCallback( self, view_id ):
-        try:
-            self.__m_Views[ view_id ].Release()
-            self.__m_Views[ view_id ].deleteLater()
-            del self.__m_Views[ view_id ]
-        except:
-            traceback.print_exc()
+    #def __RemoveEditorViewCallback( self, view_id ):
+    #    try:
+    #        self.__m_Views[ view_id ].Release()
+    #        self.__m_Views[ view_id ].deleteLater()
+    #        del self.__m_Views[ view_id ]
+    #    except:
+    #        traceback.print_exc()
 
 
 

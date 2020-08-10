@@ -454,7 +454,7 @@ class DockableFrame(Frame):
         self.setWindowTitle( '        ' )
         self.resize( 512, 512 )
         self.setLayout( QVBoxLayout() )
-        self.layout().setContentsMargins(0,0,0,0)
+        self.layout().setContentsMargins( 4, 4, 4, 4 )
 
         self.__m_TabWidget = TabWidget()
         self.layout().addWidget( self.__m_TabWidget )
@@ -567,6 +567,7 @@ class DockableFrame(Frame):
 
 
     def setCurrentIndex( self, index: int ) -> None:
+        #print( 'DockableFrame::setCurrentIndex()... %d' % index )
         return self.__m_TabWidget.setCurrentIndex(index)
 
 
@@ -758,23 +759,23 @@ class TabbedMDIManager:
 
     def FindParentDockable( self, widget_id: typing.Any ) -> (typing.Any, int):
         try:
-            contentWidget = self.__m_ContentWidgets[ widget_id ]
-
-            #parentDockable = None
-            #parentTabWidget = None
             dockableID = None
             index = -1
 
-            widget = contentWidget.parentWidget()
-            while( widget ):
-                if( type(widget) is DockableFrame ):
-                    dockableID = widget.ID()
-                    break
-                elif( type(widget) is TabWidget ):
-                    dockableID = widget.ID()
-                    index = widget.indexOf( contentWidget )
+            if( widget_id in self.__m_ContentWidgets ):
 
-                widget = widget.parentWidget()
+                contentWidget = self.__m_ContentWidgets[ widget_id ]
+
+                widget = contentWidget.parentWidget()
+                while( widget ):
+                    if( type(widget) is DockableFrame ):
+                        dockableID = widget.ID()
+                        break
+                    elif( type(widget) is TabWidget ):
+                        dockableID = widget.ID()
+                        index = widget.indexOf( contentWidget )
+
+                    widget = widget.parentWidget()
 
             return dockableID, index
 
@@ -842,8 +843,8 @@ class TabbedMDIManager:
 
 
     def Show( self ) -> None:
-        for dockable in self.__m_Dockables.values():
-            dockable.show()
+        for dockable_id in reversed(self.__m_Order):
+            self.__m_Dockables[ dockable_id ].show()
 
 
 
@@ -853,11 +854,24 @@ class TabbedMDIManager:
 
 
 
+    def Activate( self, dockable_id, index=-1 ):
+        try:
+            #print( 'TabbedMDIManager::Activate()... {}, {}'.format( self.__m_Dockables[ dockable_id ].windowTitle(), index ) )
+            self.__UpdateTopMost( dockable_id )
+            self.__m_Dockables[ dockable_id ].setCurrentIndex( index )        
+            self.__m_Dockables[ dockable_id ].activateWindow()
+
+        except:
+            traceback.print_exc()
+
+
+
     #===================== private methods ==========================#
 
 
     # Sort Dockables in top-most order
     def __UpdateTopMost( self, widget_id ):
+        #print( 'TabbedMDIManager::__UpdateTopMost()...' )
 
         depth = self.__m_Order.index(widget_id)
         # Reorder OwnerFrames
