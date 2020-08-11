@@ -825,7 +825,6 @@ class TabbedMDIManager:
                 return False
 
             self.__m_ContentWidgets[ widget_id ] = widget
-#widget.windowTitleChanged.connect( lambda: self.__UpdateDockableTitle(widget_id) )
             self.__m_Dockables[ dockable_id ].addTab( widget, label )
 
             return True
@@ -852,7 +851,6 @@ class TabbedMDIManager:
 
 
 
-# TODO: Can this method delete VOLATILE dockable?
     def DeleteTab( self, widget_id ) -> bool:
         try:
             dockable_id, index = self.FindParentDockable( widget_id )
@@ -901,11 +899,6 @@ class TabbedMDIManager:
 
         except:
             traceback.print_exc()
-
-
-
-    def ContentWidgetExists( self, content_id ):
-        return content_id in self.__m_ContentWidgets
 
 
 
@@ -1038,8 +1031,6 @@ class TabbedMDIManager:
         #print( 'TabbedMDIManager::__DeleteContentWidget()...', widget_id )
         try:
             self.__m_ContentWidgets[ widget_id ].setParent(None)
-#if( self.__m_ContentWidgets[ widget_id ].receivers( self.__m_ContentWidgets[ widget_id ].windowTitleChanged ) ):
-#    self.__m_ContentWidgets[ widget_id ].windowTitleChanged.disconnect()
             self.__m_ContentWidgets[ widget_id ].deleteLater()
             del self.__m_ContentWidgets[ widget_id ]
 
@@ -1248,41 +1239,6 @@ class TabbedMDIManager:
             print( '    name: \'{}\', hasParent: {}, type: {}'.format( content.windowTitle(), bool(content.parentWidget()), content.__class__.__name__ ) )
 
         print()
-
-
-
-#TODO: contentWidget.windowTitleChanged.connect( self.__UpdateDockableTitle )
-    #def __UpdateDockableTitle( self, content_id ) -> None:
-    #    try:
-    #        contentWidget = self.__m_ContentWidgets[ content_id ]
-    #        title = contentWidget.windowTitle()
-
-    #        widget = contentWidget.parentWidget()
-    #        bUpdateTitle = False
-
-    #        while( widget ):
-
-    #            if( type(widget) is DockableFrame ):
-    #                break
-
-    #            elif( type(widget) is TabWidget ):
-    #                contentIndex = widget.indexOf( contentWidget )
-    #                widget.setTabText( contentIndex, title )
-
-    #                if( widget.currentIndex()==contentIndex ):
-    #                    bUpdateTitle = True
-
-    #            widget = widget.parentWidget()
-
-    #        if( bUpdateTitle ):
-    #            widget.setWindowTitle( title )
-    #            print( 'TabbedMDIManager::__UpdateDockableTitle()... {}'.format( title ) )
-
-    #    except:
-    #        traceback.print_exc()
-
-
-
 
 
 

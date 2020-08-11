@@ -48,6 +48,8 @@ class MainWidget(MainWindow):
         self.__m_TabbedMDIManager = TabbedMDIManager()
 
         self.__m_DockableID = self.__m_TabbedMDIManager.AddDockable( TabWidget, Duration.Persistent )
+        rootView.setVisible(True)
+        print( rootView.isVisible())
         self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, rootView, rootView.windowTitle(), self.__m_NEScene.GetRootID() )
 
 
@@ -281,17 +283,18 @@ class MainWidget(MainWindow):
         #for view_id in view_ids:
         #    self.__m_Views[view_id].close()
         
-        self.__m_TabbedMDIManager.Clear()
 
-
+        # Regenerate root view
         rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep )
         rootView.setWindowTitle( 'Root' )
         rootView.setScene( self.__m_NEScene.GraphEditor() )
         rootView.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
         rootView.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
 
+# TODO: Salvage rootView from self.__m_TabbedMDIManager and reusable. Need to Implement DetachTab?
+        #rootView = self.__m_TabbedMDIManager.DeleteTab( self.__m_NEScene.GetRootID() )
+        self.__m_TabbedMDIManager.Clear()
         self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, rootView, rootView.windowTitle(), self.__m_NEScene.GetRootID() )
-
 
 
 
@@ -376,7 +379,7 @@ class MainWidget(MainWindow):
         #=================================== Initialize nodegraph data ============================#
         self.CloseChildViews()
         self.__m_SceneManager.Clear()
-        self.__m_SceneManager.Open( filepaths[0] )            
+        self.__m_SceneManager.Open( filepaths[0] )
         self.UpdateWindowTitle()
 
 
