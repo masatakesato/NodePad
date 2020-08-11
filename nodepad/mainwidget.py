@@ -77,7 +77,7 @@ class MainWidget(MainWindow):
 
         #============ Initialize SceneManager ===============#
         self.__m_SceneManager = NESceneManager()
-        self.__m_SceneManager.BindNEScene( self.__m_NEScene, self.UpdateWindowTitle, self.CreateNodeEditView )
+        self.__m_SceneManager.BindNEScene( self.__m_NEScene, self.UpdateWindowTitle, self.CreateNodeEditView, self.UpdateNodeEditorTitle )
 
         vsplitter = QSplitter(Qt.Vertical)
         vsplitter.setContentsMargins( 0, 0, 0, 0 )
@@ -562,6 +562,13 @@ class MainWidget(MainWindow):
     def UpdateWindowTitle( self ):
         self.setWindowTitle( 'NodePad - ' + self.__m_SceneManager.GetFilePath() + g_DataChangedSymbol[ self.__m_SceneManager.IsModified() ] )
 
+
+
+    def UpdateNodeEditorTitle( self, edit_id ):
+        edit_name = self.__m_NEScene.GetObjectName( edit_id )
+        self.__m_TabbedMDIManager.SetTabTitle( edit_id, edit_name )
+
+        self.UpdateWindowTitle()
 
 
     #def CreateNodeEditView( self, view_id, parent_id, title ):

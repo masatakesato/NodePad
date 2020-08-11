@@ -616,6 +616,11 @@ class NENodeGraph():
 
 
 
+    def GetObjectNameByID( self, obj_id ):
+        return self.__m_IDMap[ obj_id ].Key() if obj_id in self.__m_IDMap else ''
+
+
+
     def GetObjectTypeByID( self, obj_id ):
         return type(self.__m_IDMap[ obj_id ]) if obj_id in self.__m_IDMap else None
 

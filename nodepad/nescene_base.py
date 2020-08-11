@@ -155,6 +155,16 @@ def Compute( self, dataBlock ):
 
 
 
+    def GetObjectName( self, object_id ):
+        return self.__m_NodeGraph.GetObjectNameByID( object_id )
+
+
+
+    def GetType( self, object_id ):
+        return self.__m_NodeGraph.GetObjectTypeByID( object_id )
+
+
+
     def ObjectExists( self, object_id, typefilter ):
         return self.__m_NodeGraph.ObjectExistsByID( object_id, typefilter )
 
@@ -274,11 +284,6 @@ def Compute( self, dataBlock ):
 
     def ResolveChildNames( self, object_id ):
         return self.__m_NodeGraph.ResolveUnparentNameConflicts( object_id )
-
-
-
-    def GetType( self, object_id ):
-        return self.__m_NodeGraph.GetObjectTypeByID( object_id )
 
 
 
