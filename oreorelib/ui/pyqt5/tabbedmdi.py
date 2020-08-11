@@ -301,6 +301,16 @@ class TabWidget(QTabWidget):
 
 
 
+    def Clear( self ):
+        #print( 'TabWidget::Clear()...' )
+        if( self.__m_Duration==Duration.Persistent ):
+            while( self.NumActiveTabs() ):
+                self.widget(0).setParent(None)            
+        else:
+            self.Release()
+
+
+
     def Release( self ):
         #print( 'TabWidget::Release()...' )
 
@@ -465,6 +475,18 @@ class DockableFrame(Frame):
         self.tabCloseRequested = self.__m_TabWidget.tabCloseRequested
 
         self.__m_ID = id(self)
+
+
+
+    def Clear( self ):
+        #print( 'DockableFrame::Clear()...' )
+
+        if( self.IsPersistent() ):
+            self.__m_TabWidget.Clear()
+
+        else:
+            self.Release()
+
 
 
 
@@ -676,6 +698,18 @@ class TabbedMDIManager:
 
 
 
+    def Clear( self ):
+        #print( 'TabbedMDIManager::Clear()...' )
+
+        # Clear all dockers
+        for dockable in self.__m_Dockables.values():
+            dockable.Clear()
+
+        # Do cleanup
+        self.__Cleanup()
+
+
+
     def Release( self ):
         #print( 'TabbedMDIManager::Release()...' )
 
@@ -818,6 +852,7 @@ class TabbedMDIManager:
 
 
 
+# TODO: Can this method delete VOLATILE dockable?
     def DeleteTab( self, widget_id ) -> bool:
         try:
             dockable_id, index = self.FindParentDockable( widget_id )

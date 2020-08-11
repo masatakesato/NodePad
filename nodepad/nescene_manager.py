@@ -69,7 +69,7 @@ class NESceneManager:
 
         self.__m_refDataChangedCallback = None
         self.__m_refEditGroupCallback = None
-        self.__m_refUpdateGroupNameCallback = None
+        self.__m_refUpdateProcedure = None
 
 
 
@@ -87,15 +87,14 @@ class NESceneManager:
 
 
     #====================== SceneManager Setup ==============================#
-    def BindNEScene( self, nescene, datachanged, editgroup, updateGroupName ):
+    def BindNEScene( self, nescene, datachanged, editgroup, updateProcedure ):
 
         self.__m_refNEScene = nescene
         self.__m_refNEScene.BindCommandCallbacks( self.ExecCommandCallback )
         
-        self.__m_refDataChangedCallback = datachanged
         self.__m_refEditGroupCallback = editgroup
-        self.__m_refUpdateGroupNameCallback = updateGroupName
-
+        self.__m_refUpdateProcedure = updateProcedure
+        self.__m_refDataChangedCallback = lambda : updateProcedure(modified=True)#datachanged
 
 
 
@@ -106,7 +105,7 @@ class NESceneManager:
         
         self.__m_refDataChangedCallback = None
         self.__m_refEditGroupCallback = None
-        self.__m_refUpdateGroupNameCallback = None
+        self.__m_refUpdateProcedure = None
 
 
 
@@ -349,8 +348,7 @@ class NESceneManager:
         # Terminate command sequence
         #if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( self.__m_refDataChangedCallback ) )
         
-        if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( lambda: self.__m_refUpdateGroupNameCallback( object_id ) ) )
-       
+        if( terminate==True ):  self.__m_CommandManager.executeCmd( TerminalCommand( lambda: self.__m_refUpdateProcedure( renamed=object_id ) ) )
 
         return True
 

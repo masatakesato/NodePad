@@ -39,19 +39,19 @@ class MainWidget(MainWindow):
 
 
 
-        rootView2 = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep )
-        rootView2.setWindowTitle( 'Root' )
-        rootView2.setScene( self.__m_NEScene.GraphEditor() )
-        rootView2.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
-        rootView2.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
+        rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep )
+        rootView.setWindowTitle( 'Root' )
+        rootView.setScene( self.__m_NEScene.GraphEditor() )
+        rootView.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
+        rootView.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
 
         self.__m_TabbedMDIManager = TabbedMDIManager()
 
-        rootTabID = self.__m_TabbedMDIManager.AddDockable( TabWidget, Duration.Persistent )
-        self.__m_TabbedMDIManager.AddTab( rootTabID, rootView2, 'Root', self.__m_NEScene.GetRootID() )
+        self.__m_DockableID = self.__m_TabbedMDIManager.AddDockable( TabWidget, Duration.Persistent )
+        self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, rootView, rootView.windowTitle(), self.__m_NEScene.GetRootID() )
 
 
-        rootTabFrame = self.__m_TabbedMDIManager.GetDockable( rootTabID )
+        #rootTabFrame = self.__m_TabbedMDIManager.GetDockable( self.__m_DockableID )
 
 
 
@@ -77,11 +77,11 @@ class MainWidget(MainWindow):
 
         #============ Initialize SceneManager ===============#
         self.__m_SceneManager = NESceneManager()
-        self.__m_SceneManager.BindNEScene( self.__m_NEScene, self.UpdateWindowTitle, self.CreateNodeEditView, self.UpdateNodeEditorTitle )
+        self.__m_SceneManager.BindNEScene( self.__m_NEScene, self.UpdateWindowTitle, self.CreateNodeEditView, self.UpdateProedure )
 
         vsplitter = QSplitter(Qt.Vertical)
         vsplitter.setContentsMargins( 0, 0, 0, 0 )
-        vsplitter.addWidget( rootTabFrame )#rootView )
+        vsplitter.addWidget( self.__m_TabbedMDIManager.GetDockable( self.__m_DockableID ) )#rootView )
         vsplitter.addWidget(self.__m_PythonConsole)
 
         hsplitter = QSplitter(Qt.Horizontal)
@@ -276,10 +276,23 @@ class MainWidget(MainWindow):
 
 
     def CloseChildViews( self ):
-        root_id = self.__m_NEScene.GetRootID()
-        view_ids = [ key for key in self.__m_Views.keys() if key!= root_id ]
-        for view_id in view_ids:
-            self.__m_Views[view_id].close()
+        #root_id = self.__m_NEScene.GetRootID()
+        #view_ids = [ key for key in self.__m_Views.keys() if key!= root_id ]
+        #for view_id in view_ids:
+        #    self.__m_Views[view_id].close()
+        
+        self.__m_TabbedMDIManager.Clear()
+
+
+        rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep )
+        rootView.setWindowTitle( 'Root' )
+        rootView.setScene( self.__m_NEScene.GraphEditor() )
+        rootView.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
+        rootView.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
+
+        self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, rootView, rootView.windowTitle(), self.__m_NEScene.GetRootID() )
+
+
 
 
     def SceneManager( self ):
@@ -569,6 +582,20 @@ class MainWidget(MainWindow):
         self.__m_TabbedMDIManager.SetTabTitle( edit_id, edit_name )
 
         self.UpdateWindowTitle()
+
+
+
+    def UpdateProedure( self, *args, **kwargs ):
+
+        modified = kwargs[ 'modified' ] if 'modified' in kwargs else False
+        if( modified == True ):
+            self.setWindowTitle( 'NodePad - ' + self.__m_SceneManager.GetFilePath() + g_DataChangedSymbol[ self.__m_SceneManager.IsModified() ] )
+            
+        renamed = kwargs[ 'renamed' ] if 'renamed' in kwargs else None
+        if( renamed ):
+            self.__m_TabbedMDIManager.SetTabTitle( renamed, self.__m_NEScene.GetObjectName( renamed ) )
+
+
 
 
     #def CreateNodeEditView( self, view_id, parent_id, title ):
