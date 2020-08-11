@@ -5,7 +5,7 @@
 # https://wiki.qt.io/Smooth_Zoom_In_QGraphicsView/ja
 class GraphicsView(QGraphicsView):
 
-    WidgetClosed = pyqtSignal()
+    #WidgetClosed = pyqtSignal()
     FocusViewIdChanged = pyqtSignal(object)
     RenderViewIdChanged = pyqtSignal(object)
 
@@ -42,7 +42,7 @@ class GraphicsView(QGraphicsView):
 
     def __del__( self ):
         print( 'GraphicsView::__del__()...' )
-        #self.Release()
+        self.Release()
 
 
 
@@ -309,4 +309,4 @@ class GraphicsView(QGraphicsView):
 
     def closeEvent( self, event ):
         super(GraphicsView, self).closeEvent(event)
-        self.WidgetClosed.emit()
+        #self.WidgetClosed.emit()

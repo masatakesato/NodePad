@@ -27,17 +27,7 @@ class MainWidget(MainWindow):
         self.__m_NEScene = NESceneExt()#NEScene()
 
         #========== Initialize GraphicsViews ===========#
-        #self.__m_Views = {}
-
-        # Setup default view
-        #rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep ) 
-        #rootView.setScene( self.__m_NEScene.GraphEditor() )
-        #rootView.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
-        #rootView.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
-
-        #self.__m_Views[ self.__m_NEScene.GetRootID() ] = rootView
-
-
+        self.__m_TabbedMDIManager = TabbedMDIManager()
 
         rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep )
         rootView.setWindowTitle( 'Root' )
@@ -45,16 +35,10 @@ class MainWidget(MainWindow):
         rootView.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
         rootView.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
 
-        self.__m_TabbedMDIManager = TabbedMDIManager()
-
         self.__m_DockableID = self.__m_TabbedMDIManager.AddDockable( TabWidget, Duration.Persistent )
-        rootView.setVisible(True)
-        print( rootView.isVisible())
         self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, rootView, rootView.windowTitle(), self.__m_NEScene.GetRootID() )
 
-
         #rootTabFrame = self.__m_TabbedMDIManager.GetDockable( self.__m_DockableID )
-
 
 
 
@@ -268,32 +252,16 @@ class MainWidget(MainWindow):
     def Release( self ):
         self.__m_SceneManager.Release()
         self.__m_NEScene.Release()
-
-        #for view in self.__m_Views.values():
-        #    view.Release()
-        #self.__m_Views.clear()
-
         self.__m_TabbedMDIManager.Release()
 
 
 
     def CloseChildViews( self ):
-        #root_id = self.__m_NEScene.GetRootID()
-        #view_ids = [ key for key in self.__m_Views.keys() if key!= root_id ]
-        #for view_id in view_ids:
-        #    self.__m_Views[view_id].close()
-        
-
-        # Regenerate root view
-        rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep )
-        rootView.setWindowTitle( 'Root' )
-        rootView.setScene( self.__m_NEScene.GraphEditor() )
-        rootView.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
-        rootView.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
-
-# TODO: Salvage rootView from self.__m_TabbedMDIManager and reusable. Need to Implement DetachTab?
-        #rootView = self.__m_TabbedMDIManager.DeleteTab( self.__m_NEScene.GetRootID() )
+        # Detach root view
+        rootView = self.__m_TabbedMDIManager.DetachTab( self.__m_NEScene.GetRootID() )
+        # Clear remaining views
         self.__m_TabbedMDIManager.Clear()
+        # Attach root view
         self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, rootView, rootView.windowTitle(), self.__m_NEScene.GetRootID() )
 
 
@@ -600,30 +568,6 @@ class MainWidget(MainWindow):
 
 
 
-
-    #def CreateNodeEditView( self, view_id, parent_id, title ):
-
-    #    print( 'MainWidget::CreateNodeEditView()...' )
-
-    #    if( view_id in self.__m_Views ):
-    #        self.__m_Views[ view_id ].activateWindow()
-            
-    #    else:
-    #        view = GraphicsView( view_id, g_GridStep )
-    #        view.setScene( self.__m_NEScene.GraphEditor() )
-
-    #        view.setWindowTitle( title )
-    #        view.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
-    #        view.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
-    #        view.WidgetClosed.connect( functools.partial(self.__RemoveEditorViewCallback, view_id ) )# 削除時のコールバック関数
-
-    #        self.__m_Views[ view_id ] = view
-
-    #        view.setFocus()
-    #        view.show()
-        
-
-
     def CreateNodeEditView( self, view_id, parent_id, title ):
 
         print( 'MainWidget::CreateNodeEditView()...' )
@@ -644,20 +588,8 @@ class MainWidget(MainWindow):
 
         view.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
         view.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
-        #view.WidgetClosed.connect( functools.partial(self.__RemoveEditorViewCallback, view_id ) )# 削除時のコールバック関数
 
         self.__m_TabbedMDIManager.AddTab( dockable_id, view, view.windowTitle(), view_id )
-
-
-
-    # GroupEditWindow削除時のコールバック関数
-    #def __RemoveEditorViewCallback( self, view_id ):
-    #    try:
-    #        self.__m_Views[ view_id ].Release()
-    #        self.__m_Views[ view_id ].deleteLater()
-    #        del self.__m_Views[ view_id ]
-    #    except:
-    #        traceback.print_exc()
 
 
 
