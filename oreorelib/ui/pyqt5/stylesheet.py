@@ -31,7 +31,8 @@ QFrame
     font:12px bold;
     font-weight:bold;
 
-    /*height: 30px;*/
+    min-height: 30px;
+    max-height: 30px;
 
     margin: 0px 0px 0px 0px;
     border: 0px none;
@@ -43,11 +44,12 @@ QLabel
     color: rgb(235,235,235);
     background-color: none;
     
-    height: 18px;
-            
+    min-height: 18px;
+    max-height: 18px;
+
     margin: 0px 0px 0px 0px;
     border: 0px none;
-    padding: 6px 6px 6px 6px;
+    padding: 0px 6px 0px 6px;/* top, right, bottom, left */
 }
 
 """
@@ -112,6 +114,7 @@ QMenuBar
 {
     color: rgb(235,235,235);
     background-color: rgb(42,42,42);
+    spacing: 0px; /* spacing between menu bar items */
 
     margin: 0px 0px 0px 0px;
     border: 0px none;
@@ -121,13 +124,13 @@ QMenuBar
 QMenuBar::item
 {
     background-color: transparent;
-    spacing: 6px; /* spacing between menu bar items */
-
-    height: 24px;
+    
+    min-height: 24px;
+    max-height: 24px;
 
     margin: 0px 0px 0px 0px;
     border: 0px none;
-    padding: 4px 12px 4px 12px; /* top, right, bottom, left */
+    padding: 4px 14px 4px 14px; /* top, right, bottom, left */
 }
 
 QMenuBar::item:selected

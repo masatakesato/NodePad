@@ -472,7 +472,7 @@ class DockableFrame(Frame):
         super(DockableFrame, self).__init__(*args, **kwargs)
 
         self.setWindowTitle( '        ' )
-        self.resize( 512, 512 )
+        self.Resize( 512, 512 )
         self.setLayout( QVBoxLayout() )
         self.layout().setContentsMargins( 4, 4, 4, 4 )
 
@@ -994,9 +994,9 @@ class TabbedMDIManager:
 
         # transfer content widget to floater
         contentWidget = ownerWidget.widget( index )
-        floater.SetAttribs( { 'TabClosable': ownerWidget.IsTabClosable(index) } )
+        floater.SetAttribs( { 'TabClosable': ownerWidget.IsTabClosable(index), 'Size': ownerWidget.size() } )
         floater.setWindowTitle( contentWidget.windowTitle() )
-        floater.resize( contentWidget.width(), contentWidget.height() )
+        floater.resize( contentWidget.size() )
         floater.layout().addWidget( contentWidget )
         contentWidget.setVisible(True)# MUST SET VISIBLE. Widgets detached from QTabWidget are INVISIBLE.
 
@@ -1089,8 +1089,11 @@ class TabbedMDIManager:
             if( floater.layout().count() > 0 ):
 
                 contentWidget = floater.layout().itemAt(0).widget()
+
+
                 ownerWidget.addTab( contentWidget, contentWidget.windowTitle() )
                 ownerWidget.SetTabClosable( 0, floater.GetAttribs()[ 'TabClosable' ] )
+                ownerWidget.resize( floater.GetAttribs()[ 'Size' ] )
                 ownerWidget.activateWindow()
                 ownerWidget.show()
 
