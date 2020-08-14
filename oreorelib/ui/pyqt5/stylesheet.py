@@ -793,8 +793,11 @@ QTabBar::tab:selected[ TabWidgetFocus = true ]
 }
 
 
+/*============== TabBar close button Settings ======================*/
 QTabBar::close-button
 {
+    background-color: transparent;
+
     min-width: 16px;
     max-width: 16px;
     min-height: 16px;
@@ -805,13 +808,13 @@ QTabBar::close-button
     image: url(:/resource/images/close.png);
 }
 
-
-/*============== TabBar close button Settings ======================*/
+/* Disabled. Unable to handle mousehover propergation to neighbor tab (after tab insertion). */
+/*
 QTabBar::close-button:hover
 {
     background-color: rgb(96,96,96);
 }
-
+*/
 QTabBar::close-button:pressed
 {
     background-color: rgb(32,32,32);

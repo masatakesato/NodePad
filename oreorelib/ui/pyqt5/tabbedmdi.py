@@ -13,6 +13,11 @@ class Duration(Enum):
     Volatile = 0x01   # Automatically deleted if no child tab exists.
 
 
+# Tab anchor
+class Anchor(Enum):
+    Off = 0x00
+    On = 0x01
+
 
 
 class Floater(Frame):
@@ -117,6 +122,24 @@ class TabBar(QTabBar):
     # __DRAG_NONE__ -> __DRAG_TAB__ -> __DRAG_WIDGET__ -> __DRAG_NONE__
 
 
+    __CLOSABLE_MASK__ = 0x01
+    __DETACDHABLE_MASK__ = 0x02
+    __PIVOT_MASK__ = 0x04
+
+    @staticmethod
+    def SetBit( value, bitmask, on=True ):
+        return value | bitmask if on else value & ~bitmask
+
+    @staticmethod
+    def ClearBit( value, bitmask ):
+        return value & ~bitmask
+
+    @staticmethod
+    def Bit( value, bitmask ):
+        return bool( value & bitmask )
+
+
+
 
     def __init__( self, *args, **kwargs ):
         super(TabBar, self).__init__(*args, **kwargs)
@@ -128,13 +151,22 @@ class TabBar(QTabBar):
         # Create Hooter tab. Used for mouse intersection.
         self.insertTab( 0, '        ' )
         self.setTabEnabled( 0, False )
+
         self.__m_CloseButtonSize = ( self.tabButton(0, QTabBar.RightSide).width(), self.tabButton(0, QTabBar.RightSide).height() )
         self.tabButton( 0, QTabBar.RightSide ).resize( 0, 0 )# set tabbutton size to zero(unclickable).
 
-        self.__m_CurrentIndex = -1
-        self.__m_DragMode = TabBar.__DRAG_NONE__
+        self.SetTabDetachable( 0, False )
+
+
         self.__m_FocusIndex = -1
-        
+
+
+        self.__m_DragMode = TabBar.__DRAG_NONE__
+        self.__m_CurrIndex = -1
+        self.__m_PivotRect = None
+        self.__m_bInsidePivot  = False
+        self.__m_bEnteredPivot = False
+
 
 
     def NumActiveTabs( self ) -> int:
@@ -151,18 +183,34 @@ class TabBar(QTabBar):
 
 
     def SetTabClosable( self, index: int, on: bool ) -> None:
+        #print( 'TabBar::SetTabClosable()...{}: {}'.format( index, on ) )
         self.tabButton( index, QTabBar.RightSide ).resize( self.__m_CloseButtonSize[0]*int(on), self.__m_CloseButtonSize[1]*int(on) )
+        self.setTabData( index, self.SetBit( self.tabData(index), TabBar.__CLOSABLE_MASK__, on ) )
 
 
 
     def IsTabClosable( self, index: int ) -> bool:
-        return self.tabButton( index, QTabBar.RightSide ).size().isEmpty()==False
+        #return self.tabButton( index, QTabBar.RightSide ).size().isEmpty()==False
+        return self.Bit( self.tabData(index), TabBar.__CLOSABLE_MASK__ )
+
+
+
+    def SetTabDetachable( self, index: int, on: bool ) -> None:
+        #print( 'TabBar::SetTabDetachable()...{}'.format( on ) )
+        self.setTabData( index, self.SetBit( self.tabData(index), TabBar.__DETACDHABLE_MASK__, on ) )
+
+
+
+    def IsTabDetachable( self, index: int ) -> bool:
+        #print( 'TabBar::IsTabDetachable()...{}'.format( index ) )
+        return self.Bit( self.tabData(index), TabBar.__DETACDHABLE_MASK__ )
 
 
 
     def tabInserted( self, index ):
         #print( 'TabBar::tabInserted(%d)' % index )
         self.setCurrentIndex(index)
+        self.setTabData( index, TabBar.__CLOSABLE_MASK__ | TabBar.__DETACDHABLE_MASK__ )
         #return super(TabWidget, self).tabInserted(index)
         
 
@@ -177,15 +225,23 @@ class TabBar(QTabBar):
     def mousePressEvent( self, event ):
         #print( 'TabBar::mousePressEvent()...' )
 
-        self.__m_CurrentIndex = self.tabAt( event.pos() )
-
         # Triggers tab drag operations ONLY WHEN LEFT MOUSE PRESSED.
-        if( event.button()==Qt.LeftButton ):# and self.__m_CurrentIndex != self.NumActiveTabs() ):
-            if( self.__m_CurrentIndex == self.NumActiveTabs() ):
-                event.ignore()
-            else:
-                self.setCurrentIndex( self.__m_CurrentIndex )
+        if( event.button()==Qt.LeftButton ):
+
+            self.__m_CurrIndex = self.tabAt( event.pos() )
+
+            if( self.__m_CurrIndex < self.NumActiveTabs() ):
+
+                self.setCurrentIndex( self.__m_CurrIndex )
                 self.__m_DragMode = TabBar.__DRAG_TAB__
+
+                self.setTabData( self.__m_CurrIndex, self.SetBit( self.tabData(self.__m_CurrIndex), TabBar.__PIVOT_MASK__, True ) ) 
+                self.__m_bInsidePivot  = True
+                self.__m_bEnteredPivot = False
+                self.__m_PivotRect = self.tabRect( self.__m_CurrIndex )
+
+            else:
+                event.ignore()
 
         return super(TabBar, self).mousePressEvent(event)
 
@@ -201,15 +257,32 @@ class TabBar(QTabBar):
 
         elif( self.__m_DragMode==TabBar.__DRAG_TAB__ ):
             # Mouse is moving inside QTabBar area
-            if( self.rect().contains(pos) ):
-                index = self.tabAt(pos)
-                if( index != self.__m_CurrentIndex and index != self.NumActiveTabs() ):
-                    self.moveTab( self.__m_CurrentIndex, index )
-                    self.__m_CurrentIndex = index
-            # Mouse has just moved outside QTabBar area
-            else:
+            index = self.tabAt(pos)
+            if( index !=-1 and index != self.NumActiveTabs() ):
+                
+                if( self.Bit( self.tabData(index), TabBar.__PIVOT_MASK__ ) != self.__m_bInsidePivot ):
+                    #print('!!' )
+                    self.__m_PivotRect = self.tabRect( self.__m_CurrIndex )
+                    self.__m_bEnteredPivot = self.__m_PivotRect.contains(pos)
+                    self.__m_bInsidePivot = not self.__m_bInsidePivot
+
+                    self.moveTab( self.__m_CurrIndex, index )
+                    self.__m_CurrIndex = index
+                    
+                elif( self.__m_PivotRect.contains(pos)==True and self.__m_bEnteredPivot==False ):
+                    #print( 'Entered...' )
+                    self.__m_bEnteredPivot = True
+                    self.moveTab( self.__m_CurrIndex, index )
+                    self.__m_CurrIndex = index
+
+                #elif( self.__m_PivotRect.contains(pos)==False and self.__m_bEnteredPivot==True ):
+                    #print( 'Left...' )
+
+            # Mouse dragged detachable tab to outside TabBar area.
+            elif( self.IsTabDetachable( self.__m_CurrIndex ) ):
                 self.__m_DragMode = TabBar.__DRAG_WIDGET__
-                self.DetachWidgetSignal.emit( self.__m_CurrentIndex )
+                self.DetachWidgetSignal.emit( self.__m_CurrIndex )
+
 
         #else:# TabBar.__DRAG_NONE__
         #    pass
@@ -220,12 +293,15 @@ class TabBar(QTabBar):
 
     def mouseReleaseEvent( self, event ):
         #print( 'TabBar::mouseReleaseEvent()...' )
-        
+
         # Detached widget has been released inside QTabBar area
         if( self.__m_DragMode==TabBar.__DRAG_WIDGET__ ):
             self.AttachWidgetSignal.emit( event.globalPos() )
 
-        self.__m_CurrentIndex = -1
+        elif( self.__m_DragMode==TabBar.__DRAG_TAB__ ):
+            self.setTabData( self.__m_CurrIndex, self.SetBit( self.tabData(self.__m_CurrIndex), TabBar.__PIVOT_MASK__, False ) )
+
+        self.__m_CurrIndex = -1
         self.__m_DragMode = TabBar.__DRAG_NONE__
 
         return super(TabBar, self).mouseReleaseEvent(event)
@@ -253,14 +329,18 @@ class TabBar(QTabBar):
 
 
 
+    def Info( self, index ):
+        print( '//============ Tab[{}] ==============//'.format( index ) )
+        print( '  Name: {}\n  IsClosable: {}\n  IsDetachable: {}'.format( self.tabText(index), self.IsTabClosable(index), self.IsTabDetachable(index) )  )
+
+
+
 
 # TabWidget
 class TabWidget(QTabWidget):
     
     # Signals
     RaiseSignal = pyqtSignal(object)
-    MoveSignal = pyqtSignal(object, QPoint)
-    ReleaseSignal = pyqtSignal(object, QPoint)
     CleanupSignal = pyqtSignal(bool)
 
     # TabWidget Lock modes
@@ -316,12 +396,6 @@ class TabWidget(QTabWidget):
 
         if( self.receivers(self.RaiseSignal) ):
             self.RaiseSignal.disconnect()
-
-        if( self.receivers(self.MoveSignal) ):
-            self.MoveSignal.disconnect()
-
-        if( self.receivers(self.ReleaseSignal) ):
-            self.ReleaseSignal.disconnect()
 
         while( self.NumActiveTabs() ):
             self.widget(0).setParent(None)
@@ -395,6 +469,16 @@ class TabWidget(QTabWidget):
 
 
 
+    def SetTabDetachable( self, index: int, on: bool ) -> None:
+        self.__m_TabBar.SetTabDetachable( index, on )
+
+
+
+    def IsTabDetachable( self, index: int ) -> bool:
+        return self.__m_TabBar.IsTabDetachable( index )
+
+
+
     def DeleteTab( self, index: int ) -> None:
         #print( 'TabWidget::DeleteTab()...%d' % index )
         self.widget(index).setParent(None)
@@ -411,26 +495,6 @@ class TabWidget(QTabWidget):
             self.__m_Status = TabWidget.__TRASHED__
         self.CleanupSignal.emit( False )
         return contentWidget
-
-
-
-    #def mousePressEvent( self, event ):
-    #    #print( 'TabWidget::mousePressEvent()...' )
-    #    return super(TabWidget, self).mousePressEvent(event)
-
-
-
-    def mouseMoveEvent( self, event ):
-        #print( 'TabWidget::mouseMoveEvent()...' )
-        self.MoveSignal.emit( self.__m_ID, event.globalPos() )
-        return super(TabWidget, self).mouseMoveEvent(event)
-
-
-
-    def mouseReleaseEvent( self, event ):
-        #print( 'TabWidget::mouseReleaseEvent()...' )
-        self.ReleaseSignal.emit( self.__m_ID, event.globalPos() )
-        return super(TabWidget, self).mouseReleaseEvent(event)
 
 
 
@@ -582,6 +646,16 @@ class DockableFrame(Frame):
 
 
 
+    def SetTabDetachable( self, index: int, on: bool ) -> None:
+        self.__m_TabWidget.SetTabDetachable( index, on )
+
+
+
+    def IsTabDetachable( self, index: int ) -> bool:
+        return self.__m_TabWidget.IsTabDetachable( index )
+
+
+
     def DeleteTab( self, index: int ) -> None:
         self.__m_TabWidget.DeleteTab( index )
 
@@ -696,13 +770,13 @@ class TabbedMDIManager:
     __c_FloaterOffset = QPoint(-10, -10)
 
 
-
     def __init__( self ):
-
         self.__m_Dockables = {}# key: widget_id, value: widget
         self.__m_Order = []# Topmost order information of self.__m_Dockables
         self.__m_Floaters = {}# key: floater widget id, value: floater object
         self.__m_ContentWidgets = {}# key: widget_id, value: content widget
+
+        self.__m_CurrFloaterID = None
 
 
 
@@ -751,9 +825,10 @@ class TabbedMDIManager:
 
             # connect dockable signals
             newWidget.RaiseSignal.connect( self.__UpdateTopMost )
-            newWidget.MoveSignal.connect( self.__CheckDockableIntersection )
-            newWidget.ReleaseSignal.connect( self.__AttachDockable )
             newWidget.CleanupSignal.connect( self.__Cleanup )
+            if( widget_type is DockableFrame ):
+                newWidget.MoveSignal.connect( self.__CheckDockableIntersection )
+                newWidget.ReleaseSignal.connect( self.__AttachDockable )
 
             # connect tabbar signals
             newWidget.tabBar().DetachWidgetSignal.connect( lambda index: self.__DetachFloater( newWidget.ID(), index ) )
@@ -897,6 +972,14 @@ class TabbedMDIManager:
 
 
 
+    def SetTabDetachable( self, dockable_id: typing.Any, index: int, on: bool ) -> None:
+        try:
+            self.__m_Dockables[ dockable_id ].SetTabDetachable( index, on )
+        except:
+            traceback.print_exc()
+
+
+
     def SetTabTitle( self, content_id, title ):
         try:
             contentWidget = self.__m_ContentWidgets[ content_id ]
@@ -953,7 +1036,6 @@ class TabbedMDIManager:
 
 
     #===================== private methods ==========================#
-
 
     # Sort Dockables in top-most order
     def __UpdateTopMost( self, widget_id ):

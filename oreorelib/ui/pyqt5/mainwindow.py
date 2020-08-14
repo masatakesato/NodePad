@@ -10,7 +10,7 @@ class MainWindow(Frame):
 
         self.__m_MenuBar = QMenuBar( self )
         self.__m_MenuBar.setStyleSheet( g_MenuBarStyleSheet + g_MenuStyleSheet )
-        self.__m_MenuBar.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Fixed )#setSizePolicy( QSizePolicy.Preferred, QSizePolicy.Maximum )
+        self.__m_MenuBar.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Fixed )
         self.framelayout.insertWidget( 1, self.__m_MenuBar )
 
         self.__m_StatusBar = None
