@@ -152,9 +152,8 @@ class TabBar(QTabBar):
         self.insertTab( 0, '        ' )
         self.setTabEnabled( 0, False )
 
-        self.__m_CloseButtonSize = ( self.tabButton(0, QTabBar.RightSide).width(), self.tabButton(0, QTabBar.RightSide).height() )
-        self.tabButton( 0, QTabBar.RightSide ).resize( 0, 0 )# set tabbutton size to zero(unclickable).
-
+        self.tabButton( 0, QTabBar.RightSide ).hide()
+        self.SetTabClosable( 0, False )
         self.SetTabDetachable( 0, False )
 
 
@@ -184,7 +183,7 @@ class TabBar(QTabBar):
 
     def SetTabClosable( self, index: int, on: bool ) -> None:
         #print( 'TabBar::SetTabClosable()...{}: {}'.format( index, on ) )
-        self.tabButton( index, QTabBar.RightSide ).resize( self.__m_CloseButtonSize[0]*int(on), self.__m_CloseButtonSize[1]*int(on) )
+        self.tabButton( index, QTabBar.RightSide ).setEnabled(on)
         self.setTabData( index, self.SetBit( self.tabData(index), TabBar.__CLOSABLE_MASK__, on ) )
 
 

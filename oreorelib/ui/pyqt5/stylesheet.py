@@ -808,6 +808,11 @@ QTabBar::close-button
     image: url(:/resource/images/close.png);
 }
 
+QTabBar::close-button:disabled
+{
+    image: url(:/resource/images/close-disabled.png);
+}
+
 /* Disabled. Unable to handle mousehover propergation to neighbor tab (after tab insertion). */
 /*
 QTabBar::close-button:hover

@@ -29,14 +29,17 @@ class MainWidget(MainWindow):
         #========== Initialize GraphicsViews ===========#
         self.__m_TabbedMDIManager = TabbedMDIManager()
 
-        rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep )
+        viewID = self.__m_NEScene.GetRootID()
+        rootView = GraphicsView( viewID, g_GridStep )
         rootView.setWindowTitle( 'Root' )
         rootView.setScene( self.__m_NEScene.GraphEditor() )
         rootView.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
         rootView.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
 
         self.__m_DockableID = self.__m_TabbedMDIManager.AddDockable( TabWidget, Duration.Persistent )
-        self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, rootView, rootView.windowTitle(), self.__m_NEScene.GetRootID() )
+        self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, rootView, rootView.windowTitle(), viewID )
+        self.__m_TabbedMDIManager.SetTabClosable( self.__m_DockableID, 0, False )
+        self.__m_TabbedMDIManager.SetTabDetachable( self.__m_DockableID, 0, False )
 
         #rootTabFrame = self.__m_TabbedMDIManager.GetDockable( self.__m_DockableID )
 
@@ -263,7 +266,8 @@ class MainWidget(MainWindow):
         self.__m_TabbedMDIManager.Clear()
         # Attach root view
         self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, rootView, rootView.windowTitle(), self.__m_NEScene.GetRootID() )
-
+        self.__m_TabbedMDIManager.SetTabClosable( self.__m_DockableID, 0, False )
+        self.__m_TabbedMDIManager.SetTabDetachable( self.__m_DockableID, 0, False )
 
 
     def SceneManager( self ):

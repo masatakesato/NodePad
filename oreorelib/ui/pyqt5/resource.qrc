@@ -1,0 +1,17 @@
+﻿<!DOCTYPE RCC><RCC version="1.0" prefix="/">
+<qresource>
+	<file>../../resource/images/minimize.png</file>
+	<file>../../resource/images/maximize.png</file>
+	<file>../../resource/images/restore.png</file>
+	<file>../../resource/images/close.png</file>
+  <file>../../resource/images/close-disabled.png</file>  
+  <file>../../resource/images/arrow-left.png</file>
+	<file>../../resource/images/arrow-up.png</file>
+	<file>../../resource/images/arrow-right.png</file>
+	<file>../../resource/images/arrow-down.png</file>
+	<file>../../resource/images/checkbox.png</file>
+	<file>../../resource/images/edit-group.png</file>
+	<file>../../resource/images/sizegrip.png</file>
+	<file>../../resource/images/spinner-loading.gif</file>
+</qresource>
+</RCC>
