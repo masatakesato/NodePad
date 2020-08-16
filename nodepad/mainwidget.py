@@ -4,11 +4,11 @@ import functools
 
 from oreorelib.ui.pyqt5.mainwindow import MainWindow
 from oreorelib.ui.pyqt5.tabbedmdi import TabbedMDIManager, TabWidget, DockableFrame, Duration
+from oreorelib.ui.pyqt5.pythoninterpreter import InputConsole, OutputConsole
 
 from .ui.graphicssettings import *
 from .ui.graphicsview import GraphicsView
 from .ui.attributeeditorwidget import AttributeEditorWidget
-from .ui.pythoninterpreter import PyInterp
 
 from .nescene_ext import NESceneExt
 from .nescene_manager import NESceneManager
@@ -57,7 +57,7 @@ class MainWidget(MainWindow):
         attrEditFrame.layout().addWidget( qtab )
 
         #=============== Initialize Python Interpreter =============#
-        self.__m_PythonConsole = PyInterp( locals(), self )
+        self.__m_PythonConsole = InputConsole( locals() )# locals(), self
         self.__m_PythonConsole.setAcceptDrops(True)
 
 
