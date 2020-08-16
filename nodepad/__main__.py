@@ -20,6 +20,7 @@ from PyQt5.QtGui import QSurfaceFormat
 def main():
 
     app = QApplication(sys.argv)
+    QApplication.setStyle( 'Fusion' )# Required for overriding QTabBartab::paintEvent.
 
     # super sampling settings for opengl mode
     fmt = QSurfaceFormat()

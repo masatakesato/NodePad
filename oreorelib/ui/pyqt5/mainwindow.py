@@ -10,7 +10,7 @@ class MainWindow(Frame):
 
         self.__m_MenuBar = QMenuBar( self )
         self.__m_MenuBar.setStyleSheet( g_MenuBarStyleSheet + g_MenuStyleSheet )
-        self.__m_MenuBar.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Fixed )#setSizePolicy( QSizePolicy.Preferred, QSizePolicy.Maximum )
+        self.__m_MenuBar.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Fixed )
         self.framelayout.insertWidget( 1, self.__m_MenuBar )
 
         self.__m_StatusBar = None
@@ -45,7 +45,7 @@ class MainWindow(Frame):
             self.m_content.deleteLater()
         self.m_content = widget
         self.m_content.setSizePolicy( QSizePolicy.Preferred, QSizePolicy.Preferred )
-        self.contentlayout.addWidget( self.m_content )
+        self.framelayout.addWidget( self.m_content )#self.contentlayout.addWidget( self.m_content )
 
 
 

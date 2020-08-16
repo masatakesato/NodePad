@@ -3,11 +3,12 @@ import functools
 # TODO: Redirect stdout to QTextEdit.
 
 from oreorelib.ui.pyqt5.mainwindow import MainWindow
+from oreorelib.ui.pyqt5.tabbedmdi import TabbedMDIManager, TabWidget, DockableFrame, Duration
+from oreorelib.ui.pyqt5.pythoninterpreter import InputConsole, OutputConsole
 
 from .ui.graphicssettings import *
 from .ui.graphicsview import GraphicsView
 from .ui.attributeeditorwidget import AttributeEditorWidget
-from .ui.pythoninterpreter import PyInterp
 
 from .nescene_ext import NESceneExt
 from .nescene_manager import NESceneManager
@@ -20,52 +21,57 @@ class MainWidget(MainWindow):
     def __init__( self ):
         super(MainWidget, self).__init__()        
  
+        qApp.focusChanged.connect( lambda old, new: self.__onTabFocusChanged( old, new, 'TabWidgetFocus' ) )
+
         #========== Initialize NEScene ===========#
         self.__m_NEScene = NESceneExt()#NEScene()
 
         #========== Initialize GraphicsViews ===========#
-        self.__m_Views = {}
+        self.__m_TabbedMDIManager = TabbedMDIManager()
 
-        # Setup default view
-        rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep ) 
+        rootView = GraphicsView( self.__m_NEScene.GetRootID(), g_GridStep )
+        rootView.setWindowTitle( 'Root' )
         rootView.setScene( self.__m_NEScene.GraphEditor() )
         rootView.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
         rootView.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
 
-        self.__m_Views[ self.__m_NEScene.GetRootID() ] = rootView
+        self.__m_DockableID = self.__m_TabbedMDIManager.AddDockable( TabWidget, Duration.Persistent )
+        self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, rootView, rootView.windowTitle(), self.__m_NEScene.GetRootID() )
+
+        #rootTabFrame = self.__m_TabbedMDIManager.GetDockable( self.__m_DockableID )
+
 
 
         #============ Initialize Attribute Editor ============#
         qtab = QTabWidget()
         qtab.setFocusPolicy( Qt.StrongFocus )
         qtab.setLayout( QVBoxLayout() )
-        qtab.setStyleSheet( UIStyle.g_TabWidgetStyleSheet_ )
+        qtab.setStyleSheet( UIStyle.g_TabWidgetStyleSheet )
         qtab.addTab( self.__m_NEScene.AttributeEditor(), 'Attribute Editor' )
         #qtab.addTab(QLabel('Label 2'), 'Tab2')
         
         attrEditFrame = QFrame()
-        attrEditFrame.setFocusPolicy( Qt.StrongFocus )# Selectorでフォーカス状態管理するなら必要ない.
         attrEditFrame.setStyleSheet( UIStyle.g_DynamicFrameStyleSheet )#UIStyle.g_StaticFrameStyleSheet )
         attrEditFrame.setLayout( QVBoxLayout() )
-        attrEditFrame.layout().setContentsMargins(0,0,0,0)
+        attrEditFrame.layout().setContentsMargins( 0, 0, 0, 0 )
         attrEditFrame.layout().addWidget( qtab )
 
         #=============== Initialize Python Interpreter =============#
-        self.__m_PythonConsole = PyInterp( locals(), self )
+        self.__m_PythonConsole = InputConsole( locals() )# locals(), self
         self.__m_PythonConsole.setAcceptDrops(True)
 
 
         #============ Initialize SceneManager ===============#
         self.__m_SceneManager = NESceneManager()
-        self.__m_SceneManager.BindNEScene( self.__m_NEScene, self.UpdateWindowTitle, self.CreateNodeEditView )
+        self.__m_SceneManager.BindNEScene( self.__m_NEScene, self.UpdateWindowTitle, self.CreateNodeEditView, self.UpdateProedure )
 
         vsplitter = QSplitter(Qt.Vertical)
-        vsplitter.setContentsMargins(0, 0, 0, 0)
-        vsplitter.addWidget( rootView )
+        vsplitter.setContentsMargins( 0, 0, 0, 0 )
+        vsplitter.addWidget( self.__m_TabbedMDIManager.GetDockable( self.__m_DockableID ) )#rootView )
         vsplitter.addWidget(self.__m_PythonConsole)
 
         hsplitter = QSplitter(Qt.Horizontal)
-        hsplitter.setContentsMargins(0, 0, 0, 0)
+        hsplitter.setContentsMargins( 0, 0, 0, 0 )
         hsplitter.addWidget(vsplitter)
         hsplitter.addWidget( attrEditFrame )
         hsplitter.setStyleSheet(UIStyle.g_SplitterStyleSheet)
@@ -80,7 +86,7 @@ class MainWidget(MainWindow):
         #
         self.setCentralWidget(hsplitter)
         self.setGeometry( 300, 50, 1280, 768 )
-        self.centralWidget().setContentsMargins(6,0,6,6)
+        self.centralWidget().setContentsMargins( 4, 6, 4, 4 )
 
 
         #=============== Initialize Actions ==============#
@@ -242,21 +248,22 @@ class MainWidget(MainWindow):
         self.UpdateWindowTitle()
 
 
+
     def Release( self ):
         self.__m_SceneManager.Release()
         self.__m_NEScene.Release()
-
-        for view in self.__m_Views.values():
-            view.Release()
-        self.__m_Views.clear()
+        self.__m_TabbedMDIManager.Release()
 
 
 
     def CloseChildViews( self ):
-        root_id = self.__m_NEScene.GetRootID()
-        view_ids = [ key for key in self.__m_Views.keys() if key!= root_id ]
-        for view_id in view_ids:
-            self.__m_Views[view_id].close()
+        # Detach root view
+        rootView = self.__m_TabbedMDIManager.DetachTab( self.__m_NEScene.GetRootID() )
+        # Clear remaining views
+        self.__m_TabbedMDIManager.Clear()
+        # Attach root view
+        self.__m_TabbedMDIManager.AddTab( self.__m_DockableID, rootView, rootView.windowTitle(), self.__m_NEScene.GetRootID() )
+
 
 
     def SceneManager( self ):
@@ -340,7 +347,7 @@ class MainWidget(MainWindow):
         #=================================== Initialize nodegraph data ============================#
         self.CloseChildViews()
         self.__m_SceneManager.Clear()
-        self.__m_SceneManager.Open( filepaths[0] )            
+        self.__m_SceneManager.Open( filepaths[0] )
         self.UpdateWindowTitle()
 
 
@@ -541,34 +548,76 @@ class MainWidget(MainWindow):
 
 
 
-    def CreateNodeEditView( self, view_id, title ):
+    def UpdateNodeEditorTitle( self, edit_id ):
+        edit_name = self.__m_NEScene.GetObjectName( edit_id )
+        self.__m_TabbedMDIManager.SetTabTitle( edit_id, edit_name )
+
+        self.UpdateWindowTitle()
+
+
+
+    def UpdateProedure( self, *args, **kwargs ):
+
+        modified = kwargs[ 'modified' ] if 'modified' in kwargs else False
+        if( modified == True ):
+            self.setWindowTitle( 'NodePad - ' + self.__m_SceneManager.GetFilePath() + g_DataChangedSymbol[ self.__m_SceneManager.IsModified() ] )
+            
+        renamed = kwargs[ 'renamed' ] if 'renamed' in kwargs else None
+        if( renamed ):
+            self.__m_TabbedMDIManager.SetTabTitle( renamed, self.__m_NEScene.GetObjectName( renamed ) )
+
+
+
+    def CreateNodeEditView( self, view_id, parent_id, title ):
 
         print( 'MainWidget::CreateNodeEditView()...' )
 
-        if( view_id in self.__m_Views ):
-            self.__m_Views[ view_id ].activateWindow()
+        ownerDockable = self.__m_TabbedMDIManager.FindParentDockable( view_id )
+        if( ownerDockable != (None, -1) ):
+            #dockable_id, index = self.__m_TabbedMDIManager.FindParentDockable( view_id )
+            self.__m_TabbedMDIManager.Activate( ownerDockable[0], ownerDockable[1] )
+            return
+
+        dockable_id, index = self.__m_TabbedMDIManager.FindParentDockable( parent_id )
             
-        else:
-            view = GraphicsView( view_id, g_GridStep )
-            view.setScene( self.__m_NEScene.GraphEditor() )
+        #print( dockable_id, index )
 
-            view.setWindowTitle( title )
-            view.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
-            view.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
-            view.WidgetClosed.connect( functools.partial(self.__RemoveEditorViewCallback, view_id ) )# 削除時のコールバック関数
+        view = GraphicsView( view_id, g_GridStep )
+        view.setScene( self.__m_NEScene.GraphEditor() )
+        view.setWindowTitle( title )
 
-            self.__m_Views[ view_id ] = view
+        view.FocusViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetFocusViewID )
+        view.RenderViewIdChanged.connect( self.__m_NEScene.GraphEditor().SetRenderViewID )
 
-            view.setFocus()
-            view.show()
-        
+        self.__m_TabbedMDIManager.AddTab( dockable_id, view, view.windowTitle(), view_id )
 
 
-    # GroupEditWindow削除時のコールバック関数
-    def __RemoveEditorViewCallback( self, view_id ):
-        try:
-            self.__m_Views[ view_id ].Release()
-            self.__m_Views[ view_id ].deleteLater()
-            del self.__m_Views[ view_id ]
-        except:
-            traceback.print_exc()
+
+    @staticmethod
+    def __onTabFocusChanged( old: QWidget, new: QWidget, propertyName: str ) -> None:
+        #print( '{} -> {}'.format( old, new ) )
+
+        #print( '/---------------- old -----------------------/')
+        while( old ):# isinstance(old, QWidget)
+            #print( old )
+            if( isinstance( old, QTabWidget ) ):
+                old.setProperty( propertyName, False )
+                old.setStyle( old.style() )
+                tabBar = old.tabBar()
+                tabBar.setProperty( propertyName, False )
+                tabBar.setStyle( tabBar.style() )
+                break
+            old = old.parentWidget()
+
+        #print( '/---------------- new -----------------------/')
+        while( new ):# isinstance(new, QWidget)
+            #print( new )
+            if( isinstance( new, QTabWidget ) ):
+                new.setProperty( propertyName, True )
+                new.setStyle( new.style() )
+                tabBar = new.tabBar()
+                tabBar.setProperty( propertyName, True )
+                tabBar.setStyle( tabBar.style() )
+                break
+            new = new.parentWidget()       
+        #print( '\n')

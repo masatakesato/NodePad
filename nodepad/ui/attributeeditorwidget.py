@@ -1021,15 +1021,3 @@ class AttributeEditorWidget(QFrame):
         
             self.__m_AttributeEditWidget.AddWidget( collapsibleWidget_Out )
             collapsibleWidget_Out.SetExpand( self.__m_bWidgetExpanded['GroupOutput'] )
-
-
-
-    def mousePressEvent( self, event ):
-        # なにもない場所でマウスクリックした際に、UIからフォーカスを外す
-        focuswidget = self.focusWidget()
-        if( focuswidget ):
-            if( isinstance(focuswidget, QLineEdit) ):
-                focuswidget.editingFinished.emit()# 編集途中の文字列をQLineEditに保持させる
-            focuswidget.clearFocus()
-
-        return super(AttributeEditorWidget, self).mousePressEvent(event)

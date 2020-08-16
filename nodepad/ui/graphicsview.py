@@ -5,7 +5,7 @@
 # https://wiki.qt.io/Smooth_Zoom_In_QGraphicsView/ja
 class GraphicsView(QGraphicsView):
 
-    WidgetClosed = pyqtSignal()
+    #WidgetClosed = pyqtSignal()
     FocusViewIdChanged = pyqtSignal(object)
     RenderViewIdChanged = pyqtSignal(object)
 
@@ -21,7 +21,7 @@ class GraphicsView(QGraphicsView):
         self.__m_RubberBand = QRubberBand( QRubberBand.Rectangle, self )
 
         self.setStyleSheet( UIStyle.g_NodeEditorStyleSheet )
-        self.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform | QPainter.TextAntialiasing)
+        self.setRenderHints( QPainter.Antialiasing | QPainter.SmoothPixmapTransform | QPainter.TextAntialiasing )
         pal = QPalette()
         pal.setBrush( QPalette.Highlight, QColor(170,115,26) )#QColor(255,127,39)
         self.__m_RubberBand.setPalette(pal)
@@ -40,7 +40,14 @@ class GraphicsView(QGraphicsView):
 
 
 
+    def __del__( self ):
+        print( 'GraphicsView::__del__()...' )
+        self.Release()
+
+
+
     def Release( self ):
+        print( 'GraphicsView::Release()...' )
         self.setViewport(None)
         self.FocusViewIdChanged.disconnect()
         self.RenderViewIdChanged.disconnect()
@@ -302,4 +309,4 @@ class GraphicsView(QGraphicsView):
 
     def closeEvent( self, event ):
         super(GraphicsView, self).closeEvent(event)
-        self.WidgetClosed.emit()
+        #self.WidgetClosed.emit()

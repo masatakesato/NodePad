@@ -152,6 +152,18 @@ class NESceneExt(NESceneBase):
 
 
     # Implemented in NESceneBase
+    #def GetObjectName( self, object_id ):
+    #    return self.__m_NodeGraph.GetObjectNameByID( object_id )
+
+
+
+    # Implemented in NESceneBase
+    #def GetType( self, object_id ):
+    #    return self.__m_NodeGraph.GetObjectTypeByID( object_id )
+
+
+
+    # Implemented in NESceneBase
     #def GetObjectIDs( self, names, typefilter=c_KeyMapSupportTypes ):
     #    return [ self.__m_NodeGraph.GetObjectID( name, typefilter ) for name in names ]
 
@@ -262,12 +274,6 @@ class NESceneExt(NESceneBase):
     # Implemented in NESceneBase
     #def ResolveChildNames( self, object_id ):
     #    return self.__m_NodeGraph.ResolveUnparentNameConflicts( object_id )
-
-
-
-    # Implemented in NESceneBase
-    #def GetType( self, object_id ):
-    #    return self.__m_NodeGraph.GetObjectTypeByID( object_id )
 
 
 
