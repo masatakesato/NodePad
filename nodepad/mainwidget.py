@@ -63,6 +63,21 @@ class MainWidget(MainWindow):
         self.__m_PythonConsole = InputConsole( locals() )# locals(), self
         self.__m_PythonConsole.setAcceptDrops(True)
 
+#################################### Experimental implementation of interactive console GUI ########################################
+        self.__m_OutputCosole = OutputConsole()
+        self.__m_OutputCosole.setWindowTitle( 'Output' )
+
+        tabFrame2 = TabWidget()
+
+        index = tabFrame2.addTab( self.__m_PythonConsole, 'Input' )
+        tabFrame2.SetTabClosable( index, False )
+
+        index = tabFrame2.addTab( self.__m_OutputCosole, 'Output' )
+        tabFrame2.SetTabClosable( index, False )
+        tabFrame2.setCurrentIndex(0)
+
+
+
 
         #============ Initialize SceneManager ===============#
         self.__m_SceneManager = NESceneManager()
@@ -71,7 +86,7 @@ class MainWidget(MainWindow):
         vsplitter = QSplitter(Qt.Vertical)
         vsplitter.setContentsMargins( 0, 0, 0, 0 )
         vsplitter.addWidget( self.__m_TabbedMDIManager.GetDockable( self.__m_DockableID ) )#rootView )
-        vsplitter.addWidget(self.__m_PythonConsole)
+        vsplitter.addWidget(  tabFrame2 )#  self.__m_PythonConsole)
 
         hsplitter = QSplitter(Qt.Horizontal)
         hsplitter.setContentsMargins( 0, 0, 0, 0 )
