@@ -14,7 +14,7 @@ setuptools.setup(
     #long_description = 'The halloween party has gone over...',
     #long_description_content_type='text/markdown',
     url='https://bitbucket.org/masayan1115/nodepad',
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages( exclude=['images'] ),
     #install_requires=_requires_from_file('requirements.txt'),
     classifiers=[
         'Programming Language :: Python :: 3',
