@@ -4,7 +4,7 @@
 
 A simple node edit for visual scripting.
 
-![nodepad.png](https://bitbucket.org/repo/p8k4Lrr/images/160901691-nodepad.png)
+![nodepad.png](images/nodepad.gif)
 
 
 ## About
