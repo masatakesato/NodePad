@@ -1,6 +1,12 @@
 ﻿#import uuid
 import traceback
 
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+
+from oreorelib.ui.pyqt5.threaditer import ThreadIter
+
 #from .factory import builder
 #from .factory.node_manager import *
 
@@ -18,13 +24,31 @@ from .nescene_base import NESceneBase
 
 
 
-class NESceneExt(NESceneBase):
+class NESceneExt(QObject, NESceneBase):
+
+    selectGraphObjectSignal = pyqtSignal() 
+
 
     def __init__( self ):
         super(NESceneExt, self).__init__()
         
         self.__m_GraphEditor = GraphicsScene( self.GetRootID(), self.NodeTypeManager() )
         self.__m_AttribEditor = AttributeEditorWidget()
+
+
+        self.selectGraphObjectSignal.connect( self.__SELECT_SLOT )
+
+
+
+
+    def __SELECT_SLOT( self ):
+        print('__SELECT_SLOT')
+        j=0
+        for i in range(30000000):
+            j +=i
+        print(j) 
+        self.__m_GraphEditor.Select_Exec( self._NESceneBase__m_SelectionList.Iter() )
+
 
 
 
@@ -558,8 +582,14 @@ class NESceneExt(NESceneBase):
             if( result==False ):
                 return False
 
+
             if( self.__m_GraphEditor.HasTriggered()==False ):
-                self.__m_GraphEditor.Select_Exec( self._NESceneBase__m_SelectionList.Iter() )
+                #self.__m_GraphEditor.Select_Exec( self._NESceneBase__m_SelectionList.Iter() )
+                qthread = ThreadIter()
+                
+                qthread.AddSignal( self.selectGraphObjectSignal, 1 )
+                qthread.run()
+#                qthread.wait()
 
 
             self.__m_AttribEditor.DeinitializeWidget()

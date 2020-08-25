@@ -9,9 +9,11 @@ class ThreadIter( QThread ):
         self.sig_exec = []
 
 
+
     def AddSignal( self, sig, numiter ):
         self.sig_exec.append( sig )
         self.iters.append(numiter)
+
 
 
     def run( self ):
