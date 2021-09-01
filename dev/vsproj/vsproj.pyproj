@@ -1,0 +1,118 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>32f1a8ce-1d52-45ca-8b6c-a356b7f01db8</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>nodepad\__main__.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>vsproj</Name>
+    <RootNamespace>vsproj</RootNamespace>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <Environment>PATH=D:\ProgramData\Anaconda3\envs\testpy37\Library\bin
+rem PATH=D:\ProgramData\Anaconda3\envs\env_node_editor_37\Library\bin</Environment>
+    <InterpreterId>CondaEnv|CondaEnv|testpy37</InterpreterId>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="nodepad\" />
+    <Folder Include="nodepad\component\" />
+    <Folder Include="nodepad\config\" />
+    <Folder Include="nodepad\factory\" />
+    <Folder Include="nodepad\graph\" />
+    <Folder Include="nodepad\history\" />
+    <Folder Include="nodepad\plugins\" />
+    <Folder Include="nodepad\ui\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="nodepad\component\descriptors.py" />
+    <Compile Include="nodepad\component\nedata.py" />
+    <Compile Include="nodepad\component\nedatablock.py" />
+    <Compile Include="nodepad\component\nedatabuffer.py" />
+    <Compile Include="nodepad\component\neobject.py" />
+    <Compile Include="nodepad\component\neobjectarray.py" />
+    <Compile Include="nodepad\component\__init__.py" />
+    <Compile Include="nodepad\config\figure_params.py" />
+    <Compile Include="nodepad\config\__init__.py" />
+    <Compile Include="nodepad\factory\builder.py" />
+    <Compile Include="nodepad\factory\node_manager.py" />
+    <Compile Include="nodepad\factory\pipeline.py" />
+    <Compile Include="nodepad\factory\pluginbase.py" />
+    <Compile Include="nodepad\factory\__init__.py" />
+    <Compile Include="nodepad\graph\keymap.py" />
+    <Compile Include="nodepad\graph\neattributeobject.py" />
+    <Compile Include="nodepad\graph\neconnectionobject.py" />
+    <Compile Include="nodepad\graph\negraphobject.py" />
+    <Compile Include="nodepad\graph\negroupioobject.py" />
+    <Compile Include="nodepad\graph\negroupobject.py" />
+    <Compile Include="nodepad\graph\nenodegraph.py" />
+    <Compile Include="nodepad\graph\nenodeobject.py" />
+    <Compile Include="nodepad\graph\nerootobject.py" />
+    <Compile Include="nodepad\graph\nesymboliclink.py" />
+    <Compile Include="nodepad\graph\__init__.py" />
+    <Compile Include="nodepad\history\commandbase.py" />
+    <Compile Include="nodepad\history\command_manager.py" />
+    <Compile Include="nodepad\history\__init__.py" />
+    <Compile Include="nodepad\mainwidget.py" />
+    <Compile Include="nodepad\nescene_base.py" />
+    <Compile Include="nodepad\nescene_commands.py" />
+    <Compile Include="nodepad\nescene_ext.py" />
+    <Compile Include="nodepad\nescene_manager.py" />
+    <Compile Include="nodepad\plugins\addnode.py" />
+    <Compile Include="nodepad\plugins\boolnode.py" />
+    <Compile Include="nodepad\plugins\floatanode.py" />
+    <Compile Include="nodepad\plugins\genericnode.py" />
+    <Compile Include="nodepad\plugins\integernode.py" />
+    <Compile Include="nodepad\plugins\invalid_soruce.py" />
+    <Compile Include="nodepad\plugins\multnode.py" />
+    <Compile Include="nodepad\plugins\noattribute.py" />
+    <Compile Include="nodepad\plugins\plugin1.py" />
+    <Compile Include="nodepad\plugins\plugin2.py" />
+    <Compile Include="nodepad\plugins\plugin3.py" />
+    <Compile Include="nodepad\plugins\stringnode.py" />
+    <Compile Include="nodepad\plugins\__init__.py" />
+    <Compile Include="nodepad\plugin_manager.py" />
+    <Compile Include="nodepad\selector.py" />
+    <Compile Include="nodepad\ui\attributeeditorwidget.py" />
+    <Compile Include="nodepad\ui\edgeitem.py" />
+    <Compile Include="nodepad\ui\graphicsitembase.py" />
+    <Compile Include="nodepad\ui\graphicsitemlayer.py" />
+    <Compile Include="nodepad\ui\graphicsscene.py" />
+    <Compile Include="nodepad\ui\graphicssettings.py" />
+    <Compile Include="nodepad\ui\graphicsview.py" />
+    <Compile Include="nodepad\ui\groupioitem.py" />
+    <Compile Include="nodepad\ui\groupitem.py" />
+    <Compile Include="nodepad\ui\nodeitem.py" />
+    <Compile Include="nodepad\ui\portitem.py" />
+    <Compile Include="nodepad\ui\pushbuttonitem.py" />
+    <Compile Include="nodepad\ui\symboliclinkitem.py" />
+    <Compile Include="nodepad\ui\syntaxhighlighter.py" />
+    <Compile Include="nodepad\ui\__init__.py" />
+    <Compile Include="nodepad\__init__.py" />
+    <Compile Include="nodepad\__main__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="CondaEnv|CondaEnv|env_node_editor_37" />
+    <InterpreterReference Include="CondaEnv|CondaEnv|testpy37" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>
