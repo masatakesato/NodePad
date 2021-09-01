@@ -47,13 +47,13 @@ Python environment with following configuration is required at minimum.
 direct install from git
 
 ```
-pip install git+https://masayan1115@bitbucket.org/masayan1115/nodepad.git
+pip install git+https://github.com/masatakesato/NodePad.git
 ```
 
 install after cloning
 
 ```
-git clone https://masayan1115@bitbucket.org/masayan1115/nodepad.git
+git clone https://github.com/masatakesato/NodePad.git
 cd nodepad
 pip install .
 ```
