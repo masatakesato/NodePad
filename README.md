@@ -6,6 +6,8 @@ A simple node edit for visual scripting.
 
 ## About
 
+
+
 NodePad is a python based visual scripting tool.
 The software is still in development, and current goal is to make NodePad simple and protable as a standalone application( such as Windows Notepad for text edit ).
 
