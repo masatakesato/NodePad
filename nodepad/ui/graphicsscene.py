@@ -103,7 +103,7 @@ class GraphicsScene(QGraphicsScene):
 
 
     def SetFocusViewID( self, view_id ):
-        #print( 'GraphicsScene::SetFocusViewID()...' )
+        print( 'GraphicsScene::SetFocusViewID()...' )
         self.__m_FocusViewID = view_id
 
 

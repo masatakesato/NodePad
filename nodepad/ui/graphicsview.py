@@ -1,4 +1,6 @@
-﻿from .graphicssettings import *
+﻿from oreorelib.ui.pyqt5.helper import *
+
+from .graphicssettings import *
 
 
 
@@ -47,10 +49,23 @@ class GraphicsView(QGraphicsView):
 
 
     def Release( self ):
-        print( 'GraphicsView::Release()...' )
-        self.setViewport(None)
-        self.FocusViewIdChanged.disconnect()
-        self.RenderViewIdChanged.disconnect()
+        try:
+            print( 'GraphicsView::Release()...' )
+
+            self.setViewport(None)
+            #self.FocusViewIdChanged.disconnect()
+            #self.RenderViewIdChanged.disconnect()
+
+            if( self.isSignalConnected( getSignal(self,"FocusViewIdChanged") ) ):
+                print("  disconnecting signal FocusViewIdChanged")
+                self.FocusViewIdChanged.disconnect()
+
+            if( self.isSignalConnected( getSignal(self,"RenderViewIdChanged") ) ):
+                print("  disconnecting signal RenderViewIdChanged")
+                self.RenderViewIdChanged.disconnect()
+
+        except:
+            traceback.print_exc()
 
 
 
