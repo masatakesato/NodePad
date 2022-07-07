@@ -84,25 +84,25 @@ QFrame[ pressed=true ]
 QFrame[ icon = close ]
 {
     padding: 6px 8px 6px 8px;
-    image: url(:/resource/images/close.png);
+    image: url(:/resources/images/close.png);
 }
 
 QFrame[ icon = maximize ]
 {
     padding: 6px 8px 6px 8px;
-    image: url(:/resource/images/maximize.png);
+    image: url(:/resources/images/maximize.png);
 }
 
 QFrame[ icon = minimize ]
 {
     padding: 6px 8px 6px 8px;
-    image: url(:/resource/images/minimize.png);
+    image: url(:/resources/images/minimize.png);
 }
 
 QFrame[ icon = restore ]
 {
     padding: 6px 8px 6px 8px;
-    image: url(:/resource/images/restore.png) 0;
+    image: url(:/resources/images/restore.png) 0;
 }
 
 """
@@ -214,7 +214,7 @@ QSizeGrip
 
     margin: 1px 1px 1px 1px;
     border: 0px none;
-    image: url(:/resource/images/sizegrip.png);
+    image: url(:/resources/images/sizegrip.png);
 }
 
 """
@@ -341,14 +341,14 @@ QScrollBar::up-arrow:vertical
 {
     width: 14px;
     height: 14px;
-    image: url(:/resource/images/arrow-up.png);
+    image: url(:/resources/images/arrow-up.png);
 }
 
 QScrollBar::down-arrow:vertical
 {
     width: 14px;
     height: 14px;
-    image: url(:/resource/images/arrow-down.png);
+    image: url(:/resources/images/arrow-down.png);
 }
 
 
@@ -424,14 +424,14 @@ QScrollBar::left-arrow:horizontal
 {
     width: 14px;
     height: 14px;
-    image: url(:/resource/images/arrow-left.png);
+    image: url(:/resources/images/arrow-left.png);
 }
 
 QScrollBar::right-arrow:horizontal
 {
     width: 14px;
     height: 14px;
-    image: url(:/resource/images/arrow-right.png);
+    image: url(:/resources/images/arrow-right.png);
 }
 """
 
@@ -618,7 +618,7 @@ QSpinBox, QDoubleSpinBox
 QSpinBox::up-button, QDoubleSpinBox:up-button
 {
     background-color: rgb(42,42,42);
-    image: url(:/resource/images/arrow-up.png);
+    image: url(:/resources/images/arrow-up.png);
 
     margin: 1px 0px 1px 0px;
     border: 0px none;
@@ -628,7 +628,7 @@ QSpinBox::up-button, QDoubleSpinBox:up-button
 QSpinBox::down-button, QDoubleSpinBox:down-button
 {
     background-color: rgb(42,42,42);
-    image: url(:/resource/images/arrow-down.png);
+    image: url(:/resources/images/arrow-down.png);
 
     margin: 1px 0px 1px 0px;
     border: 0px none;
@@ -710,7 +710,7 @@ QCheckBox::indicator:hover
 
 QCheckBox::indicator:checked
 {
-    image: url(:/resource/images/checkbox.png);
+    image: url(:/resources/images/checkbox.png);
 }
 
 QCheckBox::indicator:disabled
@@ -734,6 +734,11 @@ QFrame
 }
 
 /*====================== TabWidget settings ==========================*/
+QTabWidget
+{
+    background-color: rgb(42,42,42);
+}
+
 QTabWidget::pane
 {
     /*background-color: transparent;*/ /* valid inside padding area */
@@ -805,12 +810,12 @@ QTabBar::close-button
     
     padding: 2px 2px 2px 2px;
 
-    image: url(:/resource/images/close.png);
+    image: url(:/resources/images/close.png);
 }
 
 QTabBar::close-button:disabled
 {
-    image: url(:/resource/images/close-disabled.png);
+    image: url(:/resources/images/close-disabled.png);
 }
 
 /* Disabled. Unable to handle mousehover propergation to neighbor tab (after tab insertion). */
@@ -877,7 +882,7 @@ QTabBar QToolButton::left-arrow
 
     padding: 1px 1px 1px 1px;
 
-    image: url(:/resource/images/arrow-left.png);
+    image: url(:/resources/images/arrow-left.png);
 }
 
 QTabBar QToolButton::left-arrow:hover
@@ -897,7 +902,7 @@ QTabBar QToolButton::right-arrow
 
     padding: 1px 1px 1px 1px;
 
-    image: url(:/resource/images/arrow-right.png);
+    image: url(:/resources/images/arrow-right.png);
 }
 
 QTabBar QToolButton::right-arrow:hover
@@ -989,25 +994,30 @@ QWidget
 
 
 
-g_NodeEditorStyleSheet = """
+g_EditorStyleSheet = """
 QGraphicsView
 {
-    background-color: rgb(24,24,24);/*rgb(42,42,42);*/
+    background-color: rgb(24,24,24);
     selection-background-color: rgb(125,75,50);
 
     margin: 0px 0px 0px 0px;
-    border: 0px none;/*border: 1px solid rgb(60,60,60);/*rgb(80,80,80);*/
+    border: 0px none;
     padding: 0px 0px 0px 0px;
 }
+"""
 
-/*
-QGraphicsView:focus
+
+
+g_TransparentEditorStyleSheet = """
+QGraphicsView
 {
+    background-color: transparent;
+    selection-background-color: rgb(125,75,50);
+
     margin: 0px 0px 0px 0px;
-    border: 1px solid rgb(96,96,96);
+    border: 0px none;
     padding: 0px 0px 0px 0px;
 }
-*/
 """
 
 
@@ -1176,7 +1186,7 @@ QComboBox::down-arrow
 {
     width: 14px;
     height: 14px;
-    image: url(:/resource/images/arrow-down.png);
+    image: url(:/resources/images/arrow-down.png);
 }
 
 QComboBox::down-arrow:on /* shift the arrow when popup is open */

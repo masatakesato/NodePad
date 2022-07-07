@@ -13,9 +13,9 @@
     <RootNamespace>vsproj</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <Environment>PATH=D:\ProgramData\Anaconda3\envs\testpy37\Library\bin
-rem PATH=D:\ProgramData\Anaconda3\envs\env_node_editor_37\Library\bin</Environment>
-    <InterpreterId>CondaEnv|CondaEnv|testpy37</InterpreterId>
+    <Environment>rem PATH=D:\ProgramData\Anaconda3\envs\testpy37\Library\bin
+PATH=D:\ProgramData\Anaconda3\envs\env_node_editor_37\Library\bin</Environment>
+    <InterpreterId>CondaEnv|CondaEnv|env_node_editor_37</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

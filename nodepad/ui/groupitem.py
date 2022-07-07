@@ -53,7 +53,7 @@ class Group(GraphicsNodeItem):
         self.__m_LabelRect = QRectF( label_pos[0], label_pos[1], label_dim[0], label_dim[1] )
         
         # GroupEdit Pushbutton
-        self.__m_EditButton = PushButton( QPixmap( ':/resource/images/edit-group.png'), self.__EditGroupButtonPushed )# group_edit_callback
+        self.__m_EditButton = PushButton( QPixmap( ':/resources/images/edit-group.png'), self.__EditGroupButtonPushed )# group_edit_callback
         self.__m_EditButton.setParentItem( self )
         self.__m_EditButton.setPos( self.__m_BoundingRect.width() - g_TitlebarHeight, 0.5 * (g_TitlebarHeight-g_ButtonSize) )
 

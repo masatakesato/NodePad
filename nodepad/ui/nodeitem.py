@@ -51,7 +51,7 @@ class Node(GraphicsNodeItem):
 
         # NodeEdit Pushbutton
         #if( node_edit_callback ):
-        #    self.__m_EditButton = PushButton( QPixmap( ':/resource/images/edit-group.png'), node_edit_callback )# TODO: attach code_edit_callback for custom scripting.
+        #    self.__m_EditButton = PushButton( QPixmap( ':/resources/images/edit-group.png'), node_edit_callback )# TODO: attach code_edit_callback for custom scripting.
         #    self.__m_EditButton.setParentItem( self )
         #    self.__m_EditButton.setPos( self.__m_BoundingRect.width() - g_TitlebarHeight, 0.5 * (g_TitlebarHeight-g_ButtonSize) )
 

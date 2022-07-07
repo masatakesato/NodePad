@@ -51,8 +51,8 @@ g_AttribMarginTop  = 0
 g_AttribMarginRight = 0
 g_AttribMarginBottom = 0
 
-g_ImagePath_ArrowCollaped = ':/resource/images/arrow-right.png'
-g_ImagePath_ArrowExpanded = ':/resource/images/arrow-down.png'
+g_ImagePath_ArrowCollaped = ':/resources/images/arrow-right.png'
+g_ImagePath_ArrowExpanded = ':/resources/images/arrow-down.png'
 
 
 

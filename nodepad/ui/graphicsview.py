@@ -22,7 +22,7 @@ class GraphicsView(QGraphicsView):
         self.__m_MouseMode = MouseMode.DoNothing
         self.__m_RubberBand = QRubberBand( QRubberBand.Rectangle, self )
 
-        self.setStyleSheet( UIStyle.g_NodeEditorStyleSheet )
+        self.setStyleSheet( UIStyle.g_EditorStyleSheet )
         self.setRenderHints( QPainter.Antialiasing | QPainter.SmoothPixmapTransform | QPainter.TextAntialiasing )
         pal = QPalette()
         pal.setBrush( QPalette.Highlight, QColor(170,115,26) )#QColor(255,127,39)
